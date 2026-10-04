@@ -10,6 +10,8 @@ namespace BE
         public string Cliente { get; set; }
         public string Direccion { get; set; }
         public string TipoInmueble { get; set; }
+        public decimal MetrosCuadrados { get; set; }
+        public int CantidadAmbientes { get; set; }
         public decimal ValorPretendido { get; set; }
         public EstadoInmueble EstadoInmueble { get; set; }
         public int IdInmueble { get; set; }

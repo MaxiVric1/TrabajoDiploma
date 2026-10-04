@@ -25,6 +25,9 @@ namespace BLL
             Inmueble inmueble = inmuebleDAL.BuscarPorId(captacion.IdInmueble);
             if (inmueble != null && inmueble.EstadoActual == EstadoInmueble.Rechazado)
                 throw new Exception("La captación debe ser renegociada por el Agente Comercial antes de poder ser tasada nuevamente.");
+            // Solo se tasa lo pendiente: evita que una tasación nueva devuelva un inmueble Tasado/Publicado a otro estado
+            if (inmueble != null && inmueble.EstadoActual != EstadoInmueble.Captado)
+                throw new Exception($"Solo se pueden tasar captaciones en estado Captado. Estado actual: {inmueble.EstadoActual}.");
 
             int result = tasacionDAL.RegistrarConDictamen(tasacion, captacion.IdInmueble, EstadoSegunDictamen(tasacion.EstadoDictamen));
             if (result == -1)

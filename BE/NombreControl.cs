@@ -66,6 +66,32 @@ namespace BE
         public const string FormGestionarCaptaciones_dgvCaptaciones_valor = "FormGestionarCaptaciones.dgvCaptaciones.valor";
         public const string FormGestionarCaptaciones_dgvCaptaciones_estado = "FormGestionarCaptaciones.dgvCaptaciones.estado";
 
+        // FormValidarTasacion
+        public const string FormValidarTasacion_lblPendientes = "FormValidarTasacion.lblPendientes";
+        public const string FormValidarTasacion_btnActualizar = "FormValidarTasacion.btnActualizar";
+        public const string FormValidarTasacion_grpDetalle = "FormValidarTasacion.grpDetalle";
+        public const string FormValidarTasacion_lblCliente = "FormValidarTasacion.lblCliente";
+        public const string FormValidarTasacion_lblDni = "FormValidarTasacion.lblDni";
+        public const string FormValidarTasacion_lblTelefono = "FormValidarTasacion.lblTelefono";
+        public const string FormValidarTasacion_lblEmail = "FormValidarTasacion.lblEmail";
+        public const string FormValidarTasacion_lblValorPretendido = "FormValidarTasacion.lblValorPretendido";
+        public const string FormValidarTasacion_lblDictamenAnterior = "FormValidarTasacion.lblDictamenAnterior";
+        public const string FormValidarTasacion_grpDictamen = "FormValidarTasacion.grpDictamen";
+        public const string FormValidarTasacion_rbAprobar = "FormValidarTasacion.rbAprobar";
+        public const string FormValidarTasacion_rbRechazar = "FormValidarTasacion.rbRechazar";
+        public const string FormValidarTasacion_lblValorFinal = "FormValidarTasacion.lblValorFinal";
+        public const string FormValidarTasacion_lblMotivo = "FormValidarTasacion.lblMotivo";
+        public const string FormValidarTasacion_lblValorSugerido = "FormValidarTasacion.lblValorSugerido";
+        public const string FormValidarTasacion_btnRegistrar = "FormValidarTasacion.btnRegistrar";
+        public const string FormValidarTasacion_dgvPendientes_nro = "FormValidarTasacion.dgvPendientes.nro";
+        public const string FormValidarTasacion_dgvPendientes_fecha = "FormValidarTasacion.dgvPendientes.fecha";
+        public const string FormValidarTasacion_dgvPendientes_cliente = "FormValidarTasacion.dgvPendientes.cliente";
+        public const string FormValidarTasacion_dgvPendientes_direccion = "FormValidarTasacion.dgvPendientes.direccion";
+        public const string FormValidarTasacion_dgvPendientes_tipo = "FormValidarTasacion.dgvPendientes.tipo";
+        public const string FormValidarTasacion_dgvPendientes_metros = "FormValidarTasacion.dgvPendientes.metros";
+        public const string FormValidarTasacion_dgvPendientes_ambientes = "FormValidarTasacion.dgvPendientes.ambientes";
+        public const string FormValidarTasacion_dgvPendientes_valor = "FormValidarTasacion.dgvPendientes.valor";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

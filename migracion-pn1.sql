@@ -53,7 +53,32 @@ INSERT INTO @Nuevos VALUES
     ('dgvCaptaciones.direccion', 'FormGestionarCaptaciones', N'Dirección', 'Address'),
     ('dgvCaptaciones.tipo', 'FormGestionarCaptaciones', 'Tipo', 'Type'),
     ('dgvCaptaciones.valor', 'FormGestionarCaptaciones', 'Valor Pretendido', 'Asking Price'),
-    ('dgvCaptaciones.estado', 'FormGestionarCaptaciones', 'Estado', 'Status');
+    ('dgvCaptaciones.estado', 'FormGestionarCaptaciones', 'Estado', 'Status'),
+    -- FormValidarTasacion
+    ('lblPendientes', 'FormValidarTasacion', N'Captaciones pendientes de tasación', 'Listings pending appraisal'),
+    ('btnActualizar', 'FormValidarTasacion', 'Actualizar', 'Refresh'),
+    ('grpDetalle', 'FormValidarTasacion', N'Detalle de la captación', 'Listing details'),
+    ('lblCliente', 'FormValidarTasacion', 'Cliente:', 'Client:'),
+    ('lblDni', 'FormValidarTasacion', 'DNI:', 'ID Number:'),
+    ('lblTelefono', 'FormValidarTasacion', N'Teléfono:', 'Phone:'),
+    ('lblEmail', 'FormValidarTasacion', 'Email:', 'Email:'),
+    ('lblValorPretendido', 'FormValidarTasacion', 'Valor pretendido:', 'Asking price:'),
+    ('lblDictamenAnterior', 'FormValidarTasacion', 'Dictamen anterior:', 'Previous appraisal:'),
+    ('grpDictamen', 'FormValidarTasacion', 'Dictamen', 'Appraisal decision'),
+    ('rbAprobar', 'FormValidarTasacion', 'Aprobar', 'Approve'),
+    ('rbRechazar', 'FormValidarTasacion', 'Rechazar', 'Reject'),
+    ('lblValorFinal', 'FormValidarTasacion', 'Valor final:', 'Final value:'),
+    ('lblMotivo', 'FormValidarTasacion', 'Motivo de rechazo:', 'Rejection reason:'),
+    ('lblValorSugerido', 'FormValidarTasacion', 'Valor sugerido (opcional):', 'Suggested value (optional):'),
+    ('btnRegistrar', 'FormValidarTasacion', 'Registrar dictamen', 'Register decision'),
+    ('dgvPendientes.nro', 'FormValidarTasacion', N'Nro Captación', 'Listing No.'),
+    ('dgvPendientes.fecha', 'FormValidarTasacion', 'Fecha', 'Date'),
+    ('dgvPendientes.cliente', 'FormValidarTasacion', 'Cliente', 'Client'),
+    ('dgvPendientes.direccion', 'FormValidarTasacion', N'Dirección', 'Address'),
+    ('dgvPendientes.tipo', 'FormValidarTasacion', 'Tipo', 'Type'),
+    ('dgvPendientes.metros', 'FormValidarTasacion', 'Metros Cuadrados', 'Square Meters'),
+    ('dgvPendientes.ambientes', 'FormValidarTasacion', 'Ambientes', 'Rooms'),
+    ('dgvPendientes.valor', 'FormValidarTasacion', 'Valor Pretendido', 'Asking Price');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

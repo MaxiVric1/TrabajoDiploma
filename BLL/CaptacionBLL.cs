@@ -163,6 +163,8 @@ namespace BLL
                     Cliente = cliente != null ? $"{cliente.Nombre} {cliente.Apellido}" : "Desconocido",
                     Direccion = inmueble.Direccion,
                     TipoInmueble = inmueble.TipoInmueble,
+                    MetrosCuadrados = inmueble.MetrosCuadrados,
+                    CantidadAmbientes = inmueble.CantidadAmbientes,
                     ValorPretendido = c.ValorPretendido,
                     EstadoInmueble = inmueble.EstadoActual,
                     IdInmueble = inmueble.IdInmueble,
