@@ -1,0 +1,9 @@
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\bin\Debug\DAL.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\bin\Debug\DAL.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\bin\Debug\BE.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\bin\Debug\BE.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\obj\Debug\DAL.csproj.AssemblyReference.cache
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\obj\Debug\DAL.csproj.CoreCompileInputs.cache
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\obj\Debug\DAL.csproj.Up2Date
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\obj\Debug\DAL.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\DAL\obj\Debug\DAL.pdb

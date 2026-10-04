@@ -1,0 +1,6 @@
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BE\bin\Debug\BE.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BE\bin\Debug\BE.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BE\obj\Debug\BE.csproj.AssemblyReference.cache
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BE\obj\Debug\BE.csproj.CoreCompileInputs.cache
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BE\obj\Debug\BE.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BE\obj\Debug\BE.pdb

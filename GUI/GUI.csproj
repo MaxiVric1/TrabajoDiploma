@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4A972DFC-14E1-40E5-8996-EBA03B3EAFE5}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TpIngSoft</RootNamespace>
+    <AssemblyName>TpIngSoft</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Resources.Extensions">
+      <Version>9.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <!-- dotnet build no resuelve PackageReference en proyectos no-SDK: se referencian los ensamblados del paquete y sus dependencias -->
+  <ItemGroup Condition=" '$(MSBuildRuntimeType)' == 'Core' ">
+    <Reference Include="$(NuGetPackageRoot)microsoft.bcl.hashcode\1.1.1\lib\net461\Microsoft.Bcl.HashCode.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.buffers\4.5.1\lib\net461\System.Buffers.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.collections.immutable\9.0.0\lib\net462\System.Collections.Immutable.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.formats.nrbf\9.0.0\lib\net462\System.Formats.Nrbf.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.memory\4.5.5\lib\net461\System.Memory.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\4.5.0\lib\net46\System.Numerics.Vectors.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.reflection.metadata\9.0.0\lib\net462\System.Reflection.Metadata.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.resources.extensions\9.0.0\lib\net462\System.Resources.Extensions.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll" />
+    <Reference Include="$(NuGetPackageRoot)system.valuetuple\4.5.0\lib\net47\System.ValueTuple.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FormLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormLogin.Designer.cs">
+      <DependentUpon>FormLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormBitacora.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormBitacora.Designer.cs">
+      <DependentUpon>FormBitacora.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionUsuarios.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionUsuarios.Designer.cs">
+      <DependentUpon>FormGestionUsuarios.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHistorialUsuario.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHistorialUsuario.Designer.cs">
+      <DependentUpon>FormHistorialUsuario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionRoles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionRoles.Designer.cs">
+      <DependentUpon>FormGestionRoles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionIdiomas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionIdiomas.Designer.cs">
+      <DependentUpon>FormGestionIdiomas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormRegistrarCaptacion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRegistrarCaptacion.Designer.cs">
+      <DependentUpon>FormRegistrarCaptacion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionarCaptaciones.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionarCaptaciones.Designer.cs">
+      <DependentUpon>FormGestionarCaptaciones.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormValidarTasacion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormValidarTasacion.Designer.cs">
+      <DependentUpon>FormValidarTasacion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormCargarMaterialAudiovisual.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormCargarMaterialAudiovisual.Designer.cs">
+      <DependentUpon>FormCargarMaterialAudiovisual.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormPublicarInmueble.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormPublicarInmueble.Designer.cs">
+      <DependentUpon>FormPublicarInmueble.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Traduccion\IControlTraducible.cs" />
+    <Compile Include="Traduccion\EtiquetaTraducible.cs" />
+    <Compile Include="Traduccion\ComboTraducible.cs" />
+    <Compile Include="Traduccion\DataGridTraducible.cs" />
+    <Compile Include="Traduccion\MenuStripTraducible.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="FormBitacora.resx">
+      <DependentUpon>FormBitacora.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormGestionIdiomas.resx">
+      <DependentUpon>FormGestionIdiomas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormGestionRoles.resx">
+      <DependentUpon>FormGestionRoles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormGestionUsuarios.resx">
+      <DependentUpon>FormGestionUsuarios.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHistorialUsuario.resx">
+      <DependentUpon>FormHistorialUsuario.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormLogin.resx">
+      <DependentUpon>FormLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BE\BE.csproj">
+      <Project>{9b893465-df84-4301-8f6e-d62355dd02fe}</Project>
+      <Name>BE</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BLL\BLL.csproj">
+      <Project>{d68bc72d-c1c9-493b-a460-d361cb1641a1}</Project>
+      <Name>BLL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SERVICIOS\SERVICIOS.csproj">
+      <Project>{bb401e30-8bf0-4522-beb5-6bbd21ae15f5}</Project>
+      <Name>SERVICIOS</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mesh-600x600.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mesh-1024x600.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mesh-bg.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

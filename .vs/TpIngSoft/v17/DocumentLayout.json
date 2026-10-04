@@ -1,0 +1,69 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6D30AC80-974E-427B-A92F-F500F6328DC6}|DAL\\DAL.csproj|c:\\desktop\\uai\\4to\\2do cuatri\\trabajo de diploma\\segunda entrega\\tpingsoft\\dal\\mapperbackup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D30AC80-974E-427B-A92F-F500F6328DC6}|DAL\\DAL.csproj|solutionrelative:dal\\mapperbackup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D30AC80-974E-427B-A92F-F500F6328DC6}|DAL\\DAL.csproj|C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\dal\\acceso.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D30AC80-974E-427B-A92F-F500F6328DC6}|DAL\\DAL.csproj|solutionrelative:dal\\acceso.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D68BC72D-C1C9-493B-A460-D361CB1641A1}|BLL\\BLL.csproj|C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\bll\\backupbll.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D68BC72D-C1C9-493B-A460-D361CB1641A1}|BLL\\BLL.csproj|solutionrelative:bll\\backupbll.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MapperBackup.cs",
+              "DocumentMoniker": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\DAL\\MapperBackup.cs",
+              "RelativeDocumentMoniker": "DAL\\MapperBackup.cs",
+              "ToolTip": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\DAL\\MapperBackup.cs",
+              "RelativeToolTip": "DAL\\MapperBackup.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-04T09:48:54.769Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Acceso.cs",
+              "DocumentMoniker": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\DAL\\Acceso.cs",
+              "RelativeDocumentMoniker": "DAL\\Acceso.cs",
+              "ToolTip": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\DAL\\Acceso.cs",
+              "RelativeToolTip": "DAL\\Acceso.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABUAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-04T09:48:29.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "BackupBLL.cs",
+              "DocumentMoniker": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\BLL\\BackupBLL.cs",
+              "RelativeDocumentMoniker": "BLL\\BackupBLL.cs",
+              "ToolTip": "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\BLL\\BackupBLL.cs",
+              "RelativeToolTip": "BLL\\BackupBLL.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAwAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-04T09:47:04.296Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

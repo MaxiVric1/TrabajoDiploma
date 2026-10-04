@@ -1,0 +1,15 @@
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\BackupCLI.exe
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\BackupCLI.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\BE.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\BLL.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\DAL.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\SERVICIOS.dll
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\BE.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\BLL.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\DAL.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\bin\Debug\SERVICIOS.pdb
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\obj\Debug\BackupCLI.csproj.AssemblyReference.cache
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\obj\Debug\BackupCLI.csproj.CoreCompileInputs.cache
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\obj\Debug\BackupCLI.csproj.Up2Date
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\obj\Debug\BackupCLI.exe
+C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\BackupCLI\obj\Debug\BackupCLI.pdb
