@@ -13,6 +13,7 @@ namespace BLL
         private InmuebleDAL inmuebleDAL = new InmuebleDAL();
         private TasacionDAL tasacionDAL = new TasacionDAL();
         private ClienteDAL clienteDAL = new ClienteDAL();
+        private MaterialAudiovisualDAL materialDAL = new MaterialAudiovisualDAL();
 
         public int Registrar(Captacion captacion)
         {
@@ -152,6 +153,9 @@ namespace BLL
             Dictionary<int, Tasacion> ultimosDictamenes = tasacionDAL.LeerTodos()
                 .GroupBy(t => t.IdCaptacion)
                 .ToDictionary(g => g.Key, g => g.OrderByDescending(t => t.FechaDictamen).ThenByDescending(t => t.NroTasacion).First());
+            Dictionary<int, int> archivosPorInmueble = materialDAL.LeerTodos()
+                .GroupBy(m => m.IdInmueble)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             List<CaptacionResumen> lista = new List<CaptacionResumen>();
             foreach (Captacion c in captacionDAL.LeerTodos())
@@ -172,12 +176,19 @@ namespace BLL
                     CantidadAmbientes = inmueble.CantidadAmbientes,
                     ValorPretendido = c.ValorPretendido,
                     ValorFinal = dictamen != null && dictamen.EstadoDictamen == EstadoDictamen.Aprobada ? dictamen.ValorFinal : null,
+                    CantidadArchivos = archivosPorInmueble.TryGetValue(inmueble.IdInmueble, out int archivos) ? archivos : 0,
                     EstadoInmueble = inmueble.EstadoActual,
                     IdInmueble = inmueble.IdInmueble,
                     IdCliente = inmueble.IdCliente
                 });
             }
             return lista;
+        }
+
+        // Listos para publicar: mismas condiciones que exige InmuebleBLL.Publicar (Tasado y con material cargado)
+        public List<CaptacionResumen> LeerListosParaPublicar()
+        {
+            return LeerResumen(EstadoInmueble.Tasado).Where(r => r.CantidadArchivos > 0).ToList();
         }
 
         public Captacion BuscarPorNro(int nroCaptacion) => captacionDAL.BuscarPorNro(nroCaptacion);

@@ -113,6 +113,25 @@ namespace BE
         public const string FormCargarMaterialAudiovisual_dgvMaterialCargado_archivo = "FormCargarMaterialAudiovisual.dgvMaterialCargado.archivo";
         public const string FormCargarMaterialAudiovisual_dgvMaterialCargado_fecha = "FormCargarMaterialAudiovisual.dgvMaterialCargado.fecha";
 
+        // FormPublicarInmueble
+        public const string FormPublicarInmueble_lblListos = "FormPublicarInmueble.lblListos";
+        public const string FormPublicarInmueble_btnActualizar = "FormPublicarInmueble.btnActualizar";
+        public const string FormPublicarInmueble_grpDetalle = "FormPublicarInmueble.grpDetalle";
+        public const string FormPublicarInmueble_lblTextoComercial = "FormPublicarInmueble.lblTextoComercial";
+        public const string FormPublicarInmueble_lblMaterial = "FormPublicarInmueble.lblMaterial";
+        public const string FormPublicarInmueble_lblVistaPrevia = "FormPublicarInmueble.lblVistaPrevia";
+        public const string FormPublicarInmueble_lblSinVistaPrevia = "FormPublicarInmueble.lblSinVistaPrevia";
+        public const string FormPublicarInmueble_btnPublicar = "FormPublicarInmueble.btnPublicar";
+        public const string FormPublicarInmueble_dgvInmuebles_nro = "FormPublicarInmueble.dgvInmuebles.nro";
+        public const string FormPublicarInmueble_dgvInmuebles_cliente = "FormPublicarInmueble.dgvInmuebles.cliente";
+        public const string FormPublicarInmueble_dgvInmuebles_direccion = "FormPublicarInmueble.dgvInmuebles.direccion";
+        public const string FormPublicarInmueble_dgvInmuebles_tipo = "FormPublicarInmueble.dgvInmuebles.tipo";
+        public const string FormPublicarInmueble_dgvInmuebles_valorFinal = "FormPublicarInmueble.dgvInmuebles.valorFinal";
+        public const string FormPublicarInmueble_dgvInmuebles_archivos = "FormPublicarInmueble.dgvInmuebles.archivos";
+        public const string FormPublicarInmueble_dgvMaterial_tipo = "FormPublicarInmueble.dgvMaterial.tipo";
+        public const string FormPublicarInmueble_dgvMaterial_archivo = "FormPublicarInmueble.dgvMaterial.archivo";
+        public const string FormPublicarInmueble_dgvMaterial_fecha = "FormPublicarInmueble.dgvMaterial.fecha";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

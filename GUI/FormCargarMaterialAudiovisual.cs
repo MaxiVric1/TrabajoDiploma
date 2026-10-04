@@ -13,7 +13,6 @@ namespace TpIngSoft
     public partial class FormCargarMaterialAudiovisual : Form, IObservador
     {
         private const string CARPETA_MATERIAL = "MaterialAudiovisual";
-        private static readonly string[] EXTENSIONES_VIDEO = { ".mp4", ".avi", ".mov", ".mkv", ".wmv" };
 
         private CaptacionBLL captacionBLL = new CaptacionBLL();
         private MaterialAudiovisualBLL materialBLL = new MaterialAudiovisualBLL();
@@ -229,7 +228,7 @@ namespace TpIngSoft
             {
                 dlg.Title = "Seleccionar fotos o videos";
                 dlg.Multiselect = true;
-                dlg.Filter = "Multimedia (fotos y videos)|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp;*.mp4;*.avi;*.mov;*.mkv;*.wmv|Todos los archivos (*.*)|*.*";
+                dlg.Filter = ArmarFiltro();
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
                 foreach (string ruta in dlg.FileNames)
@@ -244,11 +243,24 @@ namespace TpIngSoft
             }
         }
 
-        // Propuesta inicial de tipo; el usuario la cambia en la grilla (p. ej. un Recorrido360 suele ser una imagen)
+        // Formatos admitidos (definidos en la BLL): fotos y videos con su extensión; Recorrido360 cualquier formato
+        private string ArmarFiltro()
+        {
+            string fotos = string.Join(";", MaterialAudiovisualBLL.EXTENSIONES_FOTO.Select(x => "*" + x));
+            string videos = string.Join(";", MaterialAudiovisualBLL.EXTENSIONES_VIDEO.Select(x => "*" + x));
+            return $"Fotos y videos ({fotos};{videos})|{fotos};{videos}" +
+                   $"|Fotos ({fotos})|{fotos}" +
+                   $"|Videos ({videos})|{videos}" +
+                   "|Recorrido 360 - cualquier formato (*.*)|*.*";
+        }
+
+        // Propuesta inicial de tipo; el usuario la cambia en la grilla (p. ej. un Recorrido360 en .jpg)
         private string TipoSegunExtension(string ruta)
         {
             string extension = Path.GetExtension(ruta).ToLowerInvariant();
-            return (EXTENSIONES_VIDEO.Contains(extension) ? TipoMaterial.Video : TipoMaterial.Foto).ToString();
+            if (MaterialAudiovisualBLL.EXTENSIONES_FOTO.Contains(extension)) return TipoMaterial.Foto.ToString();
+            if (MaterialAudiovisualBLL.EXTENSIONES_VIDEO.Contains(extension)) return TipoMaterial.Video.ToString();
+            return TipoMaterial.Recorrido360.ToString(); // es el único tipo que admite otros formatos
         }
 
         private void dgvArchivos_CellContentClick(object sender, DataGridViewCellEventArgs e)

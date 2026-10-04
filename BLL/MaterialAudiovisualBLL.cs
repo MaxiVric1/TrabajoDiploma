@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using BE;
 using DAL;
 using SERVICIOS;
@@ -8,6 +10,11 @@ namespace BLL
 {
     public class MaterialAudiovisualBLL
     {
+        // Formatos admitidos por tipo. Fotos: solo los que Windows Forms puede mostrar en la vista previa.
+        // Recorrido360 admite cualquier formato.
+        public static readonly string[] EXTENSIONES_FOTO = { ".jpg", ".jpeg", ".png", ".gif" };
+        public static readonly string[] EXTENSIONES_VIDEO = { ".mp4", ".avi", ".mov" };
+
         private MaterialAudiovisualDAL materialDAL = new MaterialAudiovisualDAL();
         private InmuebleDAL inmuebleDAL = new InmuebleDAL();
 
@@ -112,7 +119,15 @@ namespace BLL
             if (material.IdUsuarioMarketing <= 0)
                 throw new ArgumentException("El material debe tener un usuario de marketing asignado.");
 
-            material.TipoArchivo = material.TipoArchivo.Trim();
+            string tipo = material.TipoArchivo.Trim();
+            string archivo = Path.GetFileName(material.RutaArchivo.Trim());
+            string extension = Path.GetExtension(archivo).ToLowerInvariant();
+            if (tipo == TipoMaterial.Foto.ToString() && !EXTENSIONES_FOTO.Contains(extension))
+                throw new ArgumentException($"El archivo \"{archivo}\" no es una foto admitida. Formatos válidos: {string.Join(", ", EXTENSIONES_FOTO)}.");
+            if (tipo == TipoMaterial.Video.ToString() && !EXTENSIONES_VIDEO.Contains(extension))
+                throw new ArgumentException($"El archivo \"{archivo}\" no es un video admitido. Formatos válidos: {string.Join(", ", EXTENSIONES_VIDEO)}.");
+
+            material.TipoArchivo = tipo;
             material.RutaArchivo = material.RutaArchivo.Trim();
         }
     }

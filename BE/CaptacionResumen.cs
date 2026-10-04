@@ -14,6 +14,7 @@ namespace BE
         public int CantidadAmbientes { get; set; }
         public decimal ValorPretendido { get; set; }
         public decimal? ValorFinal { get; set; } // valor de la última tasación, si fue aprobada
+        public int CantidadArchivos { get; set; } // material audiovisual cargado para el inmueble
         public EstadoInmueble EstadoInmueble { get; set; }
         public int IdInmueble { get; set; }
         public int IdCliente { get; set; }

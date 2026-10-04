@@ -92,7 +92,7 @@ namespace TpIngSoft
                 dgvPendientes.DataSource = null;
                 dgvPendientes.DataSource = captacionBLL.LeerResumen(EstadoInmueble.Captado);
 
-                foreach (string oculta in new[] { "EstadoInmueble", "IdInmueble", "IdCliente", "ValorFinal" })
+                foreach (string oculta in new[] { "EstadoInmueble", "IdInmueble", "IdCliente", "ValorFinal", "CantidadArchivos" })
                 {
                     if (dgvPendientes.Columns[oculta] != null) dgvPendientes.Columns[oculta].Visible = false;
                 }

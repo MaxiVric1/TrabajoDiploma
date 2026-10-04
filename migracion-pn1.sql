@@ -98,7 +98,25 @@ INSERT INTO @Nuevos VALUES
     ('dgvArchivos.quitar', 'FormCargarMaterialAudiovisual', 'Quitar', 'Remove'),
     ('dgvMaterialCargado.tipo', 'FormCargarMaterialAudiovisual', 'Tipo', 'Type'),
     ('dgvMaterialCargado.archivo', 'FormCargarMaterialAudiovisual', 'Archivo', 'File'),
-    ('dgvMaterialCargado.fecha', 'FormCargarMaterialAudiovisual', 'Fecha de carga', 'Upload date');
+    ('dgvMaterialCargado.fecha', 'FormCargarMaterialAudiovisual', 'Fecha de carga', 'Upload date'),
+    -- FormPublicarInmueble
+    ('lblListos', 'FormPublicarInmueble', 'Inmuebles listos para publicar', 'Properties ready to publish'),
+    ('btnActualizar', 'FormPublicarInmueble', 'Actualizar', 'Refresh'),
+    ('grpDetalle', 'FormPublicarInmueble', 'Detalle del inmueble', 'Property details'),
+    ('lblTextoComercial', 'FormPublicarInmueble', 'Texto comercial:', 'Marketing text:'),
+    ('lblMaterial', 'FormPublicarInmueble', 'Material cargado:', 'Uploaded material:'),
+    ('lblVistaPrevia', 'FormPublicarInmueble', 'Vista previa:', 'Preview:'),
+    ('lblSinVistaPrevia', 'FormPublicarInmueble', 'Vista previa no disponible', 'Preview not available'),
+    ('btnPublicar', 'FormPublicarInmueble', 'Publicar', 'Publish'),
+    ('dgvInmuebles.nro', 'FormPublicarInmueble', N'Nro Captación', 'Listing No.'),
+    ('dgvInmuebles.cliente', 'FormPublicarInmueble', 'Cliente', 'Client'),
+    ('dgvInmuebles.direccion', 'FormPublicarInmueble', N'Dirección', 'Address'),
+    ('dgvInmuebles.tipo', 'FormPublicarInmueble', 'Tipo', 'Type'),
+    ('dgvInmuebles.valorFinal', 'FormPublicarInmueble', N'Valor Final de Tasación', 'Final Appraised Value'),
+    ('dgvInmuebles.archivos', 'FormPublicarInmueble', 'Archivos cargados', 'Uploaded files'),
+    ('dgvMaterial.tipo', 'FormPublicarInmueble', 'Tipo', 'Type'),
+    ('dgvMaterial.archivo', 'FormPublicarInmueble', 'Archivo', 'File'),
+    ('dgvMaterial.fecha', 'FormPublicarInmueble', 'Fecha de carga', 'Upload date');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
