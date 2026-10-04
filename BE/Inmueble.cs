@@ -17,6 +17,7 @@ namespace BE
         public decimal MetrosCuadrados { get; set; }
         public int CantidadAmbientes { get; set; }
         public EstadoInmueble EstadoActual { get; set; } = EstadoInmueble.Captado;
+        public string TextoComercial { get; set; } // texto de la publicación, lo carga Marketing
         public int IdCliente { get; set; }
 
         public override string ToString()

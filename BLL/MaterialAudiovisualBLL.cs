@@ -27,6 +27,40 @@ namespace BLL
             return result;
         }
 
+        // Carga de varios archivos para un inmueble en una sola transacción; el texto comercial se guarda en cada uno
+        // Guarda el texto comercial del inmueble y los archivos nuevos en una sola transacción.
+        // archivos puede estar vacío para solo modificar el texto.
+        public void RegistrarLote(int idInmueble, string textoComercial, List<MaterialAudiovisual> archivos)
+        {
+            archivos = archivos ?? new List<MaterialAudiovisual>();
+            if (!SessionManager.Instance.EstaLogueado())
+                throw new ArgumentException("El material debe tener un usuario de marketing asignado.");
+
+            Inmueble inmueble = ValidarInmueble(idInmueble);
+
+            string texto = string.IsNullOrWhiteSpace(textoComercial) ? null : textoComercial.Trim();
+            if (texto != null && texto.Length > 2000)
+                throw new ArgumentException("El texto comercial no puede superar los 2000 caracteres.");
+            bool textoModificado = (texto ?? "") != (inmueble.TextoComercial ?? "");
+            if (archivos.Count == 0 && !textoModificado)
+                throw new ArgumentException("No hay cambios para guardar: agregue archivos o modifique el texto comercial.");
+
+            foreach (MaterialAudiovisual material in archivos)
+            {
+                material.IdInmueble = idInmueble;
+                material.IdUsuarioMarketing = SessionManager.Instance.UsuarioActual.Id;
+                ValidarDatos(material);
+            }
+
+            if (!materialDAL.CrearLote(idInmueble, texto, archivos))
+                throw new Exception("No se pudo guardar el material audiovisual. No se guardó ningún cambio.");
+
+            string detalle = archivos.Count > 0 ? $"{archivos.Count} archivo(s) cargado(s)" : "sin archivos nuevos";
+            if (textoModificado) detalle += ", texto comercial actualizado";
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Material",
+                $"Inmueble {idInmueble}: {detalle}.");
+        }
+
         public void Actualizar(MaterialAudiovisual material)
         {
             Validar(material);
@@ -54,22 +88,32 @@ namespace BLL
         private void Validar(MaterialAudiovisual material)
         {
             if (material == null) throw new ArgumentNullException(nameof(material));
-            if (string.IsNullOrWhiteSpace(material.TipoArchivo))
-                throw new ArgumentException("El tipo de archivo es obligatorio.");
+            ValidarInmueble(material.IdInmueble);
+            ValidarDatos(material);
+        }
+
+        // El material se carga después de la tasación aprobada (y se puede seguir agregando una vez publicado)
+        private Inmueble ValidarInmueble(int idInmueble)
+        {
+            Inmueble inmueble = inmuebleDAL.BuscarPorId(idInmueble);
+            if (inmueble == null)
+                throw new ArgumentException("El inmueble indicado no existe.");
+            if (inmueble.EstadoActual != EstadoInmueble.Tasado && inmueble.EstadoActual != EstadoInmueble.Publicado)
+                throw new ArgumentException($"Solo se puede cargar material para inmuebles con tasación aprobada. Estado actual: {inmueble.EstadoActual}.");
+            return inmueble;
+        }
+
+        private void ValidarDatos(MaterialAudiovisual material)
+        {
+            if (string.IsNullOrWhiteSpace(material.TipoArchivo) || !Enum.IsDefined(typeof(TipoMaterial), material.TipoArchivo.Trim()))
+                throw new ArgumentException("El tipo de archivo debe ser Foto, Video o Recorrido360.");
             if (string.IsNullOrWhiteSpace(material.RutaArchivo))
                 throw new ArgumentException("La ruta del archivo es obligatoria.");
             if (material.IdUsuarioMarketing <= 0)
                 throw new ArgumentException("El material debe tener un usuario de marketing asignado.");
 
-            Inmueble inmueble = inmuebleDAL.BuscarPorId(material.IdInmueble);
-            if (inmueble == null)
-                throw new ArgumentException("El inmueble indicado no existe.");
-            if (inmueble.EstadoActual == EstadoInmueble.Rechazado)
-                throw new ArgumentException("No se puede cargar material para un inmueble con tasación rechazada.");
-
             material.TipoArchivo = material.TipoArchivo.Trim();
             material.RutaArchivo = material.RutaArchivo.Trim();
-            material.TextoComercial = string.IsNullOrWhiteSpace(material.TextoComercial) ? null : material.TextoComercial.Trim();
         }
     }
 }

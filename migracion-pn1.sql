@@ -78,7 +78,27 @@ INSERT INTO @Nuevos VALUES
     ('dgvPendientes.tipo', 'FormValidarTasacion', 'Tipo', 'Type'),
     ('dgvPendientes.metros', 'FormValidarTasacion', 'Metros Cuadrados', 'Square Meters'),
     ('dgvPendientes.ambientes', 'FormValidarTasacion', 'Ambientes', 'Rooms'),
-    ('dgvPendientes.valor', 'FormValidarTasacion', 'Valor Pretendido', 'Asking Price');
+    ('dgvPendientes.valor', 'FormValidarTasacion', 'Valor Pretendido', 'Asking Price'),
+    -- FormCargarMaterialAudiovisual
+    ('lblInmuebles', 'FormCargarMaterialAudiovisual', N'Inmuebles con tasación aprobada', 'Properties with approved appraisal'),
+    ('btnActualizar', 'FormCargarMaterialAudiovisual', 'Actualizar', 'Refresh'),
+    ('grpNuevoMaterial', 'FormCargarMaterialAudiovisual', 'Nuevo material', 'New material'),
+    ('lblTextoComercial', 'FormCargarMaterialAudiovisual', 'Texto comercial:', 'Marketing text:'),
+    ('lblArchivos', 'FormCargarMaterialAudiovisual', 'Archivos:', 'Files:'),
+    ('btnAgregarArchivo', 'FormCargarMaterialAudiovisual', 'Agregar archivo...', 'Add file...'),
+    ('btnGuardar', 'FormCargarMaterialAudiovisual', 'Guardar', 'Save'),
+    ('grpMaterialCargado', 'FormCargarMaterialAudiovisual', 'Material ya cargado', 'Uploaded material'),
+    ('dgvInmuebles.nro', 'FormCargarMaterialAudiovisual', N'Nro Captación', 'Listing No.'),
+    ('dgvInmuebles.cliente', 'FormCargarMaterialAudiovisual', 'Cliente', 'Client'),
+    ('dgvInmuebles.direccion', 'FormCargarMaterialAudiovisual', N'Dirección', 'Address'),
+    ('dgvInmuebles.tipo', 'FormCargarMaterialAudiovisual', 'Tipo', 'Type'),
+    ('dgvInmuebles.valorFinal', 'FormCargarMaterialAudiovisual', N'Valor Final de Tasación', 'Final Appraised Value'),
+    ('dgvArchivos.archivo', 'FormCargarMaterialAudiovisual', 'Archivo', 'File'),
+    ('dgvArchivos.tipo', 'FormCargarMaterialAudiovisual', 'Tipo', 'Type'),
+    ('dgvArchivos.quitar', 'FormCargarMaterialAudiovisual', 'Quitar', 'Remove'),
+    ('dgvMaterialCargado.tipo', 'FormCargarMaterialAudiovisual', 'Tipo', 'Type'),
+    ('dgvMaterialCargado.archivo', 'FormCargarMaterialAudiovisual', 'Archivo', 'File'),
+    ('dgvMaterialCargado.fecha', 'FormCargarMaterialAudiovisual', 'Fecha de carga', 'Upload date');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

@@ -36,6 +36,9 @@ namespace DAL
                 acceso.CrearParametro("@IdCliente", inmueble.IdCliente),
                 outParam
             };
+            // Opcional en el SP: al captar todavía no hay texto, y así sigue funcionando con el SP anterior a la migración
+            if (!string.IsNullOrEmpty(inmueble.TextoComercial))
+                parameters.Add(acceso.CrearParametro("@TextoComercial", inmueble.TextoComercial));
 
             int result = acceso.Escribir("CrearInmueble", parameters);
             if (result != -1 && outParam.Value != null && outParam.Value != DBNull.Value)
@@ -60,6 +63,7 @@ namespace DAL
                     acceso.CrearParametro("@MetrosCuadrados", inmueble.MetrosCuadrados),
                     acceso.CrearParametro("@CantidadAmbientes", inmueble.CantidadAmbientes),
                     acceso.CrearParametro("@EstadoActual", inmueble.EstadoActual.ToString()),
+                    acceso.CrearParametro("@TextoComercial", inmueble.TextoComercial),
                     acceso.CrearParametro("@IdCliente", inmueble.IdCliente)
                 };
                 return acceso.Escribir("ActualizarInmueble", parameters) != -1;
@@ -78,6 +82,27 @@ namespace DAL
         }
 
         // Usa una conexión ya abierta (y su transacción, si la hay)
+        public bool ActualizarTextoComercial(int idInmueble, string textoComercial)
+        {
+            acceso.Abrir();
+            try
+            {
+                return ActualizarTextoComercial(idInmueble, textoComercial, acceso);
+            }
+            finally { acceso.Cerrar(); }
+        }
+
+        // Usa una conexión ya abierta (y su transacción, si la hay)
+        internal bool ActualizarTextoComercial(int idInmueble, string textoComercial, Acceso acceso)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter>
+            {
+                acceso.CrearParametro("@Id", idInmueble),
+                acceso.CrearParametro("@TextoComercial", textoComercial)
+            };
+            return acceso.Escribir("ActualizarTextoComercialInmueble", parameters) != -1;
+        }
+
         internal bool ActualizarEstado(int idInmueble, EstadoInmueble estado, Acceso acceso)
         {
             List<SqlParameter> parameters = new List<SqlParameter>
@@ -183,6 +208,7 @@ namespace DAL
                 MetrosCuadrados = Convert.ToDecimal(row["metros_cuadrados"]),
                 CantidadAmbientes = Convert.ToInt32(row["cantidad_ambientes"]),
                 EstadoActual = (EstadoInmueble)Enum.Parse(typeof(EstadoInmueble), row["estado_actual"].ToString()),
+                TextoComercial = row.Table.Columns.Contains("texto_comercial") && row["texto_comercial"] != DBNull.Value ? row["texto_comercial"].ToString() : "",
                 IdCliente = Convert.ToInt32(row["id_cliente"])
             };
         }

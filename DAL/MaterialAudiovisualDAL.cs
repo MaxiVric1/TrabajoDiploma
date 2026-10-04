@@ -15,24 +15,69 @@ namespace DAL
             acceso.Abrir();
             try
             {
-                SqlParameter outParam = acceso.CrearParametroOut("@NuevoId");
-                List<SqlParameter> parameters = new List<SqlParameter>
-                {
-                    acceso.CrearParametro("@TipoArchivo", material.TipoArchivo),
-                    acceso.CrearParametro("@RutaArchivo", material.RutaArchivo),
-                    acceso.CrearParametro("@TextoComercial", material.TextoComercial),
-                    acceso.CrearParametro("@IdInmueble", material.IdInmueble),
-                    acceso.CrearParametro("@IdUsuarioMarketing", material.IdUsuarioMarketing),
-                    outParam
-                };
+                return Crear(material, acceso);
+            }
+            finally
+            {
+                acceso.Cerrar();
+            }
+        }
 
-                int result = acceso.Escribir("CrearMaterialAudiovisual", parameters);
-                if (result != -1 && outParam.Value != null && outParam.Value != DBNull.Value)
+        // Usa una conexión ya abierta (y su transacción, si la hay)
+        internal int Crear(MaterialAudiovisual material, Acceso acceso)
+        {
+            SqlParameter outParam = acceso.CrearParametroOut("@NuevoId");
+            List<SqlParameter> parameters = new List<SqlParameter>
+            {
+                acceso.CrearParametro("@TipoArchivo", material.TipoArchivo),
+                acceso.CrearParametro("@RutaArchivo", material.RutaArchivo),
+                acceso.CrearParametro("@IdInmueble", material.IdInmueble),
+                acceso.CrearParametro("@IdUsuarioMarketing", material.IdUsuarioMarketing),
+                outParam
+            };
+
+            int result = acceso.Escribir("CrearMaterialAudiovisual", parameters);
+            if (result != -1 && outParam.Value != null && outParam.Value != DBNull.Value)
+            {
+                material.IdMaterial = Convert.ToInt32(outParam.Value);
+                return material.IdMaterial;
+            }
+            return -1;
+        }
+
+        // Transacción: el texto comercial del inmueble y todos los archivos de una carga se guardan juntos o ninguno.
+        // materiales puede estar vacío (solo se actualiza el texto).
+        public bool CrearLote(int idInmueble, string textoComercial, List<MaterialAudiovisual> materiales)
+        {
+            acceso.Abrir();
+            try
+            {
+                acceso.IniciarTx();
+
+                if (!new InmuebleDAL().ActualizarTextoComercial(idInmueble, textoComercial, acceso))
                 {
-                    material.IdMaterial = Convert.ToInt32(outParam.Value);
-                    return material.IdMaterial;
+                    acceso.DeshacerTX();
+                    return false;
                 }
-                return -1;
+
+                foreach (MaterialAudiovisual material in materiales)
+                {
+                    if (Crear(material, acceso) == -1)
+                    {
+                        acceso.DeshacerTX();
+                        materiales.ForEach(m => m.IdMaterial = 0); // los ids asignados se revirtieron
+                        return false;
+                    }
+                }
+
+                acceso.ConfirmarTX();
+                return true;
+            }
+            catch
+            {
+                acceso.DeshacerTX();
+                materiales.ForEach(m => m.IdMaterial = 0);
+                throw;
             }
             finally
             {
@@ -50,7 +95,6 @@ namespace DAL
                     acceso.CrearParametro("@Id", material.IdMaterial),
                     acceso.CrearParametro("@TipoArchivo", material.TipoArchivo),
                     acceso.CrearParametro("@RutaArchivo", material.RutaArchivo),
-                    acceso.CrearParametro("@TextoComercial", material.TextoComercial),
                     acceso.CrearParametro("@IdInmueble", material.IdInmueble),
                     acceso.CrearParametro("@IdUsuarioMarketing", material.IdUsuarioMarketing)
                 };
@@ -122,7 +166,6 @@ namespace DAL
                 IdMaterial = Convert.ToInt32(row["id_material"]),
                 TipoArchivo = row["tipo_archivo"].ToString(),
                 RutaArchivo = row["ruta_archivo"].ToString(),
-                TextoComercial = row["texto_comercial"] != DBNull.Value ? row["texto_comercial"].ToString() : "",
                 FechaCarga = Convert.ToDateTime(row["fecha_carga"]),
                 IdInmueble = Convert.ToInt32(row["id_inmueble"]),
                 IdUsuarioMarketing = Convert.ToInt32(row["id_usuario_marketing"])

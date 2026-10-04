@@ -92,6 +92,27 @@ namespace BE
         public const string FormValidarTasacion_dgvPendientes_ambientes = "FormValidarTasacion.dgvPendientes.ambientes";
         public const string FormValidarTasacion_dgvPendientes_valor = "FormValidarTasacion.dgvPendientes.valor";
 
+        // FormCargarMaterialAudiovisual
+        public const string FormCargarMaterialAudiovisual_lblInmuebles = "FormCargarMaterialAudiovisual.lblInmuebles";
+        public const string FormCargarMaterialAudiovisual_btnActualizar = "FormCargarMaterialAudiovisual.btnActualizar";
+        public const string FormCargarMaterialAudiovisual_grpNuevoMaterial = "FormCargarMaterialAudiovisual.grpNuevoMaterial";
+        public const string FormCargarMaterialAudiovisual_lblTextoComercial = "FormCargarMaterialAudiovisual.lblTextoComercial";
+        public const string FormCargarMaterialAudiovisual_lblArchivos = "FormCargarMaterialAudiovisual.lblArchivos";
+        public const string FormCargarMaterialAudiovisual_btnAgregarArchivo = "FormCargarMaterialAudiovisual.btnAgregarArchivo";
+        public const string FormCargarMaterialAudiovisual_btnGuardar = "FormCargarMaterialAudiovisual.btnGuardar";
+        public const string FormCargarMaterialAudiovisual_grpMaterialCargado = "FormCargarMaterialAudiovisual.grpMaterialCargado";
+        public const string FormCargarMaterialAudiovisual_dgvInmuebles_nro = "FormCargarMaterialAudiovisual.dgvInmuebles.nro";
+        public const string FormCargarMaterialAudiovisual_dgvInmuebles_cliente = "FormCargarMaterialAudiovisual.dgvInmuebles.cliente";
+        public const string FormCargarMaterialAudiovisual_dgvInmuebles_direccion = "FormCargarMaterialAudiovisual.dgvInmuebles.direccion";
+        public const string FormCargarMaterialAudiovisual_dgvInmuebles_tipo = "FormCargarMaterialAudiovisual.dgvInmuebles.tipo";
+        public const string FormCargarMaterialAudiovisual_dgvInmuebles_valorFinal = "FormCargarMaterialAudiovisual.dgvInmuebles.valorFinal";
+        public const string FormCargarMaterialAudiovisual_dgvArchivos_archivo = "FormCargarMaterialAudiovisual.dgvArchivos.archivo";
+        public const string FormCargarMaterialAudiovisual_dgvArchivos_tipo = "FormCargarMaterialAudiovisual.dgvArchivos.tipo";
+        public const string FormCargarMaterialAudiovisual_dgvArchivos_quitar = "FormCargarMaterialAudiovisual.dgvArchivos.quitar";
+        public const string FormCargarMaterialAudiovisual_dgvMaterialCargado_tipo = "FormCargarMaterialAudiovisual.dgvMaterialCargado.tipo";
+        public const string FormCargarMaterialAudiovisual_dgvMaterialCargado_archivo = "FormCargarMaterialAudiovisual.dgvMaterialCargado.archivo";
+        public const string FormCargarMaterialAudiovisual_dgvMaterialCargado_fecha = "FormCargarMaterialAudiovisual.dgvMaterialCargado.fecha";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

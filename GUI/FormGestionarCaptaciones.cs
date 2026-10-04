@@ -101,6 +101,7 @@ namespace TpIngSoft
                 if (dgvCaptaciones.Columns["IdCliente"] != null) dgvCaptaciones.Columns["IdCliente"].Visible = false;
                 if (dgvCaptaciones.Columns["MetrosCuadrados"] != null) dgvCaptaciones.Columns["MetrosCuadrados"].Visible = false;
                 if (dgvCaptaciones.Columns["CantidadAmbientes"] != null) dgvCaptaciones.Columns["CantidadAmbientes"].Visible = false;
+                if (dgvCaptaciones.Columns["ValorFinal"] != null) dgvCaptaciones.Columns["ValorFinal"].Visible = false;
                 if (dgvCaptaciones.Columns["FechaRegistro"] != null) dgvCaptaciones.Columns["FechaRegistro"].DefaultCellStyle.Format = "dd/MM/yyyy";
                 if (dgvCaptaciones.Columns["ValorPretendido"] != null)
                 {

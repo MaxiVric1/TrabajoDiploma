@@ -13,6 +13,7 @@ namespace BE
         public decimal MetrosCuadrados { get; set; }
         public int CantidadAmbientes { get; set; }
         public decimal ValorPretendido { get; set; }
+        public decimal? ValorFinal { get; set; } // valor de la última tasación, si fue aprobada
         public EstadoInmueble EstadoInmueble { get; set; }
         public int IdInmueble { get; set; }
         public int IdCliente { get; set; }

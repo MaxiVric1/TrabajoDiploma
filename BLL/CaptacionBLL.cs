@@ -148,6 +148,10 @@ namespace BLL
         {
             Dictionary<int, Inmueble> inmuebles = inmuebleDAL.LeerTodos().ToDictionary(i => i.IdInmueble);
             Dictionary<int, Cliente> clientes = clienteDAL.LeerTodos().ToDictionary(c => c.IdCliente);
+            // Último dictamen de cada captación (mismo criterio que TasacionBLL.ObtenerUltimoDictamen)
+            Dictionary<int, Tasacion> ultimosDictamenes = tasacionDAL.LeerTodos()
+                .GroupBy(t => t.IdCaptacion)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(t => t.FechaDictamen).ThenByDescending(t => t.NroTasacion).First());
 
             List<CaptacionResumen> lista = new List<CaptacionResumen>();
             foreach (Captacion c in captacionDAL.LeerTodos())
@@ -155,6 +159,7 @@ namespace BLL
                 if (!inmuebles.TryGetValue(c.IdInmueble, out Inmueble inmueble)) continue;
                 if (estado.HasValue && inmueble.EstadoActual != estado.Value) continue;
                 clientes.TryGetValue(inmueble.IdCliente, out Cliente cliente);
+                ultimosDictamenes.TryGetValue(c.NroCaptacion, out Tasacion dictamen);
 
                 lista.Add(new CaptacionResumen
                 {
@@ -166,6 +171,7 @@ namespace BLL
                     MetrosCuadrados = inmueble.MetrosCuadrados,
                     CantidadAmbientes = inmueble.CantidadAmbientes,
                     ValorPretendido = c.ValorPretendido,
+                    ValorFinal = dictamen != null && dictamen.EstadoDictamen == EstadoDictamen.Aprobada ? dictamen.ValorFinal : null,
                     EstadoInmueble = inmueble.EstadoActual,
                     IdInmueble = inmueble.IdInmueble,
                     IdCliente = inmueble.IdCliente
