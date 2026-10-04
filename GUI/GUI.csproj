@@ -156,6 +156,13 @@
     <Compile Include="FormPublicarInmueble.Designer.cs">
       <DependentUpon>FormPublicarInmueble.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormInmueblesPublicados.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormInmueblesPublicados.Designer.cs">
+      <DependentUpon>FormInmueblesPublicados.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MaterialVisual.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Traduccion\IControlTraducible.cs" />
     <Compile Include="Traduccion\EtiquetaTraducible.cs" />

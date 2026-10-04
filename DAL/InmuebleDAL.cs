@@ -113,15 +113,22 @@ namespace DAL
             return acceso.Escribir("ActualizarEstadoInmueble", parameters) != -1;
         }
 
-        // Transacción: el cambio a Publicado y su registro en bitácora se confirman juntos o ninguno
-        public bool Publicar(int idInmueble, Bitacora evento)
+        // Transacción: publicar (Tasado -> Publicado) o despublicar (Publicado -> Tasado) junto con su registro
+        // en bitácora. El SP solo cambia el inmueble si está en el estado esperado: si otro usuario ya lo
+        // cambió, no se afecta ninguna fila y se revierte todo.
+        public bool CambiarPublicacion(int idInmueble, bool publicar, Bitacora evento)
         {
             acceso.Abrir();
             try
             {
                 acceso.IniciarTx();
 
-                if (!ActualizarEstado(idInmueble, EstadoInmueble.Publicado, acceso) ||
+                List<SqlParameter> parameters = new List<SqlParameter>
+                {
+                    acceso.CrearParametro("@Id", idInmueble),
+                    acceso.CrearParametro("@Publicar", publicar)
+                };
+                if (acceso.Escribir("CambiarPublicacionInmueble", parameters) != 1 ||
                     !new MapperBitacora().Registrar(evento, acceso))
                 {
                     acceso.DeshacerTX();
@@ -209,6 +216,8 @@ namespace DAL
                 CantidadAmbientes = Convert.ToInt32(row["cantidad_ambientes"]),
                 EstadoActual = (EstadoInmueble)Enum.Parse(typeof(EstadoInmueble), row["estado_actual"].ToString()),
                 TextoComercial = row.Table.Columns.Contains("texto_comercial") && row["texto_comercial"] != DBNull.Value ? row["texto_comercial"].ToString() : "",
+                FechaPublicacion = row.Table.Columns.Contains("fecha_publicacion") && row["fecha_publicacion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["fecha_publicacion"]) : null,
+                FechaDespublicacion = row.Table.Columns.Contains("fecha_despublicacion") && row["fecha_despublicacion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["fecha_despublicacion"]) : null,
                 IdCliente = Convert.ToInt32(row["id_cliente"])
             };
         }

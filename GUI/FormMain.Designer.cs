@@ -32,6 +32,7 @@ namespace TpIngSoft
             this.validarTasacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cargarMaterialAudiovisualToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.publicarInmuebleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.inmueblesPublicadosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbIdioma = new System.Windows.Forms.ToolStripComboBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblSesionInfo = new System.Windows.Forms.ToolStripStatusLabel();
@@ -160,7 +161,8 @@ namespace TpIngSoft
             this.gestionarCaptacionesToolStripMenuItem,
             this.validarTasacionToolStripMenuItem,
             this.cargarMaterialAudiovisualToolStripMenuItem,
-            this.publicarInmuebleToolStripMenuItem});
+            this.publicarInmuebleToolStripMenuItem,
+            this.inmueblesPublicadosToolStripMenuItem});
             this.pn1ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             this.pn1ToolStripMenuItem.Name = "pn1ToolStripMenuItem";
             this.pn1ToolStripMenuItem.Size = new System.Drawing.Size(40, 23);
@@ -210,6 +212,15 @@ namespace TpIngSoft
             this.publicarInmuebleToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
             this.publicarInmuebleToolStripMenuItem.Text = "Publicar Inmueble";
             this.publicarInmuebleToolStripMenuItem.Click += new System.EventHandler(this.publicarInmuebleToolStripMenuItem_Click);
+            //
+            // inmueblesPublicadosToolStripMenuItem
+            //
+            this.inmueblesPublicadosToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.inmueblesPublicadosToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.inmueblesPublicadosToolStripMenuItem.Name = "inmueblesPublicadosToolStripMenuItem";
+            this.inmueblesPublicadosToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.inmueblesPublicadosToolStripMenuItem.Text = "Inmuebles Publicados";
+            this.inmueblesPublicadosToolStripMenuItem.Click += new System.EventHandler(this.inmueblesPublicadosToolStripMenuItem_Click);
             //
             // cmbIdioma
             // 
@@ -286,5 +297,6 @@ namespace TpIngSoft
         private System.Windows.Forms.ToolStripMenuItem validarTasacionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cargarMaterialAudiovisualToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem publicarInmuebleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem inmueblesPublicadosToolStripMenuItem;
     }
 }

@@ -177,6 +177,9 @@ namespace BLL
                     ValorPretendido = c.ValorPretendido,
                     ValorFinal = dictamen != null && dictamen.EstadoDictamen == EstadoDictamen.Aprobada ? dictamen.ValorFinal : null,
                     CantidadArchivos = archivosPorInmueble.TryGetValue(inmueble.IdInmueble, out int archivos) ? archivos : 0,
+                    EstadoPublicacion = inmueble.EstadoActual == EstadoInmueble.Publicado ? "Publicado" : inmueble.Despublicado ? "Despublicado" : "",
+                    FechaPublicacion = inmueble.FechaPublicacion,
+                    FechaDespublicacion = inmueble.FechaDespublicacion,
                     EstadoInmueble = inmueble.EstadoActual,
                     IdInmueble = inmueble.IdInmueble,
                     IdCliente = inmueble.IdCliente
@@ -185,10 +188,17 @@ namespace BLL
             return lista;
         }
 
-        // Listos para publicar: mismas condiciones que exige InmuebleBLL.Publicar (Tasado y con material cargado)
+        // Listos para la primera publicación: Tasado, con material y nunca publicados
+        // (los despublicados se republican desde FormInmueblesPublicados)
         public List<CaptacionResumen> LeerListosParaPublicar()
         {
-            return LeerResumen(EstadoInmueble.Tasado).Where(r => r.CantidadArchivos > 0).ToList();
+            return LeerResumen(EstadoInmueble.Tasado).Where(r => r.CantidadArchivos > 0 && !r.FechaPublicacion.HasValue).ToList();
+        }
+
+        // Publicados y despublicados (Tasado que ya estuvo publicado)
+        public List<CaptacionResumen> LeerPublicados()
+        {
+            return LeerResumen().Where(r => r.EstadoPublicacion != "").ToList();
         }
 
         public Captacion BuscarPorNro(int nroCaptacion) => captacionDAL.BuscarPorNro(nroCaptacion);

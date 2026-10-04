@@ -14,11 +14,13 @@ INSERT INTO @Nuevos VALUES
     ('validarTasacionToolStripMenuItem', 'FormMain', N'Validar Tasación', 'Validate Appraisal'),
     ('cargarMaterialAudiovisualToolStripMenuItem', 'FormMain', 'Cargar Material Audiovisual', 'Upload Audiovisual Material'),
     ('publicarInmuebleToolStripMenuItem', 'FormMain', 'Publicar Inmueble', 'Publish Property'),
+    ('inmueblesPublicadosToolStripMenuItem', 'FormMain', 'Inmuebles Publicados', 'Published Properties'),
     ('(form)', 'FormRegistrarCaptacion', N'Registrar Captación', 'Register Listing'),
     ('(form)', 'FormGestionarCaptaciones', 'Gestionar Captaciones', 'Manage Listings'),
     ('(form)', 'FormValidarTasacion', N'Validar Tasación', 'Validate Appraisal'),
     ('(form)', 'FormCargarMaterialAudiovisual', 'Cargar Material Audiovisual', 'Upload Audiovisual Material'),
     ('(form)', 'FormPublicarInmueble', 'Publicar Inmueble', 'Publish Property'),
+    ('(form)', 'FormInmueblesPublicados', 'Inmuebles Publicados', 'Published Properties'),
     -- FormRegistrarCaptacion
     ('grpCliente', 'FormRegistrarCaptacion', 'Cliente', 'Client'),
     ('lblDni', 'FormRegistrarCaptacion', 'DNI:', 'ID Number:'),
@@ -116,7 +118,28 @@ INSERT INTO @Nuevos VALUES
     ('dgvInmuebles.archivos', 'FormPublicarInmueble', 'Archivos cargados', 'Uploaded files'),
     ('dgvMaterial.tipo', 'FormPublicarInmueble', 'Tipo', 'Type'),
     ('dgvMaterial.archivo', 'FormPublicarInmueble', 'Archivo', 'File'),
-    ('dgvMaterial.fecha', 'FormPublicarInmueble', 'Fecha de carga', 'Upload date');
+    ('dgvMaterial.fecha', 'FormPublicarInmueble', 'Fecha de carga', 'Upload date'),
+    -- FormInmueblesPublicados
+    ('lblPublicados', 'FormInmueblesPublicados', 'Inmuebles publicados', 'Published properties'),
+    ('btnActualizar', 'FormInmueblesPublicados', 'Actualizar', 'Refresh'),
+    ('grpDetalle', 'FormInmueblesPublicados', 'Detalle del inmueble', 'Property details'),
+    ('lblTextoComercial', 'FormInmueblesPublicados', 'Texto comercial:', 'Marketing text:'),
+    ('lblMaterial', 'FormInmueblesPublicados', 'Material cargado:', 'Uploaded material:'),
+    ('lblVistaPrevia', 'FormInmueblesPublicados', 'Vista previa:', 'Preview:'),
+    ('lblSinVistaPrevia', 'FormInmueblesPublicados', 'Vista previa no disponible', 'Preview not available'),
+    ('btnDespublicar', 'FormInmueblesPublicados', 'Despublicar', 'Unpublish'),
+    ('btnRepublicar', 'FormInmueblesPublicados', 'Republicar', 'Republish'),
+    ('dgvInmuebles.nro', 'FormInmueblesPublicados', N'Nro Captación', 'Listing No.'),
+    ('dgvInmuebles.cliente', 'FormInmueblesPublicados', 'Cliente', 'Client'),
+    ('dgvInmuebles.direccion', 'FormInmueblesPublicados', N'Dirección', 'Address'),
+    ('dgvInmuebles.tipo', 'FormInmueblesPublicados', 'Tipo', 'Type'),
+    ('dgvInmuebles.valorFinal', 'FormInmueblesPublicados', N'Valor Final de Tasación', 'Final Appraised Value'),
+    ('dgvInmuebles.estado', 'FormInmueblesPublicados', 'Estado', 'Status'),
+    ('dgvInmuebles.fechaPublicacion', 'FormInmueblesPublicados', N'Fecha de publicación', 'Publication date'),
+    ('dgvInmuebles.fechaDespublicacion', 'FormInmueblesPublicados', N'Fecha de despublicación', 'Unpublication date'),
+    ('dgvMaterial.tipo', 'FormInmueblesPublicados', 'Tipo', 'Type'),
+    ('dgvMaterial.archivo', 'FormInmueblesPublicados', 'Archivo', 'File'),
+    ('dgvMaterial.fecha', 'FormInmueblesPublicados', 'Fecha de carga', 'Upload date');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

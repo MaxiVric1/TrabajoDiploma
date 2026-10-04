@@ -55,17 +55,52 @@ namespace BLL
             if (materialDAL.LeerPorInmueble(idInmueble).Count == 0)
                 throw new Exception("El inmueble no tiene material audiovisual cargado.");
 
-            // El evento se guarda dentro de la misma transacción que el cambio de estado
+            // migracion-pn1-publicacion.sql busca este texto en bitácora para recuperar fechas de publicación
+            CambiarPublicacion(inmueble, true, "Publicación Inmueble", $"Inmueble {idInmueble} publicado: {inmueble.Direccion}.",
+                "No se pudo publicar el inmueble. No se guardó ningún cambio.");
+        }
+
+        // Retira la publicación: Publicado -> Tasado (conserva la fecha de publicación para poder republicar)
+        public void Despublicar(int idInmueble)
+        {
+            Inmueble inmueble = inmuebleDAL.BuscarPorId(idInmueble);
+            if (inmueble == null)
+                throw new Exception("El inmueble no existe.");
+            if (inmueble.EstadoActual != EstadoInmueble.Publicado)
+                throw new Exception($"Solo se puede despublicar un inmueble publicado. Estado actual: {inmueble.EstadoActual}.");
+
+            CambiarPublicacion(inmueble, false, "Despublicación Inmueble", $"Inmueble {idInmueble} despublicado: {inmueble.Direccion}.",
+                "No se pudo despublicar el inmueble. No se guardó ningún cambio.");
+        }
+
+        // Vuelve a publicar un inmueble despublicado: Tasado -> Publicado
+        public void Republicar(int idInmueble)
+        {
+            Inmueble inmueble = inmuebleDAL.BuscarPorId(idInmueble);
+            if (inmueble == null)
+                throw new Exception("El inmueble no existe.");
+            if (!inmueble.Despublicado)
+                throw new Exception($"Solo se puede republicar un inmueble que fue despublicado. Estado actual: {inmueble.EstadoActual}.");
+            if (materialDAL.LeerPorInmueble(idInmueble).Count == 0)
+                throw new Exception("El inmueble no tiene material audiovisual cargado.");
+
+            CambiarPublicacion(inmueble, true, "Republicación Inmueble", $"Inmueble {idInmueble} republicado: {inmueble.Direccion}.",
+                "No se pudo republicar el inmueble. No se guardó ningún cambio.");
+        }
+
+        // El cambio de estado y su registro en bitácora se guardan en la misma transacción
+        private void CambiarPublicacion(Inmueble inmueble, bool publicar, string actividad, string info, string mensajeError)
+        {
             Bitacora evento = new Bitacora
             {
                 FechaHora = DateTime.Now,
                 Usuario = SessionManager.Instance.UsuarioActual,
-                Actividad = "Publicación Inmueble",
-                InfoAsociada = $"Inmueble {idInmueble} publicado: {inmueble.Direccion}."
+                Actividad = actividad,
+                InfoAsociada = info
             };
 
-            if (!inmuebleDAL.Publicar(idInmueble, evento))
-                throw new Exception("No se pudo publicar el inmueble. No se guardó ningún cambio.");
+            if (!inmuebleDAL.CambiarPublicacion(inmueble.IdInmueble, publicar, evento))
+                throw new Exception(mensajeError);
         }
 
         public void Eliminar(int idInmueble)

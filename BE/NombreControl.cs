@@ -28,6 +28,7 @@ namespace BE
         public const string FormMain_validarTasacionToolStripMenuItem = "FormMain.validarTasacionToolStripMenuItem";
         public const string FormMain_cargarMaterialAudiovisualToolStripMenuItem = "FormMain.cargarMaterialAudiovisualToolStripMenuItem";
         public const string FormMain_publicarInmuebleToolStripMenuItem = "FormMain.publicarInmuebleToolStripMenuItem";
+        public const string FormMain_inmueblesPublicadosToolStripMenuItem = "FormMain.inmueblesPublicadosToolStripMenuItem";
 
         // FormRegistrarCaptacion
         public const string FormRegistrarCaptacion_grpCliente = "FormRegistrarCaptacion.grpCliente";
@@ -131,6 +132,28 @@ namespace BE
         public const string FormPublicarInmueble_dgvMaterial_tipo = "FormPublicarInmueble.dgvMaterial.tipo";
         public const string FormPublicarInmueble_dgvMaterial_archivo = "FormPublicarInmueble.dgvMaterial.archivo";
         public const string FormPublicarInmueble_dgvMaterial_fecha = "FormPublicarInmueble.dgvMaterial.fecha";
+
+        // FormInmueblesPublicados
+        public const string FormInmueblesPublicados_lblPublicados = "FormInmueblesPublicados.lblPublicados";
+        public const string FormInmueblesPublicados_btnActualizar = "FormInmueblesPublicados.btnActualizar";
+        public const string FormInmueblesPublicados_grpDetalle = "FormInmueblesPublicados.grpDetalle";
+        public const string FormInmueblesPublicados_lblTextoComercial = "FormInmueblesPublicados.lblTextoComercial";
+        public const string FormInmueblesPublicados_lblMaterial = "FormInmueblesPublicados.lblMaterial";
+        public const string FormInmueblesPublicados_lblVistaPrevia = "FormInmueblesPublicados.lblVistaPrevia";
+        public const string FormInmueblesPublicados_lblSinVistaPrevia = "FormInmueblesPublicados.lblSinVistaPrevia";
+        public const string FormInmueblesPublicados_btnDespublicar = "FormInmueblesPublicados.btnDespublicar";
+        public const string FormInmueblesPublicados_btnRepublicar = "FormInmueblesPublicados.btnRepublicar";
+        public const string FormInmueblesPublicados_dgvInmuebles_nro = "FormInmueblesPublicados.dgvInmuebles.nro";
+        public const string FormInmueblesPublicados_dgvInmuebles_cliente = "FormInmueblesPublicados.dgvInmuebles.cliente";
+        public const string FormInmueblesPublicados_dgvInmuebles_direccion = "FormInmueblesPublicados.dgvInmuebles.direccion";
+        public const string FormInmueblesPublicados_dgvInmuebles_tipo = "FormInmueblesPublicados.dgvInmuebles.tipo";
+        public const string FormInmueblesPublicados_dgvInmuebles_valorFinal = "FormInmueblesPublicados.dgvInmuebles.valorFinal";
+        public const string FormInmueblesPublicados_dgvInmuebles_estado = "FormInmueblesPublicados.dgvInmuebles.estado";
+        public const string FormInmueblesPublicados_dgvInmuebles_fechaPublicacion = "FormInmueblesPublicados.dgvInmuebles.fechaPublicacion";
+        public const string FormInmueblesPublicados_dgvInmuebles_fechaDespublicacion = "FormInmueblesPublicados.dgvInmuebles.fechaDespublicacion";
+        public const string FormInmueblesPublicados_dgvMaterial_tipo = "FormInmueblesPublicados.dgvMaterial.tipo";
+        public const string FormInmueblesPublicados_dgvMaterial_archivo = "FormInmueblesPublicados.dgvMaterial.archivo";
+        public const string FormInmueblesPublicados_dgvMaterial_fecha = "FormInmueblesPublicados.dgvMaterial.fecha";
 
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";

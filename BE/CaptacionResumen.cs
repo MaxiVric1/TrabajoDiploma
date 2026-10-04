@@ -15,6 +15,9 @@ namespace BE
         public decimal ValorPretendido { get; set; }
         public decimal? ValorFinal { get; set; } // valor de la última tasación, si fue aprobada
         public int CantidadArchivos { get; set; } // material audiovisual cargado para el inmueble
+        public string EstadoPublicacion { get; set; } // "Publicado" / "Despublicado" (vacío si nunca se publicó)
+        public DateTime? FechaPublicacion { get; set; }
+        public DateTime? FechaDespublicacion { get; set; }
         public EstadoInmueble EstadoInmueble { get; set; }
         public int IdInmueble { get; set; }
         public int IdCliente { get; set; }

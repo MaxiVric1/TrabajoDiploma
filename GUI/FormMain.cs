@@ -53,7 +53,8 @@ namespace TpIngSoft
                 .ConItem(gestionarCaptacionesToolStripMenuItem, BE.NombreControl.FormMain_gestionarCaptacionesToolStripMenuItem)
                 .ConItem(validarTasacionToolStripMenuItem, BE.NombreControl.FormMain_validarTasacionToolStripMenuItem)
                 .ConItem(cargarMaterialAudiovisualToolStripMenuItem, BE.NombreControl.FormMain_cargarMaterialAudiovisualToolStripMenuItem)
-                .ConItem(publicarInmuebleToolStripMenuItem, BE.NombreControl.FormMain_publicarInmuebleToolStripMenuItem);
+                .ConItem(publicarInmuebleToolStripMenuItem, BE.NombreControl.FormMain_publicarInmuebleToolStripMenuItem)
+                .ConItem(inmueblesPublicadosToolStripMenuItem, BE.NombreControl.FormMain_inmueblesPublicadosToolStripMenuItem);
 
             _controlesTraducibles.Add(menuTraducible);
         }
@@ -352,6 +353,13 @@ namespace TpIngSoft
         private void publicarInmuebleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormPublicarInmueble frm = new FormPublicarInmueble();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void inmueblesPublicadosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormInmueblesPublicados frm = new FormInmueblesPublicados();
             frm.MdiParent = this;
             frm.Show();
         }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using BE;
@@ -187,51 +185,17 @@ namespace TpIngSoft
             }
         }
 
-        // Muestra la primera foto cargada; si no se puede abrir (archivo inexistente o formato no
-        // soportado, p. ej. WebP), prueba con la siguiente
         private void MostrarVistaPrevia(List<MaterialAudiovisual> material)
         {
-            List<MaterialAudiovisual> fotos = material
-                .Where(m => m.TipoArchivo == TipoMaterial.Foto.ToString())
-                .OrderBy(m => m.FechaCarga).ThenBy(m => m.IdMaterial)
-                .ToList();
-
-            if (fotos.Count == 0)
+            Image imagen = MaterialVisual.PrimeraFoto(material, out string motivo);
+            if (imagen == null)
             {
-                MostrarSinVistaPrevia("No hay fotos cargadas");
+                MostrarSinVistaPrevia(motivo);
                 return;
             }
-
-            foreach (MaterialAudiovisual foto in fotos)
-            {
-                Image imagen = CargarImagen(foto.RutaArchivo);
-                if (imagen == null) continue;
-
-                LiberarVistaPrevia();
-                picVistaPrevia.Image = imagen;
-                lblSinVistaPrevia.Visible = false;
-                return;
-            }
-
-            MostrarSinVistaPrevia("Vista previa no disponible: las fotos no se encuentran o tienen un formato no soportado");
-        }
-
-        // Carga la imagen en memoria para no dejar el archivo bloqueado; null si no se puede leer
-        private Image CargarImagen(string ruta)
-        {
-            if (string.IsNullOrEmpty(ruta) || !File.Exists(ruta)) return null;
-            try
-            {
-                using (FileStream fs = new FileStream(ruta, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (Image original = Image.FromStream(fs))
-                {
-                    return new Bitmap(original);
-                }
-            }
-            catch (ArgumentException) { return null; }      // formato que GDI+ no reconoce
-            catch (OutOfMemoryException) { return null; }   // GDI+ también lo informa así para imágenes inválidas
-            catch (IOException) { return null; }
-            catch (UnauthorizedAccessException) { return null; }
+            LiberarVistaPrevia();
+            picVistaPrevia.Image = imagen;
+            lblSinVistaPrevia.Visible = false;
         }
 
         private void MostrarSinVistaPrevia(string mensaje)
@@ -248,33 +212,15 @@ namespace TpIngSoft
             anterior?.Dispose();
         }
 
-        // En la grilla se muestra solo el nombre del archivo; la ruta completa queda en el tooltip
         private void dgvMaterial_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex < 0 || dgvMaterial.Columns[e.ColumnIndex].Name != "RutaArchivo" || e.Value == null) return;
-            string ruta = e.Value.ToString();
-            dgvMaterial.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = ruta;
-            e.Value = Path.GetFileName(ruta);
-            e.FormattingApplied = true;
+            MaterialVisual.MostrarNombreArchivo(dgvMaterial, e);
         }
 
         private void dgvMaterial_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || !(dgvMaterial.Rows[e.RowIndex].DataBoundItem is MaterialAudiovisual material)) return;
-
-            if (!File.Exists(material.RutaArchivo))
-            {
-                MessageBox.Show("El archivo ya no existe en:\n" + material.RutaArchivo, "Archivo no encontrado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            try
-            {
-                Process.Start(material.RutaArchivo);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("No se pudo abrir el archivo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            if (e.RowIndex >= 0 && dgvMaterial.Rows[e.RowIndex].DataBoundItem is MaterialAudiovisual material)
+                MaterialVisual.AbrirArchivo(material.RutaArchivo);
         }
 
         private void btnPublicar_Click(object sender, EventArgs e)

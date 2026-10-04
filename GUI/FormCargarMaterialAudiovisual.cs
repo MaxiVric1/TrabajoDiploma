@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -193,33 +192,15 @@ namespace TpIngSoft
             }
         }
 
-        // En la grilla se muestra solo el nombre del archivo; la ruta completa queda en el tooltip
         private void dgvMaterialCargado_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex < 0 || dgvMaterialCargado.Columns[e.ColumnIndex].Name != "RutaArchivo" || e.Value == null) return;
-            string ruta = e.Value.ToString();
-            dgvMaterialCargado.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = ruta;
-            e.Value = Path.GetFileName(ruta);
-            e.FormattingApplied = true;
+            MaterialVisual.MostrarNombreArchivo(dgvMaterialCargado, e);
         }
 
         private void dgvMaterialCargado_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || !(dgvMaterialCargado.Rows[e.RowIndex].DataBoundItem is MaterialAudiovisual material)) return;
-
-            if (!File.Exists(material.RutaArchivo))
-            {
-                MessageBox.Show("El archivo ya no existe en:\n" + material.RutaArchivo, "Archivo no encontrado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            try
-            {
-                Process.Start(material.RutaArchivo);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("No se pudo abrir el archivo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            if (e.RowIndex >= 0 && dgvMaterialCargado.Rows[e.RowIndex].DataBoundItem is MaterialAudiovisual material)
+                MaterialVisual.AbrirArchivo(material.RutaArchivo);
         }
 
         private void btnAgregarArchivo_Click(object sender, EventArgs e)
