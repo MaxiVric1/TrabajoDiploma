@@ -1,9 +1,0 @@
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\bin\x64\Release\SERVICIOS.dll
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\bin\x64\Release\SERVICIOS.pdb
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\bin\x64\Release\BE.dll
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\bin\x64\Release\BE.pdb
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\obj\x64\Release\SERVICIOS.csproj.AssemblyReference.cache
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\obj\x64\Release\SERVICIOS.csproj.CoreCompileInputs.cache
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\obj\x64\Release\SERVICIOS.csproj.Up2Date
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\obj\x64\Release\SERVICIOS.dll
-C:\Desktop\UAI\4to\2do Cuatri\Trabajo de Diploma\SEGUNDA ENTREGA\TpIngSoft\SERVICIOS\obj\x64\Release\SERVICIOS.pdb

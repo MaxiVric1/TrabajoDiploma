@@ -1,0 +1,92 @@
+# ====================================================
+# .NET Framework / Windows Forms - Visual Studio
+# ====================================================
+
+# Resultados de compilación (en cualquier proyecto: BE, BLL, DAL, GUI, SERVICIOS, BackupCLI)
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ll]og/
+[Ll]ogs/
+
+# Carpeta de estado de Visual Studio (índices, layout, caché de IntelliSense/Copilot)
+.vs/
+
+# Archivos de usuario de Visual Studio
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Paquetes NuGet (se restauran con "dotnet restore" / Visual Studio)
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Caché y temporales de compilación
+*.cache
+*.tmp
+*.tlog
+*.log
+*.vspscc
+*.vssscc
+*.pidb
+*.svclog
+*.ilk
+*.meta
+*.obj
+*.pch
+*.ipch
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.VC.opendb
+
+# Resultados de tests
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+
+# Herramientas (ReSharper, Rider)
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# VS Code: se versionan solo las preferencias compartidas del proyecto
+.vscode/*
+!.vscode/settings.json
+
+# ====================================================
+# Generados por la aplicación al ejecutarse
+# ====================================================
+
+# Sesión local guardada por UsuarioBLL
+session.dat
+
+# Archivos copiados por los formularios del PN1 (normalmente dentro de bin/, por si se ejecuta desde otra carpeta)
+Autorizaciones/
+MaterialAudiovisual/
+
+# Backups de la base (BackupCLI los guarda en la carpeta de SQL Server, nunca en el repo)
+*.bak
+
+# ====================================================
+# Sistema operativo
+# ====================================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
