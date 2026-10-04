@@ -230,6 +230,926 @@
           "bin/placeholder/SERVICIOS.dll": {}
         }
       }
+    },
+    ".NETFramework,Version=v4.7.2/win": {
+      "Microsoft.Bcl.HashCode/1.1.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/Microsoft.Bcl.HashCode.dll": {}
+        },
+        "runtime": {
+          "lib/net461/Microsoft.Bcl.HashCode.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Collections.Immutable/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.5",
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        },
+        "compile": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Formats.Nrbf/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Bcl.HashCode": "1.1.1",
+          "System.Reflection.Metadata": "9.0.0",
+          "System.ValueTuple": "4.5.0"
+        },
+        "compile": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Memory/4.5.5": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Reflection.Metadata/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.Immutable": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Resources.Extensions/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Formats.Nrbf": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/System.Resources.Extensions.targets": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "BE/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/BE.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BE.dll": {}
+        }
+      },
+      "BLL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0",
+          "DAL": "1.0.0",
+          "SERVICIOS": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BLL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BLL.dll": {}
+        }
+      },
+      "DAL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DAL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DAL.dll": {}
+        }
+      },
+      "SERVICIOS/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-arm64": {
+      "Microsoft.Bcl.HashCode/1.1.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/Microsoft.Bcl.HashCode.dll": {}
+        },
+        "runtime": {
+          "lib/net461/Microsoft.Bcl.HashCode.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Collections.Immutable/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.5",
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        },
+        "compile": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Formats.Nrbf/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Bcl.HashCode": "1.1.1",
+          "System.Reflection.Metadata": "9.0.0",
+          "System.ValueTuple": "4.5.0"
+        },
+        "compile": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Memory/4.5.5": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Reflection.Metadata/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.Immutable": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Resources.Extensions/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Formats.Nrbf": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/System.Resources.Extensions.targets": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "BE/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/BE.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BE.dll": {}
+        }
+      },
+      "BLL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0",
+          "DAL": "1.0.0",
+          "SERVICIOS": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BLL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BLL.dll": {}
+        }
+      },
+      "DAL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DAL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DAL.dll": {}
+        }
+      },
+      "SERVICIOS/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x64": {
+      "Microsoft.Bcl.HashCode/1.1.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/Microsoft.Bcl.HashCode.dll": {}
+        },
+        "runtime": {
+          "lib/net461/Microsoft.Bcl.HashCode.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Collections.Immutable/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.5",
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        },
+        "compile": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Formats.Nrbf/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Bcl.HashCode": "1.1.1",
+          "System.Reflection.Metadata": "9.0.0",
+          "System.ValueTuple": "4.5.0"
+        },
+        "compile": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Memory/4.5.5": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Reflection.Metadata/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.Immutable": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Resources.Extensions/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Formats.Nrbf": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/System.Resources.Extensions.targets": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "BE/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/BE.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BE.dll": {}
+        }
+      },
+      "BLL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0",
+          "DAL": "1.0.0",
+          "SERVICIOS": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BLL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BLL.dll": {}
+        }
+      },
+      "DAL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DAL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DAL.dll": {}
+        }
+      },
+      "SERVICIOS/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x86": {
+      "Microsoft.Bcl.HashCode/1.1.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net461/Microsoft.Bcl.HashCode.dll": {}
+        },
+        "runtime": {
+          "lib/net461/Microsoft.Bcl.HashCode.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Buffers/4.5.1": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net45/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Buffers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Collections.Immutable/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Memory": "4.5.5",
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        },
+        "compile": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Collections.Immutable.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Formats.Nrbf/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Bcl.HashCode": "1.1.1",
+          "System.Reflection.Metadata": "9.0.0",
+          "System.ValueTuple": "4.5.0"
+        },
+        "compile": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Formats.Nrbf.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Memory/4.5.5": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
+        "frameworkAssemblies": [
+          "System",
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Numerics",
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net46/System.Numerics.Vectors.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.Reflection.Metadata/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.Immutable": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Reflection.Metadata.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/_._": {}
+        }
+      },
+      "System.Resources.Extensions/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Formats.Nrbf": "9.0.0",
+          "System.Memory": "4.5.5"
+        },
+        "compile": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/System.Resources.Extensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net462/System.Resources.Extensions.targets": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "BE/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/BE.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BE.dll": {}
+        }
+      },
+      "BLL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0",
+          "DAL": "1.0.0",
+          "SERVICIOS": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BLL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BLL.dll": {}
+        }
+      },
+      "DAL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DAL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DAL.dll": {}
+        }
+      },
+      "SERVICIOS/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "BE": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SERVICIOS.dll": {}
+        }
+      }
     }
   },
   "libraries": {
@@ -630,6 +1550,20 @@
             "version": "[9.0.0, )"
           }
         }
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-arm64": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
       }
     }
   }

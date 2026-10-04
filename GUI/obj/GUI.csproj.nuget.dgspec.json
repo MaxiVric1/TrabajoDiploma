@@ -122,6 +122,20 @@
             }
           }
         }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-arm64": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
       }
     },
     "C:\\Desktop\\UAI\\4to\\2do Cuatri\\Trabajo de Diploma\\SEGUNDA ENTREGA\\TpIngSoft\\SERVICIOS\\SERVICIOS.csproj": {
