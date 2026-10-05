@@ -35,12 +35,21 @@ namespace BLL
 
         // ---------- Operaciones ----------
 
-        public int Registrar(Contrato contrato)
+        // inquilinoNuevo: para un inquilino que todavía no existe; se da de alta junto con el contrato en una sola
+        // transacción. Si ya existe uno con ese DNI se rechaza (hay que usar el existente).
+        public int Registrar(Contrato contrato, Inquilino inquilinoNuevo = null)
         {
             if (contrato != null && contrato.IdUsuarioAgente == 0 && SessionManager.Instance.EstaLogueado())
                 contrato.IdUsuarioAgente = SessionManager.Instance.UsuarioActual.Id;
 
-            Validar(contrato);
+            if (inquilinoNuevo != null)
+            {
+                new InquilinoBLL().Validar(inquilinoNuevo);
+                if (inquilinoDAL.BuscarPorDni(inquilinoNuevo.Dni) != null)
+                    throw new ArgumentException($"Ya existe un inquilino con DNI {inquilinoNuevo.Dni}: búsquelo para usar sus datos.");
+            }
+
+            Validar(contrato, validarInquilino: inquilinoNuevo == null);
             if (!inmuebleDAL.LeerDisponibles().Any(i => i.IdInmuebleAlquiler == contrato.IdInmuebleAlquiler))
                 throw new ArgumentException("El inmueble ya tiene un contrato vigente.");
 
@@ -51,12 +60,13 @@ namespace BLL
             // Un contrato corto puede nacer ya dentro del período de alerta: se guarda con ese estado en la misma transacción
             contrato.EstadoContrato = estadoInicial;
             contrato.AlertaVencimiento = AlertaSegunEstado(estadoInicial);
-            int result = contratoDAL.CrearConEstado(contrato);
+            int result = contratoDAL.CrearConEstado(contrato, inquilinoNuevo);
             if (result == -1)
                 throw new Exception("No se pudo registrar el contrato. No se guardó ningún cambio.");
 
+            string inquilino = inquilinoNuevo != null ? $"inquilino nuevo DNI {inquilinoNuevo.Dni}" : $"inquilino {contrato.IdInquilino}";
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Contrato",
-                $"Contrato N° {result}: inmueble {contrato.IdInmuebleAlquiler}, inquilino {contrato.IdInquilino}, " +
+                $"Contrato N° {result}: inmueble {contrato.IdInmuebleAlquiler}, {inquilino}, " +
                 $"{contrato.DuracionMeses} meses desde {contrato.FechaInicio:dd/MM/yyyy}, ${contrato.MontoMensual:N2} mensuales.");
             return result;
         }
@@ -137,7 +147,8 @@ namespace BLL
         // Vigentes que vencen dentro de DIAS_ALERTA_VENCIMIENTO días, con el contacto del inquilino
         public List<Contrato> LeerPorVencer() => contratoDAL.LeerPorVencer(DIAS_ALERTA_VENCIMIENTO);
 
-        private void Validar(Contrato contrato)
+        // validarInquilino = false cuando el inquilino se crea en la misma transacción y todavía no existe
+        private void Validar(Contrato contrato, bool validarInquilino = true)
         {
             if (contrato == null) throw new ArgumentNullException(nameof(contrato));
             if (contrato.FechaInicio == default(DateTime))
@@ -148,7 +159,7 @@ namespace BLL
                 throw new ArgumentException("El monto mensual debe ser mayor a cero.");
             if (contrato.IdUsuarioAgente <= 0)
                 throw new ArgumentException("El contrato debe tener un agente asignado.");
-            if (inquilinoDAL.BuscarPorId(contrato.IdInquilino) == null)
+            if (validarInquilino && inquilinoDAL.BuscarPorId(contrato.IdInquilino) == null)
                 throw new ArgumentException("El inquilino indicado no existe.");
             if (inmuebleDAL.BuscarPorId(contrato.IdInmuebleAlquiler) == null)
                 throw new ArgumentException("El inmueble indicado no existe.");

@@ -162,6 +162,28 @@ namespace BE
         public const string FormInmueblesPublicados_dgvMaterial_archivo = "FormInmueblesPublicados.dgvMaterial.archivo";
         public const string FormInmueblesPublicados_dgvMaterial_fecha = "FormInmueblesPublicados.dgvMaterial.fecha";
 
+        // FormRegistrarContrato
+        public const string FormRegistrarContrato_grpInquilino = "FormRegistrarContrato.grpInquilino";
+        public const string FormRegistrarContrato_lblDni = "FormRegistrarContrato.lblDni";
+        public const string FormRegistrarContrato_btnBuscarInquilino = "FormRegistrarContrato.btnBuscarInquilino";
+        public const string FormRegistrarContrato_lblNombre = "FormRegistrarContrato.lblNombre";
+        public const string FormRegistrarContrato_lblApellido = "FormRegistrarContrato.lblApellido";
+        public const string FormRegistrarContrato_lblTelefono = "FormRegistrarContrato.lblTelefono";
+        public const string FormRegistrarContrato_lblEmail = "FormRegistrarContrato.lblEmail";
+        public const string FormRegistrarContrato_grpInmueble = "FormRegistrarContrato.grpInmueble";
+        public const string FormRegistrarContrato_lblInmueble = "FormRegistrarContrato.lblInmueble";
+        public const string FormRegistrarContrato_btnNuevoInmueble = "FormRegistrarContrato.btnNuevoInmueble";
+        public const string FormRegistrarContrato_lblNuevaDireccion = "FormRegistrarContrato.lblNuevaDireccion";
+        public const string FormRegistrarContrato_btnAgregarInmueble = "FormRegistrarContrato.btnAgregarInmueble";
+        public const string FormRegistrarContrato_btnCancelarInmueble = "FormRegistrarContrato.btnCancelarInmueble";
+        public const string FormRegistrarContrato_grpContrato = "FormRegistrarContrato.grpContrato";
+        public const string FormRegistrarContrato_lblFechaInicio = "FormRegistrarContrato.lblFechaInicio";
+        public const string FormRegistrarContrato_lblDuracion = "FormRegistrarContrato.lblDuracion";
+        public const string FormRegistrarContrato_lblMonto = "FormRegistrarContrato.lblMonto";
+        public const string FormRegistrarContrato_lblFechaFin = "FormRegistrarContrato.lblFechaFin";
+        public const string FormRegistrarContrato_btnGuardar = "FormRegistrarContrato.btnGuardar";
+        public const string FormRegistrarContrato_btnCancelar = "FormRegistrarContrato.btnCancelar";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

@@ -90,24 +90,32 @@ namespace DAL
 
         // Transacción: alta del contrato y, si no nace Activo (p. ej. un contrato corto ya dentro del período de
         // alerta), su estado inicial. El SP CrearContrato siempre crea en Activo y sin alerta.
-        public int CrearConEstado(Contrato contrato)
+        // inquilinoNuevo: si se indica, se da de alta en la misma transacción y el contrato queda a su nombre.
+        public int CrearConEstado(Contrato contrato, Inquilino inquilinoNuevo = null)
         {
             EstadoContrato estado = contrato.EstadoContrato;
             bool alerta = contrato.AlertaVencimiento;
+            int idInquilinoOriginal = contrato.IdInquilino;
 
             acceso.Abrir();
             try
             {
                 acceso.IniciarTx();
 
-                bool ok = Crear(contrato, acceso) != -1;
+                bool ok = true;
+                if (inquilinoNuevo != null)
+                {
+                    ok = new InquilinoDAL().Crear(inquilinoNuevo, acceso) != -1;
+                    contrato.IdInquilino = inquilinoNuevo.IdInquilino;
+                }
+                if (ok) ok = Crear(contrato, acceso) != -1;
                 if (ok && estado != EstadoContrato.Activo)
                     ok = ActualizarEstado(contrato.IdContrato, estado, alerta, acceso);
 
                 if (!ok)
                 {
                     acceso.DeshacerTX();
-                    contrato.IdContrato = 0; // el id asignado se revirtió
+                    RestaurarIds(contrato, idInquilinoOriginal, inquilinoNuevo);
                     return -1;
                 }
 
@@ -119,13 +127,21 @@ namespace DAL
             catch
             {
                 acceso.DeshacerTX();
-                contrato.IdContrato = 0;
+                RestaurarIds(contrato, idInquilinoOriginal, inquilinoNuevo);
                 throw;
             }
             finally
             {
                 acceso.Cerrar();
             }
+        }
+
+        // Tras un rollback, los ids asignados no existen en la base: se limpian para que un reintento no los use
+        private void RestaurarIds(Contrato contrato, int idInquilinoOriginal, Inquilino inquilinoNuevo)
+        {
+            contrato.IdContrato = 0;
+            contrato.IdInquilino = idInquilinoOriginal;
+            if (inquilinoNuevo != null) inquilinoNuevo.IdInquilino = 0;
         }
 
         public bool ActualizarEstado(int idContrato, EstadoContrato estado, bool alertaVencimiento)

@@ -22,7 +22,28 @@ INSERT INTO @Nuevos VALUES
     ('(form)', 'FormRegistrarPago', 'Registrar Pago', 'Register Payment'),
     ('(form)', 'FormGestionarMora', 'Gestionar Mora', 'Manage Arrears'),
     ('(form)', 'FormGestionarLitigios', 'Gestionar Litigios', 'Manage Litigation'),
-    ('(form)', 'FormContratosPorVencer', 'Contratos Por Vencer', 'Expiring Contracts');
+    ('(form)', 'FormContratosPorVencer', 'Contratos Por Vencer', 'Expiring Contracts'),
+    -- FormRegistrarContrato
+    ('grpInquilino', 'FormRegistrarContrato', 'Inquilino', 'Tenant'),
+    ('lblDni', 'FormRegistrarContrato', 'DNI:', 'ID Number:'),
+    ('btnBuscarInquilino', 'FormRegistrarContrato', 'Buscar', 'Search'),
+    ('lblNombre', 'FormRegistrarContrato', 'Nombre:', 'First Name:'),
+    ('lblApellido', 'FormRegistrarContrato', 'Apellido:', 'Last Name:'),
+    ('lblTelefono', 'FormRegistrarContrato', N'Teléfono:', 'Phone:'),
+    ('lblEmail', 'FormRegistrarContrato', 'Email:', 'Email:'),
+    ('grpInmueble', 'FormRegistrarContrato', 'Inmueble', 'Property'),
+    ('lblInmueble', 'FormRegistrarContrato', 'Disponibles:', 'Available:'),
+    ('btnNuevoInmueble', 'FormRegistrarContrato', 'Nuevo Inmueble', 'New Property'),
+    ('lblNuevaDireccion', 'FormRegistrarContrato', N'Dirección / tipo:', 'Address / type:'),
+    ('btnAgregarInmueble', 'FormRegistrarContrato', 'Agregar', 'Add'),
+    ('btnCancelarInmueble', 'FormRegistrarContrato', 'Cancelar', 'Cancel'),
+    ('grpContrato', 'FormRegistrarContrato', 'Contrato', 'Contract'),
+    ('lblFechaInicio', 'FormRegistrarContrato', 'Fecha de inicio:', 'Start date:'),
+    ('lblDuracion', 'FormRegistrarContrato', N'Duración (meses):', 'Length (months):'),
+    ('lblMonto', 'FormRegistrarContrato', 'Monto mensual:', 'Monthly rent:'),
+    ('lblFechaFin', 'FormRegistrarContrato', 'Finaliza:', 'Ends:'),
+    ('btnGuardar', 'FormRegistrarContrato', 'Guardar', 'Save'),
+    ('btnCancelar', 'FormRegistrarContrato', 'Cancelar', 'Cancel');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
