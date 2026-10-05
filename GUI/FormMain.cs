@@ -54,7 +54,14 @@ namespace TpIngSoft
                 .ConItem(validarTasacionToolStripMenuItem, BE.NombreControl.FormMain_validarTasacionToolStripMenuItem)
                 .ConItem(cargarMaterialAudiovisualToolStripMenuItem, BE.NombreControl.FormMain_cargarMaterialAudiovisualToolStripMenuItem)
                 .ConItem(publicarInmuebleToolStripMenuItem, BE.NombreControl.FormMain_publicarInmuebleToolStripMenuItem)
-                .ConItem(inmueblesPublicadosToolStripMenuItem, BE.NombreControl.FormMain_inmueblesPublicadosToolStripMenuItem);
+                .ConItem(inmueblesPublicadosToolStripMenuItem, BE.NombreControl.FormMain_inmueblesPublicadosToolStripMenuItem)
+                .ConItem(pn2ToolStripMenuItem, BE.NombreControl.FormMain_pn2ToolStripMenuItem)
+                .ConItem(gestionarContratosToolStripMenuItem, BE.NombreControl.FormMain_gestionarContratosToolStripMenuItem)
+                .ConItem(registrarContratoToolStripMenuItem, BE.NombreControl.FormMain_registrarContratoToolStripMenuItem)
+                .ConItem(registrarPagoToolStripMenuItem, BE.NombreControl.FormMain_registrarPagoToolStripMenuItem)
+                .ConItem(gestionarMoraToolStripMenuItem, BE.NombreControl.FormMain_gestionarMoraToolStripMenuItem)
+                .ConItem(gestionarLitigiosToolStripMenuItem, BE.NombreControl.FormMain_gestionarLitigiosToolStripMenuItem)
+                .ConItem(contratosPorVencerToolStripMenuItem, BE.NombreControl.FormMain_contratosPorVencerToolStripMenuItem);
 
             _controlesTraducibles.Add(menuTraducible);
         }
@@ -360,6 +367,48 @@ namespace TpIngSoft
         private void inmueblesPublicadosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormInmueblesPublicados frm = new FormInmueblesPublicados();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void gestionarContratosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormGestionarContratos frm = new FormGestionarContratos();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void registrarContratoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormRegistrarContrato frm = new FormRegistrarContrato();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void registrarPagoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormRegistrarPago frm = new FormRegistrarPago();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void gestionarMoraToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormGestionarMora frm = new FormGestionarMora();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void gestionarLitigiosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormGestionarLitigios frm = new FormGestionarLitigios();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void contratosPorVencerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormContratosPorVencer frm = new FormContratosPorVencer();
             frm.MdiParent = this;
             frm.Show();
         }

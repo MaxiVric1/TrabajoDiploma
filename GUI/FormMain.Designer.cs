@@ -33,6 +33,13 @@ namespace TpIngSoft
             this.cargarMaterialAudiovisualToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.publicarInmuebleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inmueblesPublicadosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pn2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gestionarContratosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.registrarContratoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.registrarPagoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gestionarMoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gestionarLitigiosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contratosPorVencerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbIdioma = new System.Windows.Forms.ToolStripComboBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblSesionInfo = new System.Windows.Forms.ToolStripStatusLabel();
@@ -47,6 +54,7 @@ namespace TpIngSoft
             this.archivoToolStripMenuItem,
             this.adminToolStripMenuItem,
             this.pn1ToolStripMenuItem,
+            this.pn2ToolStripMenuItem,
             this.cmbIdioma});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -222,6 +230,75 @@ namespace TpIngSoft
             this.inmueblesPublicadosToolStripMenuItem.Text = "Inmuebles Publicados";
             this.inmueblesPublicadosToolStripMenuItem.Click += new System.EventHandler(this.inmueblesPublicadosToolStripMenuItem_Click);
             //
+            // pn2ToolStripMenuItem
+            //
+            this.pn2ToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.pn2ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.gestionarContratosToolStripMenuItem,
+            this.registrarContratoToolStripMenuItem,
+            this.registrarPagoToolStripMenuItem,
+            this.gestionarMoraToolStripMenuItem,
+            this.gestionarLitigiosToolStripMenuItem,
+            this.contratosPorVencerToolStripMenuItem});
+            this.pn2ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.pn2ToolStripMenuItem.Name = "pn2ToolStripMenuItem";
+            this.pn2ToolStripMenuItem.Size = new System.Drawing.Size(40, 23);
+            this.pn2ToolStripMenuItem.Text = "PN2";
+            //
+            // gestionarContratosToolStripMenuItem
+            //
+            this.gestionarContratosToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.gestionarContratosToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.gestionarContratosToolStripMenuItem.Name = "gestionarContratosToolStripMenuItem";
+            this.gestionarContratosToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.gestionarContratosToolStripMenuItem.Text = "Gestionar Contratos";
+            this.gestionarContratosToolStripMenuItem.Click += new System.EventHandler(this.gestionarContratosToolStripMenuItem_Click);
+            //
+            // registrarContratoToolStripMenuItem
+            //
+            this.registrarContratoToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.registrarContratoToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.registrarContratoToolStripMenuItem.Name = "registrarContratoToolStripMenuItem";
+            this.registrarContratoToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.registrarContratoToolStripMenuItem.Text = "Registrar Contrato";
+            this.registrarContratoToolStripMenuItem.Click += new System.EventHandler(this.registrarContratoToolStripMenuItem_Click);
+            //
+            // registrarPagoToolStripMenuItem
+            //
+            this.registrarPagoToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.registrarPagoToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.registrarPagoToolStripMenuItem.Name = "registrarPagoToolStripMenuItem";
+            this.registrarPagoToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.registrarPagoToolStripMenuItem.Text = "Registrar Pago";
+            this.registrarPagoToolStripMenuItem.Click += new System.EventHandler(this.registrarPagoToolStripMenuItem_Click);
+            //
+            // gestionarMoraToolStripMenuItem
+            //
+            this.gestionarMoraToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.gestionarMoraToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.gestionarMoraToolStripMenuItem.Name = "gestionarMoraToolStripMenuItem";
+            this.gestionarMoraToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.gestionarMoraToolStripMenuItem.Text = "Gestionar Mora";
+            this.gestionarMoraToolStripMenuItem.Click += new System.EventHandler(this.gestionarMoraToolStripMenuItem_Click);
+            //
+            // gestionarLitigiosToolStripMenuItem
+            //
+            this.gestionarLitigiosToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.gestionarLitigiosToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.gestionarLitigiosToolStripMenuItem.Name = "gestionarLitigiosToolStripMenuItem";
+            this.gestionarLitigiosToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.gestionarLitigiosToolStripMenuItem.Text = "Gestionar Litigios";
+            this.gestionarLitigiosToolStripMenuItem.Click += new System.EventHandler(this.gestionarLitigiosToolStripMenuItem_Click);
+            //
+            // contratosPorVencerToolStripMenuItem
+            //
+            this.contratosPorVencerToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.contratosPorVencerToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.contratosPorVencerToolStripMenuItem.Name = "contratosPorVencerToolStripMenuItem";
+            this.contratosPorVencerToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.contratosPorVencerToolStripMenuItem.Text = "Contratos Por Vencer";
+            this.contratosPorVencerToolStripMenuItem.Click += new System.EventHandler(this.contratosPorVencerToolStripMenuItem_Click);
+            //
             // cmbIdioma
             // 
             this.cmbIdioma.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -298,5 +375,12 @@ namespace TpIngSoft
         private System.Windows.Forms.ToolStripMenuItem cargarMaterialAudiovisualToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem publicarInmuebleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inmueblesPublicadosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pn2ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gestionarContratosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem registrarContratoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem registrarPagoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gestionarMoraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gestionarLitigiosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem contratosPorVencerToolStripMenuItem;
     }
 }

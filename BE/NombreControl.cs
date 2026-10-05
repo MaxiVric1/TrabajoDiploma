@@ -29,6 +29,13 @@ namespace BE
         public const string FormMain_cargarMaterialAudiovisualToolStripMenuItem = "FormMain.cargarMaterialAudiovisualToolStripMenuItem";
         public const string FormMain_publicarInmuebleToolStripMenuItem = "FormMain.publicarInmuebleToolStripMenuItem";
         public const string FormMain_inmueblesPublicadosToolStripMenuItem = "FormMain.inmueblesPublicadosToolStripMenuItem";
+        public const string FormMain_pn2ToolStripMenuItem = "FormMain.pn2ToolStripMenuItem";
+        public const string FormMain_gestionarContratosToolStripMenuItem = "FormMain.gestionarContratosToolStripMenuItem";
+        public const string FormMain_registrarContratoToolStripMenuItem = "FormMain.registrarContratoToolStripMenuItem";
+        public const string FormMain_registrarPagoToolStripMenuItem = "FormMain.registrarPagoToolStripMenuItem";
+        public const string FormMain_gestionarMoraToolStripMenuItem = "FormMain.gestionarMoraToolStripMenuItem";
+        public const string FormMain_gestionarLitigiosToolStripMenuItem = "FormMain.gestionarLitigiosToolStripMenuItem";
+        public const string FormMain_contratosPorVencerToolStripMenuItem = "FormMain.contratosPorVencerToolStripMenuItem";
 
         // FormRegistrarCaptacion
         public const string FormRegistrarCaptacion_grpCliente = "FormRegistrarCaptacion.grpCliente";

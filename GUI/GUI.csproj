@@ -163,6 +163,42 @@
       <DependentUpon>FormInmueblesPublicados.cs</DependentUpon>
     </Compile>
     <Compile Include="MaterialVisual.cs" />
+    <Compile Include="FormGestionarContratos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionarContratos.Designer.cs">
+      <DependentUpon>FormGestionarContratos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormRegistrarContrato.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRegistrarContrato.Designer.cs">
+      <DependentUpon>FormRegistrarContrato.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormRegistrarPago.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRegistrarPago.Designer.cs">
+      <DependentUpon>FormRegistrarPago.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionarMora.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionarMora.Designer.cs">
+      <DependentUpon>FormGestionarMora.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionarLitigios.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionarLitigios.Designer.cs">
+      <DependentUpon>FormGestionarLitigios.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormContratosPorVencer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormContratosPorVencer.Designer.cs">
+      <DependentUpon>FormContratosPorVencer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Traduccion\IControlTraducible.cs" />
     <Compile Include="Traduccion\EtiquetaTraducible.cs" />
