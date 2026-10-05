@@ -50,6 +50,7 @@ Source: "BackupCLI\bin\x64\Release\BackupCLI.exe.config"; DestDir: "{app}"; Flag
 ; Scripts de la base de datos (se ejecutan al final de la instalación)
 Source: "schema-init.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 Source: "stored-procedures.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
+Source: "permisos.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 
 [Icons]
 ; Solo en el menú Inicio: sin acceso directo en el escritorio
@@ -166,14 +167,15 @@ end;
 
 // -f 65001: los scripts están en UTF-8 sin BOM (sin esto se rompen las tildes de las traducciones)
 // -I: QUOTED_IDENTIFIER ON (índice filtrado de Contrato)
-function EjecutarScript(const Script: String): Boolean;
+// Variables: parámetros -v de sqlcmd para el script (vacío si no usa)
+function EjecutarScript(const Script, Variables: String): Boolean;
 var
   Carpeta: String;
   Codigo: Integer;
 begin
   Carpeta := ExpandConstant('{app}\BaseDeDatos\');
-  Result := Exec('sqlcmd.exe', '-S "' + Instancia + '" -E -b -l 15 -I -f 65001 -i "' + Carpeta + Script + '.sql" -o "' +
-                 Carpeta + Script + '.log"', '', SW_HIDE, ewWaitUntilTerminated, Codigo)
+  Result := Exec('sqlcmd.exe', '-S "' + Instancia + '" -E -b -l 15 -I -f 65001 ' + Variables + ' -i "' + Carpeta + Script +
+                 '.sql" -o "' + Carpeta + Script + '.log"', '', SW_HIDE, ewWaitUntilTerminated, Codigo)
             and (Codigo = 0);
   if not Result then
     SuppressibleMsgBox('Falló la ejecución de ' + Script + '.sql en ' + Instancia + ' (código ' + IntToStr(Codigo) + ').' + #13#10 +
@@ -189,16 +191,39 @@ begin
     'Los archivos de {#AppNombre} se instalaron, pero falta crear la base de datos. ' +
     'Con SQL Server disponible, ejecute en una consola (reemplazando INSTANCIA, p. ej. .\SQLEXPRESS):' + #13#10#13#10 +
     'sqlcmd -S INSTANCIA -E -b -I -f 65001 -i "' + Carpeta + 'schema-init.sql"' + #13#10 +
-    'sqlcmd -S INSTANCIA -E -b -I -f 65001 -i "' + Carpeta + 'stored-procedures.sql"',
+    'sqlcmd -S INSTANCIA -E -b -I -f 65001 -i "' + Carpeta + 'stored-procedures.sql"' + #13#10 +
+    'sqlcmd -S INSTANCIA -E -b -I -f 65001 -v Usuario="DOMINIO\usuario" -i "' + Carpeta + 'permisos.sql"',
     mbInformation, MB_OK, IDOK);
+end;
+
+// Usuario de Windows que abrió el instalador (DOMINIO\usuario). El instalador corre elevado: si se elevó con
+// otra cuenta (p. ej. un administrador en una PC de laboratorio), SYSTEM_USER sería esa cuenta y no la que
+// usa la aplicación. Se obtiene con whoami ejecutado como el usuario original; '' si no se pudo.
+function UsuarioOriginal(): String;
+var
+  Archivo: String;
+  Contenido: AnsiString;
+  Codigo: Integer;
+begin
+  Result := '';
+  // C:\ProgramData: lo puede escribir el usuario original y leer el instalador elevado
+  Archivo := ExpandConstant('{commonappdata}\LandSmart-usuario.tmp');
+  DeleteFile(Archivo);
+  if ExecAsOriginalUser(ExpandConstant('{cmd}'), '/C whoami > "' + Archivo + '"', '', SW_HIDE,
+                        ewWaitUntilTerminated, Codigo) and (Codigo = 0) and LoadStringFromFile(Archivo, Contenido) then
+    Result := Trim(String(Contenido));
+  DeleteFile(Archivo);
 end;
 
 // schema-init.sql BORRA y recrea todas las tablas: en una instalación nueva se ejecuta directamente;
 // si la base ya existe (reinstalación o actualización) solo se recrea si el usuario lo confirma.
 // stored-procedures.sql se puede ejecutar más de una vez sin perder datos: se ejecuta siempre.
+// permisos.sql da acceso (db_owner) al usuario de Windows que instaló y al grupo local de usuarios de la PC
+// (cualquier usuario de Windows puede usar la aplicación); también idempotente.
 procedure CrearBaseDeDatos();
 var
   BaseExiste, SinSqlcmd, Recrear: Boolean;
+  Usuario: String;
 begin
   if GetArrayLength(InstanciasInstaladas()) = 0 then
   begin
@@ -229,12 +254,20 @@ begin
   if Recrear then
   begin
     WizardForm.StatusLabel.Caption := 'Creando la base de datos {#SqlBase} en ' + Instancia + '...';
-    if not EjecutarScript('schema-init') then
+    if not EjecutarScript('schema-init', '') then
       Exit;
   end;
 
   WizardForm.StatusLabel.Caption := 'Creando los stored procedures en ' + Instancia + '...';
-  EjecutarScript('stored-procedures');
+  EjecutarScript('stored-procedures', '');
+
+  // Sin el usuario original, permisos.sql usa SYSTEM_USER (la cuenta con la que corre el instalador)
+  Usuario := UsuarioOriginal();
+  if Usuario = '' then
+    Usuario := 'SYSTEM_USER';
+  Log('Usuario de Windows para los permisos: ' + Usuario);
+  WizardForm.StatusLabel.Caption := 'Otorgando permisos a ' + Usuario + ' y a los usuarios de la PC...';
+  EjecutarScript('permisos', '-v Usuario="' + Usuario + '"');
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
