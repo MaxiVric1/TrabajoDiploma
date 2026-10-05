@@ -78,6 +78,11 @@
     <Compile Include="CaptacionDAL.cs" />
     <Compile Include="TasacionDAL.cs" />
     <Compile Include="MaterialAudiovisualDAL.cs" />
+    <Compile Include="InquilinoDAL.cs" />
+    <Compile Include="InmuebleAlquilerDAL.cs" />
+    <Compile Include="ContratoDAL.cs" />
+    <Compile Include="PagoAlquilerDAL.cs" />
+    <Compile Include="AccionLegalDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
