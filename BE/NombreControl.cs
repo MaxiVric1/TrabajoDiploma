@@ -292,6 +292,53 @@ namespace BE
         public const string FormGestionarLitigios_dgvAcciones_tipo = "FormGestionarLitigios.dgvAcciones.tipo";
         public const string FormGestionarLitigios_dgvAcciones_descripcion = "FormGestionarLitigios.dgvAcciones.descripcion";
 
+        // FormContratosPorVencer
+        public const string FormContratosPorVencer_btnActualizar = "FormContratosPorVencer.btnActualizar";
+        public const string FormContratosPorVencer_grpInquilino = "FormContratosPorVencer.grpInquilino";
+        public const string FormContratosPorVencer_lblNombre = "FormContratosPorVencer.lblNombre";
+        public const string FormContratosPorVencer_lblApellido = "FormContratosPorVencer.lblApellido";
+        public const string FormContratosPorVencer_lblDni = "FormContratosPorVencer.lblDni";
+        public const string FormContratosPorVencer_lblTelefono = "FormContratosPorVencer.lblTelefono";
+        public const string FormContratosPorVencer_lblEmail = "FormContratosPorVencer.lblEmail";
+        public const string FormContratosPorVencer_grpAcciones = "FormContratosPorVencer.grpAcciones";
+        public const string FormContratosPorVencer_lblObservacion = "FormContratosPorVencer.lblObservacion";
+        public const string FormContratosPorVencer_btnRenovacion = "FormContratosPorVencer.btnRenovacion";
+        public const string FormContratosPorVencer_btnDesocupacion = "FormContratosPorVencer.btnDesocupacion";
+        public const string FormContratosPorVencer_grpContrato = "FormContratosPorVencer.grpContrato";
+        public const string FormContratosPorVencer_lblNroContrato = "FormContratosPorVencer.lblNroContrato";
+        public const string FormContratosPorVencer_lblDireccion = "FormContratosPorVencer.lblDireccion";
+        public const string FormContratosPorVencer_lblTipo = "FormContratosPorVencer.lblTipo";
+        public const string FormContratosPorVencer_lblFechaInicio = "FormContratosPorVencer.lblFechaInicio";
+        public const string FormContratosPorVencer_lblDuracion = "FormContratosPorVencer.lblDuracion";
+        public const string FormContratosPorVencer_lblFechaFin = "FormContratosPorVencer.lblFechaFin";
+        public const string FormContratosPorVencer_lblDiasRestantes = "FormContratosPorVencer.lblDiasRestantes";
+        public const string FormContratosPorVencer_lblMonto = "FormContratosPorVencer.lblMonto";
+        public const string FormContratosPorVencer_lblEstado = "FormContratosPorVencer.lblEstado";
+        public const string FormContratosPorVencer_lblAlerta = "FormContratosPorVencer.lblAlerta";
+        public const string FormContratosPorVencer_lblPagoActual = "FormContratosPorVencer.lblPagoActual";
+        public const string FormContratosPorVencer_lblDeuda = "FormContratosPorVencer.lblDeuda";
+        public const string FormContratosPorVencer_lblDesocupacion = "FormContratosPorVencer.lblDesocupacion";
+        public const string FormContratosPorVencer_dgvContratos_nro = "FormContratosPorVencer.dgvContratos.nro";
+        public const string FormContratosPorVencer_dgvContratos_inquilino = "FormContratosPorVencer.dgvContratos.inquilino";
+        public const string FormContratosPorVencer_dgvContratos_direccion = "FormContratosPorVencer.dgvContratos.direccion";
+        public const string FormContratosPorVencer_dgvContratos_tipo = "FormContratosPorVencer.dgvContratos.tipo";
+        public const string FormContratosPorVencer_dgvContratos_monto = "FormContratosPorVencer.dgvContratos.monto";
+        public const string FormContratosPorVencer_dgvContratos_fechaFin = "FormContratosPorVencer.dgvContratos.fechaFin";
+        public const string FormContratosPorVencer_dgvContratos_diasRestantes = "FormContratosPorVencer.dgvContratos.diasRestantes";
+        public const string FormContratosPorVencer_dgvContratos_estado = "FormContratosPorVencer.dgvContratos.estado";
+        public const string FormContratosPorVencer_dgvContratos_estadoPago = "FormContratosPorVencer.dgvContratos.estadoPago";
+        public const string FormContratosPorVencer_dgvContratos_desocupacion = "FormContratosPorVencer.dgvContratos.desocupacion";
+
+        // FormRenovarContrato
+        public const string FormRenovarContrato_lblContrato = "FormRenovarContrato.lblContrato";
+        public const string FormRenovarContrato_lblVencimientoActual = "FormRenovarContrato.lblVencimientoActual";
+        public const string FormRenovarContrato_lblMontoActual = "FormRenovarContrato.lblMontoActual";
+        public const string FormRenovarContrato_lblMeses = "FormRenovarContrato.lblMeses";
+        public const string FormRenovarContrato_lblNuevoMonto = "FormRenovarContrato.lblNuevoMonto";
+        public const string FormRenovarContrato_lblNuevoVencimiento = "FormRenovarContrato.lblNuevoVencimiento";
+        public const string FormRenovarContrato_btnConfirmar = "FormRenovarContrato.btnConfirmar";
+        public const string FormRenovarContrato_btnCancelar = "FormRenovarContrato.btnCancelar";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

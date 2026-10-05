@@ -86,6 +86,9 @@ namespace BLL
 
             contrato.EstadoContrato = EstadoSegunVencimiento(contrato.FechaFin, DateTime.Now);
             contrato.AlertaVencimiento = AlertaSegunEstado(contrato.EstadoContrato);
+            // El aviso de desocupación solo cambia con RegistrarDesocupacion y Renovar
+            contrato.AvisoDesocupacion = actual.AvisoDesocupacion;
+            contrato.FechaAvisoDesocupacion = actual.FechaAvisoDesocupacion;
 
             if (!contratoDAL.Actualizar(contrato))
                 throw new Exception("No se pudo actualizar el contrato.");
@@ -96,7 +99,8 @@ namespace BLL
 
         // Renovación: extiende el mismo contrato mesesAdicionales meses (corre la fecha de fin) con un nuevo monto
         // mensual. Solo para contratos vigentes. El estado y la alerta se recalculan según la nueva fecha de fin
-        // (un contrato Por Vencer que se extiende vuelve a Activo). Devuelve el contrato actualizado.
+        // (un contrato Por Vencer que se extiende vuelve a Activo). Si había aviso de desocupación, queda sin efecto
+        // (el inquilino se queda). Devuelve el contrato actualizado.
         public Contrato Renovar(int idContrato, int mesesAdicionales, decimal nuevoMontoMensual)
         {
             if (mesesAdicionales <= 0)
@@ -112,18 +116,22 @@ namespace BLL
 
             DateTime finAnterior = contrato.FechaFin;
             decimal montoAnterior = contrato.MontoMensual;
+            bool teniaAviso = contrato.AvisoDesocupacion;
 
             contrato.DuracionMeses += mesesAdicionales;
             contrato.MontoMensual = nuevoMontoMensual;
             contrato.EstadoContrato = EstadoSegunVencimiento(contrato.FechaFin, DateTime.Now);
             contrato.AlertaVencimiento = AlertaSegunEstado(contrato.EstadoContrato);
+            contrato.AvisoDesocupacion = false;
+            contrato.FechaAvisoDesocupacion = null;
 
             if (!contratoDAL.Actualizar(contrato))
                 throw new Exception("No se pudo renovar el contrato.");
 
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Renovación Contrato",
                 $"Contrato N° {idContrato} renovado {mesesAdicionales} meses: vence {finAnterior:dd/MM/yyyy} -> {contrato.FechaFin:dd/MM/yyyy}, " +
-                $"monto ${montoAnterior:N2} -> ${nuevoMontoMensual:N2} (estado {contrato.EstadoContrato}).");
+                $"monto ${montoAnterior:N2} -> ${nuevoMontoMensual:N2} (estado {contrato.EstadoContrato})" +
+                (teniaAviso ? "; se anula el aviso de desocupación." : "."));
             return contrato;
         }
 
@@ -168,6 +176,28 @@ namespace BLL
                 throw new Exception("No se pudo eliminar el contrato.");
 
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Baja Contrato", $"Contrato N° {idContrato} eliminado.");
+        }
+
+        // Aviso de que el inquilino desocupa el inmueble al vencimiento: marca aviso_desocupacion con la fecha actual.
+        // El estado no cambia (el contrato sigue vigente hasta que vence). La observación queda en la bitácora.
+        public void RegistrarDesocupacion(int idContrato, string observacion)
+        {
+            Contrato contrato = contratoDAL.BuscarPorId(idContrato);
+            if (contrato == null)
+                throw new Exception("El contrato no existe.");
+            if (!contrato.Vigente)
+                throw new ArgumentException("Solo se puede registrar la desocupación de un contrato Activo o Por Vencer.");
+            if (contrato.AvisoDesocupacion)
+                throw new ArgumentException($"El Contrato N° {idContrato} ya tiene registrado un aviso de desocupación " +
+                    $"(desde el {contrato.FechaAvisoDesocupacion:dd/MM/yyyy}).");
+
+            if (!contratoDAL.RegistrarAvisoDesocupacion(idContrato))
+                throw new Exception("No se pudo registrar el aviso de desocupación.");
+
+            string info = $"Contrato N° {idContrato}: el inquilino desocupará el inmueble al vencimiento ({contrato.FechaFin:dd/MM/yyyy}).";
+            if (!string.IsNullOrWhiteSpace(observacion))
+                info += " Observación: " + observacion.Trim();
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Desocupación Contrato", info);
         }
 
         public List<Contrato> LeerTodos() => contratoDAL.LeerTodos();

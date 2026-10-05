@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using BE;
+using BLL;
 
 namespace TpIngSoft
 {
@@ -46,6 +49,40 @@ namespace TpIngSoft
                     "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return "No se pudieron actualizar los estados automáticamente.";
             }
+        }
+
+        // Estado del pago del mes en curso, con las mismas reglas que PagoAlquilerBLL. Versión corta para grillas.
+        public static string EstadoMesActual(Contrato contrato, List<PagoAlquiler> pagos, System.DateTime hoy)
+        {
+            PagoAlquiler pago = pagos.FirstOrDefault(p => p.MesCorrespondiente == hoy.Month && p.AnioCorrespondiente == hoy.Year);
+            if (pago != null)
+                return pago.Pagado ? "Pagado" : Texto(pago.EstadoPago);
+            if (!PagoAlquilerBLL.PeriodosDelContrato(contrato).Contains((hoy.Month, hoy.Year)))
+                return "No corresponde";
+
+            EstadoPago? estado = PagoAlquilerBLL.EstadoSegunFecha(hoy.Month, hoy.Year, hoy);
+            return estado == null ? "Pendiente" : Texto(estado.Value);
+        }
+
+        // Versión completa para el detalle
+        public static string DescribirMesActual(Contrato contrato, List<PagoAlquiler> pagos, System.DateTime hoy)
+        {
+            string periodo = $"{hoy.Month:00}/{hoy.Year}";
+            PagoAlquiler pago = pagos.FirstOrDefault(p => p.MesCorrespondiente == hoy.Month && p.AnioCorrespondiente == hoy.Year);
+            if (pago != null)
+            {
+                if (pago.Pagado)
+                    return $"{periodo}: Al día — pagado el {pago.FechaPago:dd/MM/yyyy} (${pago.MontoPagado:N2})";
+                return $"{periodo}: {Texto(pago.EstadoPago)} — sin pago (recargo ${pago.RecargoAplicado:N2})";
+            }
+
+            if (!PagoAlquilerBLL.PeriodosDelContrato(contrato).Contains((hoy.Month, hoy.Year)))
+                return $"{periodo}: no corresponde al período del contrato";
+
+            EstadoPago? estado = PagoAlquilerBLL.EstadoSegunFecha(hoy.Month, hoy.Year, hoy);
+            return estado == null
+                ? $"{periodo}: pendiente — vence el {PagoAlquilerBLL.FechaVencimiento(hoy.Month, hoy.Year):dd/MM/yyyy}"
+                : $"{periodo}: {Texto(estado.Value)} — sin pago";
         }
 
         // Colorea una fila de grilla: rojo (deuda) tiene prioridad sobre amarillo (por vencer)

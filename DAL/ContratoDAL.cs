@@ -81,9 +81,26 @@ namespace DAL
                     acceso.CrearParametro("@AlertaVencimiento", contrato.AlertaVencimiento),
                     acceso.CrearParametro("@IdInquilino", contrato.IdInquilino),
                     acceso.CrearParametro("@IdInmuebleAlquiler", contrato.IdInmuebleAlquiler),
-                    acceso.CrearParametro("@IdUsuarioAgente", contrato.IdUsuarioAgente)
+                    acceso.CrearParametro("@IdUsuarioAgente", contrato.IdUsuarioAgente),
+                    acceso.CrearParametro("@AvisoDesocupacion", contrato.AvisoDesocupacion),
+                    acceso.CrearParametro("@FechaAvisoDesocupacion", contrato.AvisoDesocupacion
+                        ? (object)contrato.FechaAvisoDesocupacion ?? DBNull.Value
+                        : DBNull.Value)
                 };
                 return acceso.Escribir("ActualizarContrato", parameters) != -1;
+            }
+            finally { acceso.Cerrar(); }
+        }
+
+        // Marca el aviso de desocupación con la fecha actual. Devuelve false si no se actualizó
+        // (el SP ignora contratos finalizados o que ya tienen aviso).
+        public bool RegistrarAvisoDesocupacion(int idContrato)
+        {
+            acceso.Abrir();
+            try
+            {
+                List<SqlParameter> parameters = new List<SqlParameter> { acceso.CrearParametro("@Id", idContrato) };
+                return acceso.Escribir("RegistrarAvisoDesocupacion", parameters) > 0;
             }
             finally { acceso.Cerrar(); }
         }
@@ -245,6 +262,14 @@ namespace DAL
                 IdInmuebleAlquiler = Convert.ToInt32(row["id_inmueble_alquiler"]),
                 IdUsuarioAgente = Convert.ToInt32(row["id_usuario_agente"])
             };
+
+            if (cols.Contains("aviso_desocupacion"))
+            {
+                contrato.AvisoDesocupacion = Convert.ToBoolean(row["aviso_desocupacion"]);
+                contrato.FechaAvisoDesocupacion = row["fecha_aviso_desocupacion"] != DBNull.Value
+                    ? Convert.ToDateTime(row["fecha_aviso_desocupacion"])
+                    : (DateTime?)null;
+            }
 
             // Consultas con detalle: el SP trae el nombre del inquilino ya concatenado
             if (cols.Contains("inquilino"))

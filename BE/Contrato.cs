@@ -22,6 +22,10 @@ namespace BE
         public int IdInmuebleAlquiler { get; set; }
         public int IdUsuarioAgente { get; set; }
 
+        // El inquilino avisó que desocupa al vencimiento; el contrato sigue vigente hasta entonces
+        public bool AvisoDesocupacion { get; set; }
+        public DateTime? FechaAvisoDesocupacion { get; set; }
+
         // Cargados por las consultas con detalle (LeerContratosDetalle / LeerContratosPorVencer); null en las demás
         public Inquilino Inquilino { get; set; }
         public InmuebleAlquiler InmuebleAlquiler { get; set; }

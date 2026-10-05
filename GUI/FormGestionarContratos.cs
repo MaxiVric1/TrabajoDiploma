@@ -277,33 +277,12 @@ namespace TpIngSoft
                     EstadosPN2.Resaltar(row, estado != EstadoPago.AlDia, false);
                 }
 
-                lblMesActualValor.Text = DescribirMesActual(contrato, pagos, DateTime.Now);
+                lblMesActualValor.Text = EstadosPN2.DescribirMesActual(contrato, pagos, DateTime.Now);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error al cargar el detalle del contrato: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        // Estado del pago del mes en curso, con las mismas reglas que PagoAlquilerBLL
-        private string DescribirMesActual(Contrato contrato, List<PagoAlquiler> pagos, DateTime hoy)
-        {
-            string periodo = $"{hoy.Month:00}/{hoy.Year}";
-            PagoAlquiler pago = pagos.FirstOrDefault(p => p.MesCorrespondiente == hoy.Month && p.AnioCorrespondiente == hoy.Year);
-            if (pago != null)
-            {
-                if (pago.Pagado)
-                    return $"{periodo}: Al día — pagado el {pago.FechaPago:dd/MM/yyyy} (${pago.MontoPagado:N2})";
-                return $"{periodo}: {EstadosPN2.Texto(pago.EstadoPago)} — sin pago (recargo ${pago.RecargoAplicado:N2})";
-            }
-
-            if (!PagoAlquilerBLL.PeriodosDelContrato(contrato).Contains((hoy.Month, hoy.Year)))
-                return $"{periodo}: no corresponde al período del contrato";
-
-            EstadoPago? estado = PagoAlquilerBLL.EstadoSegunFecha(hoy.Month, hoy.Year, hoy);
-            return estado == null
-                ? $"{periodo}: pendiente — vence el {PagoAlquilerBLL.FechaVencimiento(hoy.Month, hoy.Year):dd/MM/yyyy}"
-                : $"{periodo}: {EstadosPN2.Texto(estado.Value)} — sin pago";
         }
 
         private void nudMesesExtension_ValueChanged(object sender, EventArgs e)

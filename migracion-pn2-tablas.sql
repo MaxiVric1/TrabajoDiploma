@@ -49,7 +49,13 @@ CREATE TABLE [dbo].[Contrato] (
     [alerta_vencimiento] BIT NOT NULL DEFAULT 0,
     [id_inquilino] INT NOT NULL FOREIGN KEY REFERENCES [dbo].[Inquilino]([id_inquilino]),
     [id_inmueble_alquiler] INT NOT NULL FOREIGN KEY REFERENCES [dbo].[InmuebleAlquiler]([id_inmueble_alquiler]),
-    [id_usuario_agente] INT NOT NULL FOREIGN KEY REFERENCES [dbo].[Usuario]([id])
+    [id_usuario_agente] INT NOT NULL FOREIGN KEY REFERENCES [dbo].[Usuario]([id]),
+    -- Aviso de que el inquilino desocupa al vencimiento (ver migracion-pn2-desocupacion.sql)
+    [aviso_desocupacion] BIT NOT NULL CONSTRAINT [DF_Contrato_AvisoDesocupacion] DEFAULT 0,
+    [fecha_aviso_desocupacion] DATETIME NULL,
+    CONSTRAINT [CK_Contrato_AvisoDesocupacion]
+        CHECK (([aviso_desocupacion] = 1 AND [fecha_aviso_desocupacion] IS NOT NULL)
+            OR ([aviso_desocupacion] = 0 AND [fecha_aviso_desocupacion] IS NULL))
 );
 GO
 
@@ -57,6 +63,20 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Contrato_InmuebleVigente')
     CREATE UNIQUE INDEX [UX_Contrato_InmuebleVigente] ON [dbo].[Contrato]([id_inmueble_alquiler])
     WHERE [estado_contrato] <> 'Finalizado';
+GO
+
+-- Bases creadas antes del aviso de desocupación: la tabla ya existía sin estas columnas (los SPs las usan)
+IF COL_LENGTH('dbo.Contrato', 'aviso_desocupacion') IS NULL
+    ALTER TABLE [dbo].[Contrato] ADD [aviso_desocupacion] BIT NOT NULL
+        CONSTRAINT [DF_Contrato_AvisoDesocupacion] DEFAULT 0;
+GO
+IF COL_LENGTH('dbo.Contrato', 'fecha_aviso_desocupacion') IS NULL
+    ALTER TABLE [dbo].[Contrato] ADD [fecha_aviso_desocupacion] DATETIME NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Contrato_AvisoDesocupacion')
+    ALTER TABLE [dbo].[Contrato] ADD CONSTRAINT [CK_Contrato_AvisoDesocupacion]
+        CHECK (([aviso_desocupacion] = 1 AND [fecha_aviso_desocupacion] IS NOT NULL)
+            OR ([aviso_desocupacion] = 0 AND [fecha_aviso_desocupacion] IS NULL));
 GO
 
 -- Un registro por contrato y mes: fecha_pago y monto_pagado vacíos/0 mientras el mes no se pagó
@@ -312,13 +332,36 @@ CREATE PROCEDURE [dbo].[ActualizarContrato]
     @AlertaVencimiento BIT,
     @IdInquilino INT,
     @IdInmuebleAlquiler INT,
-    @IdUsuarioAgente INT
+    @IdUsuarioAgente INT,
+    @AvisoDesocupacion BIT = NULL,            -- NULL conserva el aviso actual; 0 lo quita; 1 lo registra
+    @FechaAvisoDesocupacion DATETIME = NULL
 AS BEGIN
     UPDATE Contrato
     SET fecha_inicio = @FechaInicio, duracion_meses = @DuracionMeses, monto_mensual = @MontoMensual,
         estado_contrato = @EstadoContrato, alerta_vencimiento = @AlertaVencimiento,
-        id_inquilino = @IdInquilino, id_inmueble_alquiler = @IdInmuebleAlquiler, id_usuario_agente = @IdUsuarioAgente
+        id_inquilino = @IdInquilino, id_inmueble_alquiler = @IdInmuebleAlquiler, id_usuario_agente = @IdUsuarioAgente,
+        aviso_desocupacion = ISNULL(@AvisoDesocupacion, aviso_desocupacion),
+        fecha_aviso_desocupacion = CASE
+            WHEN @AvisoDesocupacion IS NULL THEN fecha_aviso_desocupacion
+            WHEN @AvisoDesocupacion = 1 THEN ISNULL(@FechaAvisoDesocupacion, GETDATE())
+            ELSE NULL END
     WHERE id_contrato = @Id;
+END
+GO
+
+-- ====================================================
+-- RegistrarAvisoDesocupacion (solo vigentes y sin aviso previo: 0 filas si no corresponde)
+-- ====================================================
+IF OBJECT_ID('[dbo].[RegistrarAvisoDesocupacion]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[RegistrarAvisoDesocupacion];
+GO
+CREATE PROCEDURE [dbo].[RegistrarAvisoDesocupacion]
+    @Id INT
+AS BEGIN
+    UPDATE Contrato
+    SET aviso_desocupacion = 1, fecha_aviso_desocupacion = GETDATE()
+    WHERE id_contrato = @Id
+      AND estado_contrato <> 'Finalizado'
+      AND aviso_desocupacion = 0;
 END
 GO
 
@@ -358,6 +401,7 @@ GO
 CREATE PROCEDURE [dbo].[LeerContratos]
 AS BEGIN
     SELECT id_contrato, fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
+           aviso_desocupacion, fecha_aviso_desocupacion,
            id_inquilino, id_inmueble_alquiler, id_usuario_agente,
            DATEADD(MONTH, duracion_meses, fecha_inicio) AS fecha_fin
     FROM Contrato
@@ -374,6 +418,7 @@ CREATE PROCEDURE [dbo].[BuscarContratoPorId]
     @Id INT
 AS BEGIN
     SELECT id_contrato, fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
+           aviso_desocupacion, fecha_aviso_desocupacion,
            id_inquilino, id_inmueble_alquiler, id_usuario_agente,
            DATEADD(MONTH, duracion_meses, fecha_inicio) AS fecha_fin
     FROM Contrato
@@ -390,6 +435,7 @@ CREATE PROCEDURE [dbo].[LeerContratosDetalle]
     @Estado VARCHAR(20) = NULL
 AS BEGIN
     SELECT c.id_contrato, c.fecha_inicio, c.duracion_meses, c.monto_mensual, c.estado_contrato, c.alerta_vencimiento,
+           c.aviso_desocupacion, c.fecha_aviso_desocupacion,
            DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) AS fecha_fin,
            c.id_inquilino, q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino,
            c.id_inmueble_alquiler, i.direccion, i.tipo_inmueble, c.id_usuario_agente
@@ -410,6 +456,7 @@ CREATE PROCEDURE [dbo].[LeerContratosPorVencer]
     @DiasAnticipacion INT = 60
 AS BEGIN
     SELECT c.id_contrato, c.fecha_inicio, c.duracion_meses, c.monto_mensual, c.estado_contrato, c.alerta_vencimiento,
+           c.aviso_desocupacion, c.fecha_aviso_desocupacion,
            DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) AS fecha_fin,
            DATEDIFF(DAY, CAST(GETDATE() AS DATE), DATEADD(MONTH, c.duracion_meses, c.fecha_inicio)) AS dias_restantes,
            c.id_inquilino, q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino, q.telefono, q.email,
