@@ -11,6 +11,13 @@ GO
 -- 1. Creación de tablas
 -- ====================================================
 
+-- Tablas del PN2 (migracion-pn2-tablas.sql): referencian a Usuario, se borran primero
+IF OBJECT_ID('[dbo].[AccionLegal]', 'U') IS NOT NULL DROP TABLE [dbo].[AccionLegal];
+IF OBJECT_ID('[dbo].[PagoAlquiler]', 'U') IS NOT NULL DROP TABLE [dbo].[PagoAlquiler];
+IF OBJECT_ID('[dbo].[Contrato]', 'U') IS NOT NULL DROP TABLE [dbo].[Contrato];
+IF OBJECT_ID('[dbo].[InmuebleAlquiler]', 'U') IS NOT NULL DROP TABLE [dbo].[InmuebleAlquiler];
+IF OBJECT_ID('[dbo].[Inquilino]', 'U') IS NOT NULL DROP TABLE [dbo].[Inquilino];
+
 -- Tablas del PN1 (migracion-pn1-tablas.sql): referencian a Usuario, se borran primero
 IF OBJECT_ID('[dbo].[MaterialAudiovisual]', 'U') IS NOT NULL DROP TABLE [dbo].[MaterialAudiovisual];
 IF OBJECT_ID('[dbo].[Tasacion]', 'U') IS NOT NULL DROP TABLE [dbo].[Tasacion];
