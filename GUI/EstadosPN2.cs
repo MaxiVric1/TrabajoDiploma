@@ -25,6 +25,29 @@ namespace TpIngSoft
             }
         }
 
+        // Procesos automáticos que ejecutan los formularios del PN2 al abrirse: primero la mora (un contrato recién
+        // vencido todavía genera sus últimos meses impagos), después los vencimientos de contratos.
+        // Devuelve el resumen para mostrar; si falla, avisa con un MessageBox y devuelve el aviso.
+        public static string EjecutarProcesosAutomaticos()
+        {
+            try
+            {
+                var (enMora, enLitigio) = new BLL.PagoAlquilerBLL().ActualizarEstadosAutomaticos();
+                int contratos = new BLL.ContratoBLL().ActualizarVencimientos();
+
+                return enMora + enLitigio + contratos == 0
+                    ? $"Estados actualizados al {System.DateTime.Now:dd/MM/yyyy HH:mm}: sin cambios."
+                    : $"Estados actualizados al {System.DateTime.Now:dd/MM/yyyy HH:mm}: {enMora} mes(es) pasaron a En Mora, " +
+                      $"{enLitigio} a En Litigio y {contratos} contrato(s) cambiaron por vencimiento.";
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("No se pudieron actualizar los estados de pagos y contratos: " + ex.Message,
+                    "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return "No se pudieron actualizar los estados automáticamente.";
+            }
+        }
+
         // Colorea una fila de grilla: rojo (deuda) tiene prioridad sobre amarillo (por vencer)
         public static void Resaltar(DataGridViewRow fila, bool conDeuda, bool porVencer)
         {

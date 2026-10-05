@@ -47,7 +47,37 @@ namespace BLL
             return periodos;
         }
 
+        // Importe de un mes según la fecha en que se paga: hasta el día 10 el monto mensual; después, monto + 10%.
+        // Es el mismo cálculo que valida RegistrarPago.
+        public static (decimal Base, decimal Recargo, decimal Total) CalcularImporte(Contrato contrato, int mes, int anio, DateTime fechaPago)
+        {
+            decimal recargo = fechaPago.Date > FechaVencimiento(mes, anio) ? CalcularRecargo(contrato.MontoMensual) : 0;
+            return (contrato.MontoMensual, recargo, contrato.MontoMensual + recargo);
+        }
+
         // ---------- Operaciones ----------
+
+        // Meses del contrato sin pago registrado, desde el primero hasta el mes en curso (los futuros no se adelantan):
+        // los vencidos (En Mora / En Litigio / regularizados) y el del mes actual si todavía está pendiente
+        public List<PeriodoAPagar> LeerPeriodosAPagar(Contrato contrato, DateTime hoy)
+        {
+            Dictionary<(int, int), PagoAlquiler> registrados = pagoDAL.LeerPorContrato(contrato.IdContrato)
+                .ToDictionary(p => (p.MesCorrespondiente, p.AnioCorrespondiente));
+            DateTime mesEnCurso = new DateTime(hoy.Year, hoy.Month, 1);
+
+            List<PeriodoAPagar> periodos = new List<PeriodoAPagar>();
+            foreach (var (mes, anio) in PeriodosDelContrato(contrato))
+            {
+                if (new DateTime(anio, mes, 1) > mesEnCurso) break;
+                registrados.TryGetValue((mes, anio), out PagoAlquiler registro);
+                if (registro != null && registro.Pagado) continue;
+
+                periodos.Add(registro != null
+                    ? new PeriodoAPagar { Mes = mes, Anio = anio, Estado = registro.EstadoPago == EstadoPago.AlDia ? (EstadoPago?)null : registro.EstadoPago, Regularizado = registro.EstadoPago == EstadoPago.AlDia }
+                    : new PeriodoAPagar { Mes = mes, Anio = anio, Estado = EstadoSegunFecha(mes, anio, hoy) });
+            }
+            return periodos;
+        }
 
         // Registra el pago de un mes. Hasta el día 10 se paga el monto mensual; después, monto + recargo del 10%.
         // Si el mes ya estaba En Mora o En Litigio, el pago lo regulariza (queda Al día con el recargo registrado).
@@ -68,9 +98,8 @@ namespace BLL
             if (existente != null && existente.Pagado)
                 throw new ArgumentException($"El período {mes:00}/{anio} ya tiene un pago registrado el {existente.FechaPago:dd/MM/yyyy}.");
 
-            bool fueraDeTermino = fechaPago.Date > FechaVencimiento(mes, anio);
-            decimal recargo = fueraDeTermino ? CalcularRecargo(contrato.MontoMensual) : 0;
-            decimal totalAPagar = contrato.MontoMensual + recargo;
+            var (_, recargo, totalAPagar) = CalcularImporte(contrato, mes, anio, fechaPago);
+            bool fueraDeTermino = recargo > 0;
             if (montoPagado < totalAPagar)
                 throw new ArgumentException(fueraDeTermino
                     ? $"Pago fuera de término: el monto debe ser al menos ${totalAPagar:N2} (alquiler ${contrato.MontoMensual:N2} + recargo por mora ${recargo:N2})."

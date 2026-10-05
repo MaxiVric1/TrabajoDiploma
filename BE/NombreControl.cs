@@ -216,6 +216,24 @@ namespace BE
         public const string FormGestionarContratos_dgvPagos_recargo = "FormGestionarContratos.dgvPagos.recargo";
         public const string FormGestionarContratos_dgvPagos_fechaPago = "FormGestionarContratos.dgvPagos.fechaPago";
 
+        // FormRegistrarPago
+        public const string FormRegistrarPago_grpContrato = "FormRegistrarPago.grpContrato";
+        public const string FormRegistrarPago_lblNroContrato = "FormRegistrarPago.lblNroContrato";
+        public const string FormRegistrarPago_btnBuscar = "FormRegistrarPago.btnBuscar";
+        public const string FormRegistrarPago_lblInquilino = "FormRegistrarPago.lblInquilino";
+        public const string FormRegistrarPago_lblDireccion = "FormRegistrarPago.lblDireccion";
+        public const string FormRegistrarPago_lblMontoMensual = "FormRegistrarPago.lblMontoMensual";
+        public const string FormRegistrarPago_lblEstadoContrato = "FormRegistrarPago.lblEstadoContrato";
+        public const string FormRegistrarPago_grpPeriodo = "FormRegistrarPago.grpPeriodo";
+        public const string FormRegistrarPago_lblPeriodo = "FormRegistrarPago.lblPeriodo";
+        public const string FormRegistrarPago_lblEstadoMes = "FormRegistrarPago.lblEstadoMes";
+        public const string FormRegistrarPago_lblFechaPago = "FormRegistrarPago.lblFechaPago";
+        public const string FormRegistrarPago_lblMontoBase = "FormRegistrarPago.lblMontoBase";
+        public const string FormRegistrarPago_lblRecargo = "FormRegistrarPago.lblRecargo";
+        public const string FormRegistrarPago_lblTotal = "FormRegistrarPago.lblTotal";
+        public const string FormRegistrarPago_grpResumen = "FormRegistrarPago.grpResumen";
+        public const string FormRegistrarPago_btnRegistrar = "FormRegistrarPago.btnRegistrar";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

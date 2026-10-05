@@ -84,6 +84,7 @@
     <Compile Include="InmuebleAlquiler.cs" />
     <Compile Include="Contrato.cs" />
     <Compile Include="PagoAlquiler.cs" />
+    <Compile Include="PeriodoAPagar.cs" />
     <Compile Include="AccionLegal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

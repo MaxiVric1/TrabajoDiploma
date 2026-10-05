@@ -130,26 +130,9 @@ namespace TpIngSoft
             cmbFiltroEstado.SelectedIndex = 0; // dispara la primera carga
         }
 
-        // Procesos automáticos: primero la mora (un contrato recién vencido todavía genera sus últimos meses impagos),
-        // después los vencimientos de contratos
         private void ActualizarEstados()
         {
-            try
-            {
-                var (enMora, enLitigio) = pagoBLL.ActualizarEstadosAutomaticos();
-                int contratos = contratoBLL.ActualizarVencimientos();
-
-                lblActualizacion.Text = enMora + enLitigio + contratos == 0
-                    ? $"Estados actualizados al {DateTime.Now:dd/MM/yyyy HH:mm}: sin cambios."
-                    : $"Estados actualizados al {DateTime.Now:dd/MM/yyyy HH:mm}: {enMora} mes(es) pasaron a En Mora, " +
-                      $"{enLitigio} a En Litigio y {contratos} contrato(s) cambiaron por vencimiento.";
-            }
-            catch (Exception ex)
-            {
-                lblActualizacion.Text = "No se pudieron actualizar los estados automáticamente.";
-                MessageBox.Show("No se pudieron actualizar los estados de pagos y contratos: " + ex.Message,
-                    "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            lblActualizacion.Text = EstadosPN2.EjecutarProcesosAutomaticos();
         }
 
         private void cmbFiltroEstado_SelectedIndexChanged(object sender, EventArgs e)

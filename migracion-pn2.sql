@@ -74,7 +74,24 @@ INSERT INTO @Nuevos VALUES
     ('dgvPagos.estado', 'FormGestionarContratos', 'Estado', 'Status'),
     ('dgvPagos.monto', 'FormGestionarContratos', 'Monto Pagado', 'Amount Paid'),
     ('dgvPagos.recargo', 'FormGestionarContratos', 'Recargo', 'Surcharge'),
-    ('dgvPagos.fechaPago', 'FormGestionarContratos', 'Fecha de Pago', 'Payment Date');
+    ('dgvPagos.fechaPago', 'FormGestionarContratos', 'Fecha de Pago', 'Payment Date'),
+    -- FormRegistrarPago
+    ('grpContrato', 'FormRegistrarPago', 'Contrato', 'Contract'),
+    ('lblNroContrato', 'FormRegistrarPago', 'Nro Contrato:', 'Contract No.:'),
+    ('btnBuscar', 'FormRegistrarPago', 'Buscar', 'Search'),
+    ('lblInquilino', 'FormRegistrarPago', 'Inquilino:', 'Tenant:'),
+    ('lblDireccion', 'FormRegistrarPago', N'Dirección:', 'Address:'),
+    ('lblMontoMensual', 'FormRegistrarPago', 'Monto mensual:', 'Monthly rent:'),
+    ('lblEstadoContrato', 'FormRegistrarPago', 'Estado:', 'Status:'),
+    ('grpPeriodo', 'FormRegistrarPago', N'Período a pagar', 'Period to pay'),
+    ('lblPeriodo', 'FormRegistrarPago', N'Período:', 'Period:'),
+    ('lblEstadoMes', 'FormRegistrarPago', 'Estado del mes:', 'Month status:'),
+    ('lblFechaPago', 'FormRegistrarPago', 'Fecha de pago:', 'Payment date:'),
+    ('lblMontoBase', 'FormRegistrarPago', 'Alquiler:', 'Rent:'),
+    ('lblRecargo', 'FormRegistrarPago', 'Recargo (10%):', 'Surcharge (10%):'),
+    ('lblTotal', 'FormRegistrarPago', 'Total a pagar:', 'Total due:'),
+    ('grpResumen', 'FormRegistrarPago', 'Resumen del pago', 'Payment summary'),
+    ('btnRegistrar', 'FormRegistrarPago', 'Registrar Pago', 'Register Payment');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
