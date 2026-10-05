@@ -94,6 +94,39 @@ namespace BLL
                 $"Contrato N° {contrato.IdContrato} actualizado (estado {contrato.EstadoContrato}).");
         }
 
+        // Renovación: extiende el mismo contrato mesesAdicionales meses (corre la fecha de fin) con un nuevo monto
+        // mensual. Solo para contratos vigentes. El estado y la alerta se recalculan según la nueva fecha de fin
+        // (un contrato Por Vencer que se extiende vuelve a Activo). Devuelve el contrato actualizado.
+        public Contrato Renovar(int idContrato, int mesesAdicionales, decimal nuevoMontoMensual)
+        {
+            if (mesesAdicionales <= 0)
+                throw new ArgumentException("La renovación debe extender el contrato al menos un mes.");
+            if (nuevoMontoMensual <= 0)
+                throw new ArgumentException("El monto mensual debe ser mayor a cero.");
+
+            Contrato contrato = contratoDAL.BuscarPorId(idContrato);
+            if (contrato == null)
+                throw new Exception("El contrato no existe.");
+            if (!contrato.Vigente)
+                throw new ArgumentException("Solo se puede renovar un contrato Activo o Por Vencer.");
+
+            DateTime finAnterior = contrato.FechaFin;
+            decimal montoAnterior = contrato.MontoMensual;
+
+            contrato.DuracionMeses += mesesAdicionales;
+            contrato.MontoMensual = nuevoMontoMensual;
+            contrato.EstadoContrato = EstadoSegunVencimiento(contrato.FechaFin, DateTime.Now);
+            contrato.AlertaVencimiento = AlertaSegunEstado(contrato.EstadoContrato);
+
+            if (!contratoDAL.Actualizar(contrato))
+                throw new Exception("No se pudo renovar el contrato.");
+
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Renovación Contrato",
+                $"Contrato N° {idContrato} renovado {mesesAdicionales} meses: vence {finAnterior:dd/MM/yyyy} -> {contrato.FechaFin:dd/MM/yyyy}, " +
+                $"monto ${montoAnterior:N2} -> ${nuevoMontoMensual:N2} (estado {contrato.EstadoContrato}).");
+            return contrato;
+        }
+
         // Proceso de vencimientos: Activo -> Por Vencer (alerta) a 60 días; vencidos -> Finalizado.
         // Devuelve la cantidad de contratos modificados.
         public int ActualizarVencimientos()

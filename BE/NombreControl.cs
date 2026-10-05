@@ -184,6 +184,38 @@ namespace BE
         public const string FormRegistrarContrato_btnGuardar = "FormRegistrarContrato.btnGuardar";
         public const string FormRegistrarContrato_btnCancelar = "FormRegistrarContrato.btnCancelar";
 
+        // FormGestionarContratos
+        public const string FormGestionarContratos_lblFiltroEstado = "FormGestionarContratos.lblFiltroEstado";
+        public const string FormGestionarContratos_btnActualizar = "FormGestionarContratos.btnActualizar";
+        public const string FormGestionarContratos_grpInquilino = "FormGestionarContratos.grpInquilino";
+        public const string FormGestionarContratos_lblNombre = "FormGestionarContratos.lblNombre";
+        public const string FormGestionarContratos_lblApellido = "FormGestionarContratos.lblApellido";
+        public const string FormGestionarContratos_lblDni = "FormGestionarContratos.lblDni";
+        public const string FormGestionarContratos_lblTelefono = "FormGestionarContratos.lblTelefono";
+        public const string FormGestionarContratos_lblEmail = "FormGestionarContratos.lblEmail";
+        public const string FormGestionarContratos_grpRenovacion = "FormGestionarContratos.grpRenovacion";
+        public const string FormGestionarContratos_lblMesesExtension = "FormGestionarContratos.lblMesesExtension";
+        public const string FormGestionarContratos_lblNuevoMonto = "FormGestionarContratos.lblNuevoMonto";
+        public const string FormGestionarContratos_lblNuevoVencimiento = "FormGestionarContratos.lblNuevoVencimiento";
+        public const string FormGestionarContratos_btnRenovar = "FormGestionarContratos.btnRenovar";
+        public const string FormGestionarContratos_grpPagos = "FormGestionarContratos.grpPagos";
+        public const string FormGestionarContratos_lblMesActual = "FormGestionarContratos.lblMesActual";
+        public const string FormGestionarContratos_dgvContratos_nro = "FormGestionarContratos.dgvContratos.nro";
+        public const string FormGestionarContratos_dgvContratos_inquilino = "FormGestionarContratos.dgvContratos.inquilino";
+        public const string FormGestionarContratos_dgvContratos_direccion = "FormGestionarContratos.dgvContratos.direccion";
+        public const string FormGestionarContratos_dgvContratos_tipo = "FormGestionarContratos.dgvContratos.tipo";
+        public const string FormGestionarContratos_dgvContratos_monto = "FormGestionarContratos.dgvContratos.monto";
+        public const string FormGestionarContratos_dgvContratos_fechaInicio = "FormGestionarContratos.dgvContratos.fechaInicio";
+        public const string FormGestionarContratos_dgvContratos_fechaFin = "FormGestionarContratos.dgvContratos.fechaFin";
+        public const string FormGestionarContratos_dgvContratos_estado = "FormGestionarContratos.dgvContratos.estado";
+        public const string FormGestionarContratos_dgvContratos_alerta = "FormGestionarContratos.dgvContratos.alerta";
+        public const string FormGestionarContratos_dgvPagos_mes = "FormGestionarContratos.dgvPagos.mes";
+        public const string FormGestionarContratos_dgvPagos_anio = "FormGestionarContratos.dgvPagos.anio";
+        public const string FormGestionarContratos_dgvPagos_estado = "FormGestionarContratos.dgvPagos.estado";
+        public const string FormGestionarContratos_dgvPagos_monto = "FormGestionarContratos.dgvPagos.monto";
+        public const string FormGestionarContratos_dgvPagos_recargo = "FormGestionarContratos.dgvPagos.recargo";
+        public const string FormGestionarContratos_dgvPagos_fechaPago = "FormGestionarContratos.dgvPagos.fechaPago";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

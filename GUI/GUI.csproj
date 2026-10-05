@@ -163,6 +163,7 @@
       <DependentUpon>FormInmueblesPublicados.cs</DependentUpon>
     </Compile>
     <Compile Include="MaterialVisual.cs" />
+    <Compile Include="EstadosPN2.cs" />
     <Compile Include="FormGestionarContratos.cs">
       <SubType>Form</SubType>
     </Compile>
