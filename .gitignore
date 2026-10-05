@@ -12,6 +12,9 @@ x86/
 [Ll]og/
 [Ll]ogs/
 
+# Instalador generado por Inno Setup (ISCC instalador.iss)
+Output/
+
 # Carpeta de estado de Visual Studio (índices, layout, caché de IntelliSense/Copilot)
 .vs/
 
