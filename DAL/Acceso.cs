@@ -15,17 +15,19 @@ namespace DAL
         private SqlTransaction transaccion;
 
         // Nombre de la cadena en <connectionStrings> del .config del ejecutable (TpIngSoft.exe.config, BackupCLI.exe.config)
-        internal const string NOMBRE_CONEXION = "TpIngSoft";
+        internal const string NOMBRE_CONEXION = ServidorSql.NOMBRE_CONEXION;
 
+        // Instancia de SQL Server detectada automáticamente (App.config queda como alternativa); también la usa MapperBackup
         internal static string CadenaConexion
         {
             get
             {
-                ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings[NOMBRE_CONEXION];
-                if (cadena == null || string.IsNullOrWhiteSpace(cadena.ConnectionString))
-                    throw new ConfigurationErrorsException(
-                        $"Falta la cadena de conexión '{NOMBRE_CONEXION}' en <connectionStrings> del archivo .config de la aplicación.");
-                return cadena.ConnectionString;
+                //ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings[NOMBRE_CONEXION];
+                //if (cadena == null || string.IsNullOrWhiteSpace(cadena.ConnectionString))
+                //    throw new ConfigurationErrorsException(
+                //        $"Falta la cadena de conexión '{NOMBRE_CONEXION}' en <connectionStrings> del archivo .config de la aplicación.");
+                //return cadena.ConnectionString;
+                return ServidorSql.Detectar();
             }
         }
 
@@ -35,7 +37,8 @@ namespace DAL
             {
                 //ConnectionString = @"Data Source=NOTE-MAX\SQLEXPRESS;Initial Catalog=tpingsoft;Integrated Security=True;"
                 //ConnectionString = "Data Source=localhost;Initial Catalog=tpingsoft;Integrated Security=True;"
-                ConnectionString = CadenaConexion
+                //ConnectionString = CadenaConexion
+                ConnectionString = ServidorSql.Detectar()
             };
             conexion.Open();
         }

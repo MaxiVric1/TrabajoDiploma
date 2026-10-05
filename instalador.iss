@@ -8,8 +8,8 @@
 #define AppVersion "1.0.0"
 #define AppEditor "Maximiliano Vricciariello"
 #define AppExe "TpIngSoft.exe"
-; Instancia de SQL Server y base: deben coincidir con la cadena de conexión de TpIngSoft.exe.config y BackupCLI.exe.config
-#define SqlInstancia ".\SQLEXPRESS"
+; Base de datos: debe coincidir con Initial Catalog de TpIngSoft.exe.config y BackupCLI.exe.config.
+; La instancia de SQL Server se detecta al instalar, con el mismo criterio que DAL/ServidorSql.cs.
 #define SqlBase "TpIngSoft"
 
 [Setup]
@@ -77,12 +77,92 @@ begin
       mbCriticalError, MB_OK, IDOK);
 end;
 
-// Ejecuta sqlcmd contra la instancia. Devuelve False si sqlcmd no se pudo iniciar (no está instalado).
-function EjecutarSqlcmd(const Parametros: String; var Codigo: Integer): Boolean;
+// ---------- Detección de la instancia de SQL Server (mismo criterio que DAL/ServidorSql.cs) ----------
+
+const
+  CLAVE_INSTANCIAS = 'SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL';
+  INSTANCIA_POR_DEFECTO = 'MSSQLSERVER';
+  // Códigos de salida de ProbarInstancia (sqlcmd devuelve el valor de EXIT(SELECT ...); 1 si no se conecta)
+  SQL_SIN_BASE = 10;
+  SQL_CON_BASE = 11;
+
+var
+  Instancia: String;   // instancia elegida: "." (por defecto) o ".\NOMBRE"
+
+procedure AgregarInstancias(Raiz: Integer; var Servidores: TArrayOfString);
+var
+  Nombres: TArrayOfString;
+  I, J: Integer;
+  Servidor: String;
+  Repetido: Boolean;
 begin
-  Result := Exec('sqlcmd.exe', '-S "{#SqlInstancia}" -E -b -l 15 ' + Parametros, '',
-                 SW_HIDE, ewWaitUntilTerminated, Codigo);
+  if not RegGetValueNames(Raiz, CLAVE_INSTANCIAS, Nombres) then
+    Exit;
+  for I := 0 to GetArrayLength(Nombres) - 1 do
+  begin
+    if CompareText(Nombres[I], INSTANCIA_POR_DEFECTO) = 0 then
+      Servidor := '.'
+    else
+      Servidor := '.\' + Nombres[I];
+    Repetido := False;
+    for J := 0 to GetArrayLength(Servidores) - 1 do
+      if CompareText(Servidores[J], Servidor) = 0 then
+        Repetido := True;
+    if not Repetido then
+    begin
+      SetArrayLength(Servidores, GetArrayLength(Servidores) + 1);
+      Servidores[GetArrayLength(Servidores) - 1] := Servidor;
+    end;
+  end;
 end;
+
+// Instancias instaladas según el registro (vistas de 64 y 32 bits)
+function InstanciasInstaladas(): TArrayOfString;
+begin
+  SetArrayLength(Result, 0);
+  AgregarInstancias(HKLM64, Result);
+  AgregarInstancias(HKLM32, Result);
+end;
+
+// SQL_CON_BASE / SQL_SIN_BASE si responde; otro valor si no responde. False si sqlcmd no se pudo iniciar.
+function ProbarInstancia(const Servidor: String; var Codigo: Integer): Boolean;
+begin
+  Result := Exec('sqlcmd.exe', '-S "' + Servidor + '" -E -l 3 -d master -Q "EXIT(SELECT CASE WHEN DB_ID(''{#SqlBase}'') ' +
+                 'IS NULL THEN ' + IntToStr(SQL_SIN_BASE) + ' ELSE ' + IntToStr(SQL_CON_BASE) + ' END)"',
+                 '', SW_HIDE, ewWaitUntilTerminated, Codigo);
+end;
+
+// Prefiere la instancia que ya tiene la base; si ninguna la tiene, la primera que responde.
+// Devuelve '' si ninguna responde. SinSqlcmd = True si sqlcmd no está instalado.
+function DetectarInstancia(var BaseExiste: Boolean; var SinSqlcmd: Boolean): String;
+var
+  Servidores: TArrayOfString;
+  I, Codigo: Integer;
+begin
+  Result := '';
+  BaseExiste := False;
+  SinSqlcmd := False;
+  Servidores := InstanciasInstaladas();
+  for I := 0 to GetArrayLength(Servidores) - 1 do
+  begin
+    WizardForm.StatusLabel.Caption := 'Buscando SQL Server (' + Servidores[I] + ')...';
+    if not ProbarInstancia(Servidores[I], Codigo) then
+    begin
+      SinSqlcmd := True;
+      Exit;
+    end;
+    if Codigo = SQL_CON_BASE then
+    begin
+      Result := Servidores[I];
+      BaseExiste := True;
+      Exit;
+    end;
+    if (Codigo = SQL_SIN_BASE) and (Result = '') then
+      Result := Servidores[I];
+  end;
+end;
+
+// ---------- Ejecución de los scripts ----------
 
 // -f 65001: los scripts están en UTF-8 sin BOM (sin esto se rompen las tildes de las traducciones)
 // -I: QUOTED_IDENTIFIER ON (índice filtrado de Contrato)
@@ -92,10 +172,11 @@ var
   Codigo: Integer;
 begin
   Carpeta := ExpandConstant('{app}\BaseDeDatos\');
-  Result := EjecutarSqlcmd('-I -f 65001 -i "' + Carpeta + Script + '.sql" -o "' + Carpeta + Script + '.log"', Codigo)
+  Result := Exec('sqlcmd.exe', '-S "' + Instancia + '" -E -b -l 15 -I -f 65001 -i "' + Carpeta + Script + '.sql" -o "' +
+                 Carpeta + Script + '.log"', '', SW_HIDE, ewWaitUntilTerminated, Codigo)
             and (Codigo = 0);
   if not Result then
-    SuppressibleMsgBox('Falló la ejecución de ' + Script + '.sql (código ' + IntToStr(Codigo) + ').' + #13#10 +
+    SuppressibleMsgBox('Falló la ejecución de ' + Script + '.sql en ' + Instancia + ' (código ' + IntToStr(Codigo) + ').' + #13#10 +
       'Revise el detalle en ' + Carpeta + Script + '.log', mbError, MB_OK, IDOK);
 end;
 
@@ -106,9 +187,9 @@ begin
   Carpeta := ExpandConstant('{app}\BaseDeDatos\');
   SuppressibleMsgBox(Motivo + #13#10#13#10 +
     'Los archivos de {#AppNombre} se instalaron, pero falta crear la base de datos. ' +
-    'Con SQL Server disponible, ejecute en una consola:' + #13#10#13#10 +
-    'sqlcmd -S {#SqlInstancia} -E -b -I -f 65001 -i "' + Carpeta + 'schema-init.sql"' + #13#10 +
-    'sqlcmd -S {#SqlInstancia} -E -b -I -f 65001 -i "' + Carpeta + 'stored-procedures.sql"',
+    'Con SQL Server disponible, ejecute en una consola (reemplazando INSTANCIA, p. ej. .\SQLEXPRESS):' + #13#10#13#10 +
+    'sqlcmd -S INSTANCIA -E -b -I -f 65001 -i "' + Carpeta + 'schema-init.sql"' + #13#10 +
+    'sqlcmd -S INSTANCIA -E -b -I -f 65001 -i "' + Carpeta + 'stored-procedures.sql"',
     mbInformation, MB_OK, IDOK);
 end;
 
@@ -117,38 +198,42 @@ end;
 // stored-procedures.sql se puede ejecutar más de una vez sin perder datos: se ejecuta siempre.
 procedure CrearBaseDeDatos();
 var
-  Codigo: Integer;
-  Recrear: Boolean;
+  BaseExiste, SinSqlcmd, Recrear: Boolean;
 begin
-  WizardForm.StatusLabel.Caption := 'Conectando con SQL Server ({#SqlInstancia})...';
-  if not EjecutarSqlcmd('-Q "SELECT 1"', Codigo) then
+  if GetArrayLength(InstanciasInstaladas()) = 0 then
+  begin
+    MostrarPasosManuales('No se encontró ninguna instancia de SQL Server instalada en esta PC.');
+    Exit;
+  end;
+
+  Instancia := DetectarInstancia(BaseExiste, SinSqlcmd);
+  if SinSqlcmd then
   begin
     MostrarPasosManuales('No se encontró sqlcmd (se instala con SQL Server).');
     Exit;
   end;
-  if Codigo <> 0 then
+  if Instancia = '' then
   begin
-    MostrarPasosManuales('No se pudo conectar con SQL Server en {#SqlInstancia}.');
+    MostrarPasosManuales('Ninguna instancia de SQL Server respondió. Verifique que el servicio esté iniciado.');
     Exit;
   end;
+  Log('Instancia de SQL Server elegida: ' + Instancia);
 
-  // Código 1 si la base ya existe
-  EjecutarSqlcmd('-Q "IF DB_ID(''{#SqlBase}'') IS NOT NULL RAISERROR(''existe'', 16, 1)"', Codigo);
-  Recrear := Codigo = 0;
+  Recrear := not BaseExiste;
   if not Recrear then
-    Recrear := SuppressibleMsgBox('La base de datos {#SqlBase} ya existe en {#SqlInstancia}.' + #13#10#13#10 +
+    Recrear := SuppressibleMsgBox('La base de datos {#SqlBase} ya existe en ' + Instancia + '.' + #13#10#13#10 +
       '¿Desea recrearla? Se BORRARÁN todos sus datos (usuarios, captaciones, contratos, pagos, etc.).' + #13#10#13#10 +
       'Elija "No" para conservar los datos: solo se actualizarán los stored procedures.',
       mbConfirmation, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES;
 
   if Recrear then
   begin
-    WizardForm.StatusLabel.Caption := 'Creando la base de datos {#SqlBase}...';
+    WizardForm.StatusLabel.Caption := 'Creando la base de datos {#SqlBase} en ' + Instancia + '...';
     if not EjecutarScript('schema-init') then
       Exit;
   end;
 
-  WizardForm.StatusLabel.Caption := 'Creando los stored procedures...';
+  WizardForm.StatusLabel.Caption := 'Creando los stored procedures en ' + Instancia + '...';
   EjecutarScript('stored-procedures');
 end;
 

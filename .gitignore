@@ -78,6 +78,9 @@ _ReSharper*/
 # Sesión local guardada por UsuarioBLL
 session.dat
 
+# Claves y credenciales locales: nunca se suben al repositorio
+Claves.txt
+
 # Archivos copiados por los formularios del PN1 (normalmente dentro de bin/, por si se ejecuta desde otra carpeta)
 Autorizaciones/
 MaterialAudiovisual/

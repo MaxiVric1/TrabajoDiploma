@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Acceso.cs" />
+    <Compile Include="ServidorSql.cs" />
     <Compile Include="Mapper.cs" />
     <Compile Include="MapperUsuario.cs" />
     <Compile Include="MapperBackup.cs" />
