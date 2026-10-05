@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -13,13 +14,28 @@ namespace DAL
         private SqlConnection conexion;
         private SqlTransaction transaccion;
 
+        // Nombre de la cadena en <connectionStrings> del .config del ejecutable (TpIngSoft.exe.config, BackupCLI.exe.config)
+        internal const string NOMBRE_CONEXION = "TpIngSoft";
+
+        internal static string CadenaConexion
+        {
+            get
+            {
+                ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings[NOMBRE_CONEXION];
+                if (cadena == null || string.IsNullOrWhiteSpace(cadena.ConnectionString))
+                    throw new ConfigurationErrorsException(
+                        $"Falta la cadena de conexión '{NOMBRE_CONEXION}' en <connectionStrings> del archivo .config de la aplicación.");
+                return cadena.ConnectionString;
+            }
+        }
 
         public void Abrir()
         {
             conexion = new SqlConnection
             {
-                ConnectionString = @"Data Source=NOTE-MAX\SQLEXPRESS;Initial Catalog=tpingsoft;Integrated Security=True;"
+                //ConnectionString = @"Data Source=NOTE-MAX\SQLEXPRESS;Initial Catalog=tpingsoft;Integrated Security=True;"
                 //ConnectionString = "Data Source=localhost;Initial Catalog=tpingsoft;Integrated Security=True;"
+                ConnectionString = CadenaConexion
             };
             conexion.Open();
         }

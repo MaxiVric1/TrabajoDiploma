@@ -5,9 +5,25 @@ namespace DAL
 {
     public class MapperBackup
     {
-        private string masterConnectionString = @"Data Source=NOTE-MAX\SQLEXPRESS;Initial Catalog=master;Integrated Security=True;";
+        //private string masterConnectionString = @"Data Source=NOTE-MAX\SQLEXPRESS;Initial Catalog=master;Integrated Security=True;";
         //private string masterConnectionString = "Data Source=localhost;Initial Catalog=master;Integrated Security=True;";
-        private string dbName = "tpingsoft";
+        //private string dbName = "tpingsoft";
+        private readonly string masterConnectionString;
+        private readonly string dbName;
+
+        // Misma cadena que la aplicación (App.config), pero conectada a master: un backup o restore
+        // no puede hacerse estando conectado a la propia base
+        public MapperBackup()
+        {
+            var cadena = new SqlConnectionStringBuilder(Acceso.CadenaConexion);
+            dbName = cadena.InitialCatalog;
+            if (string.IsNullOrWhiteSpace(dbName))
+                throw new InvalidOperationException(
+                    $"La cadena de conexión '{Acceso.NOMBRE_CONEXION}' no indica la base de datos (Initial Catalog).");
+
+            cadena.InitialCatalog = "master";
+            masterConnectionString = cadena.ConnectionString;
+        }
 
         public string ObtenerDirectorioDefaultBackup()
         {
