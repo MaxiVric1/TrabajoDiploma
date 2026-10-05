@@ -18,6 +18,7 @@ namespace TpIngSoft
         {
             InitializeComponent();
             this.IsMdiContainer = true;
+            VentanasMdi.Instalar(this); // formularios secundarios: dentro del área y con scroll por ruedita
             this.WindowState = FormWindowState.Maximized;
             this.Text = "TpIngSoft - Sistema de Gestión";
 

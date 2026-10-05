@@ -207,6 +207,7 @@
       <DependentUpon>FormRenovarContrato.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="VentanasMdi.cs" />
     <Compile Include="Traduccion\IControlTraducible.cs" />
     <Compile Include="Traduccion\EtiquetaTraducible.cs" />
     <Compile Include="Traduccion\ComboTraducible.cs" />
