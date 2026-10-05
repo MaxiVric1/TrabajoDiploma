@@ -141,6 +141,26 @@ namespace TpIngSoft
             }
         }
 
+        // Cerrar la ventana principal (X, Alt+F4, Salir, apagado de Windows) cierra la sesión igual que "Cerrar Sesión":
+        // si no, el próximo inicio la recupera con ValidarSesionLocal y entra sin pedir credenciales.
+        // Después de un "Cerrar Sesión" del menú no hay sesión activa y Logout no hace nada.
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            if (e.Cancel) return; // algún formulario canceló el cierre: la sesión sigue
+
+            try
+            {
+                usuarioBLL.Logout(); // sesión en la base, archivo local, bitácora y SessionManager
+            }
+            catch (Exception)
+            {
+                // Sin base de datos: al menos se borra la sesión local para que el próximo inicio pida credenciales
+                try { usuarioBLL.BorrarSesionLocal(); } catch (Exception) { }
+                SessionManager.Instance.CerrarSesion();
+            }
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             GestorIdioma.Instancia.Separar(this);
