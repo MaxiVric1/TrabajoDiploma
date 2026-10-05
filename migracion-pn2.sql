@@ -118,7 +118,36 @@ INSERT INTO @Nuevos VALUES
     ('dgvPagos.diasMora', 'FormGestionarMora', N'Días en Mora', 'Days Overdue'),
     ('dgvContactos.fecha', 'FormGestionarMora', 'Fecha', 'Date'),
     ('dgvContactos.descripcion', 'FormGestionarMora', N'Descripción', 'Description'),
-    ('dgvContactos.analista', 'FormGestionarMora', 'Analista', 'Analyst');
+    ('dgvContactos.analista', 'FormGestionarMora', 'Analista', 'Analyst'),
+    -- FormGestionarLitigios
+    ('grpInquilino', 'FormGestionarLitigios', 'Inquilino', 'Tenant'),
+    ('lblNombre', 'FormGestionarLitigios', 'Nombre:', 'First Name:'),
+    ('lblApellido', 'FormGestionarLitigios', 'Apellido:', 'Last Name:'),
+    ('lblDni', 'FormGestionarLitigios', 'DNI:', 'ID Number:'),
+    ('lblTelefono', 'FormGestionarLitigios', N'Teléfono:', 'Phone:'),
+    ('lblEmail', 'FormGestionarLitigios', 'Email:', 'Email:'),
+    ('grpContrato', 'FormGestionarLitigios', 'Contrato y deuda', 'Contract and debt'),
+    ('lblDireccion', 'FormGestionarLitigios', N'Dirección:', 'Address:'),
+    ('lblMontoMensual', 'FormGestionarLitigios', 'Monto mensual:', 'Monthly rent:'),
+    ('lblFechaFin', 'FormGestionarLitigios', 'Fin del contrato:', 'Contract end:'),
+    ('lblDiasLitigio', 'FormGestionarLitigios', N'Días en litigio:', 'Days in litigation:'),
+    ('lblMontoAdeudado', 'FormGestionarLitigios', 'Con recargo:', 'With surcharge:'),
+    ('lblDeudaTotal', 'FormGestionarLitigios', 'Deuda en litigio del contrato:', 'Contract debt in litigation:'),
+    ('grpAcciones', 'FormGestionarLitigios', 'Acciones legales', 'Legal actions'),
+    ('lblFechaAccion', 'FormGestionarLitigios', 'Fecha:', 'Date:'),
+    ('lblDescripcion', 'FormGestionarLitigios', N'Descripción:', 'Description:'),
+    ('btnIntimacion', 'FormGestionarLitigios', N'Registrar Intimación', 'Register Formal Notice'),
+    ('btnResuelto', 'FormGestionarLitigios', 'Marcar Resuelto', 'Mark Resolved'),
+    ('btnDesalojo', 'FormGestionarLitigios', 'Registrar Desalojo', 'Register Eviction'),
+    ('dgvPagos.nro', 'FormGestionarLitigios', 'Nro Contrato', 'Contract No.'),
+    ('dgvPagos.inquilino', 'FormGestionarLitigios', 'Inquilino', 'Tenant'),
+    ('dgvPagos.direccion', 'FormGestionarLitigios', N'Dirección', 'Address'),
+    ('dgvPagos.periodo', 'FormGestionarLitigios', N'Período', 'Period'),
+    ('dgvPagos.montoAdeudado', 'FormGestionarLitigios', 'Monto Adeudado', 'Amount Owed'),
+    ('dgvPagos.diasLitigio', 'FormGestionarLitigios', N'Días en Litigio', 'Days in Litigation'),
+    ('dgvAcciones.fecha', 'FormGestionarLitigios', 'Fecha', 'Date'),
+    ('dgvAcciones.tipo', 'FormGestionarLitigios', 'Tipo', 'Type'),
+    ('dgvAcciones.descripcion', 'FormGestionarLitigios', N'Descripción', 'Description');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

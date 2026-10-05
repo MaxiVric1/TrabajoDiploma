@@ -626,10 +626,11 @@ CREATE PROCEDURE [dbo].[CrearAccionLegal]
     @TipoAccion VARCHAR(20),
     @IdContrato INT,
     @IdUsuarioLegal INT,
+    @FechaAccion DATETIME = NULL,
     @NuevoId INT OUTPUT
 AS BEGIN
     INSERT INTO AccionLegal (fecha_accion, descripcion, tipo_accion, id_contrato, id_usuario_legal)
-    VALUES (GETDATE(), @Descripcion, @TipoAccion, @IdContrato, @IdUsuarioLegal);
+    VALUES (ISNULL(@FechaAccion, GETDATE()), @Descripcion, @TipoAccion, @IdContrato, @IdUsuarioLegal);
     SET @NuevoId = SCOPE_IDENTITY();
 END
 GO

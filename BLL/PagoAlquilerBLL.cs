@@ -198,6 +198,10 @@ namespace BLL
         // Días transcurridos desde el vencimiento del mes (día 10); 0 si todavía no venció
         public static int DiasEnMora(int mes, int anio, DateTime hoy) => Math.Max(0, (hoy.Date - FechaVencimiento(mes, anio)).Days);
 
+        // Días desde que el mes entró en litigio según la regla automática (día 1 del mes siguiente); 0 si todavía no.
+        // La base no guarda la fecha de un escalamiento manual anterior, así que para esos casos es un mínimo.
+        public static int DiasEnLitigio(int mes, int anio, DateTime hoy) => Math.Max(0, (hoy.Date - new DateTime(anio, mes, 1).AddMonths(1)).Days);
+
         // Escalamiento manual a legal (además del automático del día 1 del mes siguiente): En Mora -> En Litigio.
         // Conserva el recargo. Solo para meses impagos En Mora.
         public void EscalarALitigio(int idPago)

@@ -35,6 +35,9 @@ namespace DAL
                 acceso.CrearParametro("@IdUsuarioLegal", accion.IdUsuarioLegal),
                 outParam
             };
+            // Opcional en el SP (sin fecha usa la actual); así sigue funcionando con el SP anterior a migracion-pn2-accion-fecha.sql
+            if (accion.FechaAccion != default(DateTime))
+                parameters.Add(acceso.CrearParametro("@FechaAccion", accion.FechaAccion));
 
             int result = acceso.Escribir("CrearAccionLegal", parameters);
             if (result != -1 && outParam.Value != null && outParam.Value != DBNull.Value)

@@ -262,6 +262,36 @@ namespace BE
         public const string FormGestionarMora_dgvContactos_descripcion = "FormGestionarMora.dgvContactos.descripcion";
         public const string FormGestionarMora_dgvContactos_analista = "FormGestionarMora.dgvContactos.analista";
 
+        // FormGestionarLitigios
+        public const string FormGestionarLitigios_grpInquilino = "FormGestionarLitigios.grpInquilino";
+        public const string FormGestionarLitigios_lblNombre = "FormGestionarLitigios.lblNombre";
+        public const string FormGestionarLitigios_lblApellido = "FormGestionarLitigios.lblApellido";
+        public const string FormGestionarLitigios_lblDni = "FormGestionarLitigios.lblDni";
+        public const string FormGestionarLitigios_lblTelefono = "FormGestionarLitigios.lblTelefono";
+        public const string FormGestionarLitigios_lblEmail = "FormGestionarLitigios.lblEmail";
+        public const string FormGestionarLitigios_grpContrato = "FormGestionarLitigios.grpContrato";
+        public const string FormGestionarLitigios_lblDireccion = "FormGestionarLitigios.lblDireccion";
+        public const string FormGestionarLitigios_lblMontoMensual = "FormGestionarLitigios.lblMontoMensual";
+        public const string FormGestionarLitigios_lblFechaFin = "FormGestionarLitigios.lblFechaFin";
+        public const string FormGestionarLitigios_lblDiasLitigio = "FormGestionarLitigios.lblDiasLitigio";
+        public const string FormGestionarLitigios_lblMontoAdeudado = "FormGestionarLitigios.lblMontoAdeudado";
+        public const string FormGestionarLitigios_lblDeudaTotal = "FormGestionarLitigios.lblDeudaTotal";
+        public const string FormGestionarLitigios_grpAcciones = "FormGestionarLitigios.grpAcciones";
+        public const string FormGestionarLitigios_lblFechaAccion = "FormGestionarLitigios.lblFechaAccion";
+        public const string FormGestionarLitigios_lblDescripcion = "FormGestionarLitigios.lblDescripcion";
+        public const string FormGestionarLitigios_btnIntimacion = "FormGestionarLitigios.btnIntimacion";
+        public const string FormGestionarLitigios_btnResuelto = "FormGestionarLitigios.btnResuelto";
+        public const string FormGestionarLitigios_btnDesalojo = "FormGestionarLitigios.btnDesalojo";
+        public const string FormGestionarLitigios_dgvPagos_nro = "FormGestionarLitigios.dgvPagos.nro";
+        public const string FormGestionarLitigios_dgvPagos_inquilino = "FormGestionarLitigios.dgvPagos.inquilino";
+        public const string FormGestionarLitigios_dgvPagos_direccion = "FormGestionarLitigios.dgvPagos.direccion";
+        public const string FormGestionarLitigios_dgvPagos_periodo = "FormGestionarLitigios.dgvPagos.periodo";
+        public const string FormGestionarLitigios_dgvPagos_montoAdeudado = "FormGestionarLitigios.dgvPagos.montoAdeudado";
+        public const string FormGestionarLitigios_dgvPagos_diasLitigio = "FormGestionarLitigios.dgvPagos.diasLitigio";
+        public const string FormGestionarLitigios_dgvAcciones_fecha = "FormGestionarLitigios.dgvAcciones.fecha";
+        public const string FormGestionarLitigios_dgvAcciones_tipo = "FormGestionarLitigios.dgvAcciones.tipo";
+        public const string FormGestionarLitigios_dgvAcciones_descripcion = "FormGestionarLitigios.dgvAcciones.descripcion";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

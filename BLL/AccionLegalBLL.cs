@@ -118,6 +118,9 @@ namespace BLL
                 throw new ArgumentException("El tipo de acción no es válido.");
             if (accion.IdUsuarioLegal <= 0)
                 throw new ArgumentException("La acción debe tener un usuario del área legal asignado.");
+            // Sin fecha se registra con la actual; no se admiten acciones futuras
+            if (accion.FechaAccion.Date > DateTime.Now.Date)
+                throw new ArgumentException("La fecha de la acción legal no puede ser futura.");
 
             accion.Descripcion = accion.Descripcion.Trim();
         }
