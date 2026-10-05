@@ -197,6 +197,18 @@ namespace TpIngSoft
                 cargarMaterialAudiovisualToolStripMenuItem.Visible = marketing;
                 publicarInmuebleToolStripMenuItem.Visible = marketing;
                 inmueblesPublicadosToolStripMenuItem.Visible = marketing;
+
+                // PN2: misma lógica que PN1 (Admin tiene los tres roles)
+                bool administradorAlquileres = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN2AdministradorAlquileres);
+                bool analistaCobranzas = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN2AnalistaCobranzas);
+                bool asesorLegal = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN2AsesorLegal);
+                pn2ToolStripMenuItem.Visible = administradorAlquileres || analistaCobranzas || asesorLegal;
+                registrarContratoToolStripMenuItem.Visible = administradorAlquileres;
+                gestionarContratosToolStripMenuItem.Visible = administradorAlquileres;
+                contratosPorVencerToolStripMenuItem.Visible = administradorAlquileres;
+                registrarPagoToolStripMenuItem.Visible = analistaCobranzas;
+                gestionarMoraToolStripMenuItem.Visible = analistaCobranzas;
+                gestionarLitigiosToolStripMenuItem.Visible = asesorLegal;
             }
             else
             {
@@ -208,6 +220,7 @@ namespace TpIngSoft
                 gestionIdiomasToolStripMenuItem.Visible = false;
                 verificarIntegridadToolStripMenuItem.Visible = false;
                 pn1ToolStripMenuItem.Visible = false;
+                pn2ToolStripMenuItem.Visible = false;
             }
 
             // Re-sync selected language in combobox when session config updates
