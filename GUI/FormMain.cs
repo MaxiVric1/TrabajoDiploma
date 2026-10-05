@@ -185,6 +185,18 @@ namespace TpIngSoft
                 gestionPerfilesToolStripMenuItem.Visible = SERVICIOS.SessionManager.Instance.TienePermiso("AccesoAdmin");
                 gestionIdiomasToolStripMenuItem.Visible = SERVICIOS.SessionManager.Instance.TienePermiso("AccesoAdmin");
                 verificarIntegridadToolStripMenuItem.Visible = SERVICIOS.SessionManager.Instance.TienePermiso("AccesoAdmin");
+
+                // PN1: cada rol ve sus opciones; el menú aparece si tiene al menos una (Admin tiene los tres roles)
+                bool agenteComercial = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN1AgenteComercial);
+                bool tasador = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN1Tasador);
+                bool marketing = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN1Marketing);
+                pn1ToolStripMenuItem.Visible = agenteComercial || tasador || marketing;
+                registrarCaptacionToolStripMenuItem.Visible = agenteComercial;
+                gestionarCaptacionesToolStripMenuItem.Visible = agenteComercial;
+                validarTasacionToolStripMenuItem.Visible = tasador;
+                cargarMaterialAudiovisualToolStripMenuItem.Visible = marketing;
+                publicarInmuebleToolStripMenuItem.Visible = marketing;
+                inmueblesPublicadosToolStripMenuItem.Visible = marketing;
             }
             else
             {
@@ -195,6 +207,7 @@ namespace TpIngSoft
                 gestionPerfilesToolStripMenuItem.Visible = false;
                 gestionIdiomasToolStripMenuItem.Visible = false;
                 verificarIntegridadToolStripMenuItem.Visible = false;
+                pn1ToolStripMenuItem.Visible = false;
             }
 
             // Re-sync selected language in combobox when session config updates
