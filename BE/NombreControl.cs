@@ -234,6 +234,34 @@ namespace BE
         public const string FormRegistrarPago_grpResumen = "FormRegistrarPago.grpResumen";
         public const string FormRegistrarPago_btnRegistrar = "FormRegistrarPago.btnRegistrar";
 
+        // FormGestionarMora
+        public const string FormGestionarMora_grpInquilino = "FormGestionarMora.grpInquilino";
+        public const string FormGestionarMora_lblNombre = "FormGestionarMora.lblNombre";
+        public const string FormGestionarMora_lblApellido = "FormGestionarMora.lblApellido";
+        public const string FormGestionarMora_lblDni = "FormGestionarMora.lblDni";
+        public const string FormGestionarMora_lblTelefono = "FormGestionarMora.lblTelefono";
+        public const string FormGestionarMora_lblEmail = "FormGestionarMora.lblEmail";
+        public const string FormGestionarMora_grpContrato = "FormGestionarMora.grpContrato";
+        public const string FormGestionarMora_lblDireccion = "FormGestionarMora.lblDireccion";
+        public const string FormGestionarMora_lblMontoMensual = "FormGestionarMora.lblMontoMensual";
+        public const string FormGestionarMora_lblFechaFin = "FormGestionarMora.lblFechaFin";
+        public const string FormGestionarMora_lblDiasMora = "FormGestionarMora.lblDiasMora";
+        public const string FormGestionarMora_lblMontoAdeudado = "FormGestionarMora.lblMontoAdeudado";
+        public const string FormGestionarMora_btnEscalar = "FormGestionarMora.btnEscalar";
+        public const string FormGestionarMora_grpContactos = "FormGestionarMora.grpContactos";
+        public const string FormGestionarMora_lblFechaContacto = "FormGestionarMora.lblFechaContacto";
+        public const string FormGestionarMora_lblDescripcion = "FormGestionarMora.lblDescripcion";
+        public const string FormGestionarMora_btnRegistrarContacto = "FormGestionarMora.btnRegistrarContacto";
+        public const string FormGestionarMora_dgvPagos_nro = "FormGestionarMora.dgvPagos.nro";
+        public const string FormGestionarMora_dgvPagos_inquilino = "FormGestionarMora.dgvPagos.inquilino";
+        public const string FormGestionarMora_dgvPagos_direccion = "FormGestionarMora.dgvPagos.direccion";
+        public const string FormGestionarMora_dgvPagos_periodo = "FormGestionarMora.dgvPagos.periodo";
+        public const string FormGestionarMora_dgvPagos_montoAdeudado = "FormGestionarMora.dgvPagos.montoAdeudado";
+        public const string FormGestionarMora_dgvPagos_diasMora = "FormGestionarMora.dgvPagos.diasMora";
+        public const string FormGestionarMora_dgvContactos_fecha = "FormGestionarMora.dgvContactos.fecha";
+        public const string FormGestionarMora_dgvContactos_descripcion = "FormGestionarMora.dgvContactos.descripcion";
+        public const string FormGestionarMora_dgvContactos_analista = "FormGestionarMora.dgvContactos.analista";
+
         // FormGestionUsuarios
         public const string FormGestionUsuarios_label1 = "FormGestionUsuarios.label1";
         public const string FormGestionUsuarios_label2 = "FormGestionUsuarios.label2";

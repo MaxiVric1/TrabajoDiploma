@@ -80,6 +80,7 @@
     <Compile Include="ContratoBLL.cs" />
     <Compile Include="PagoAlquilerBLL.cs" />
     <Compile Include="AccionLegalBLL.cs" />
+    <Compile Include="ContactoCobranzaBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

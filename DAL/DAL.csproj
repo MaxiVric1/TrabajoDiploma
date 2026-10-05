@@ -83,6 +83,7 @@
     <Compile Include="ContratoDAL.cs" />
     <Compile Include="PagoAlquilerDAL.cs" />
     <Compile Include="AccionLegalDAL.cs" />
+    <Compile Include="ContactoCobranzaDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

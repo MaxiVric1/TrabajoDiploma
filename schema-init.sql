@@ -11,7 +11,8 @@ GO
 -- 1. Creación de tablas
 -- ====================================================
 
--- Tablas del PN2 (migracion-pn2-tablas.sql): referencian a Usuario, se borran primero
+-- Tablas del PN2 (migracion-pn2-tablas.sql y migracion-pn2-contactos.sql): referencian a Usuario, se borran primero
+IF OBJECT_ID('[dbo].[ContactoCobranza]', 'U') IS NOT NULL DROP TABLE [dbo].[ContactoCobranza];
 IF OBJECT_ID('[dbo].[AccionLegal]', 'U') IS NOT NULL DROP TABLE [dbo].[AccionLegal];
 IF OBJECT_ID('[dbo].[PagoAlquiler]', 'U') IS NOT NULL DROP TABLE [dbo].[PagoAlquiler];
 IF OBJECT_ID('[dbo].[Contrato]', 'U') IS NOT NULL DROP TABLE [dbo].[Contrato];

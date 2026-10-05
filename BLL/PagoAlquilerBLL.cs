@@ -195,6 +195,29 @@ namespace BLL
             return (enMora, enLitigio);
         }
 
+        // Días transcurridos desde el vencimiento del mes (día 10); 0 si todavía no venció
+        public static int DiasEnMora(int mes, int anio, DateTime hoy) => Math.Max(0, (hoy.Date - FechaVencimiento(mes, anio)).Days);
+
+        // Escalamiento manual a legal (además del automático del día 1 del mes siguiente): En Mora -> En Litigio.
+        // Conserva el recargo. Solo para meses impagos En Mora.
+        public void EscalarALitigio(int idPago)
+        {
+            PagoAlquiler pago = pagoDAL.BuscarPorId(idPago);
+            if (pago == null)
+                throw new Exception("El pago no existe.");
+            if (pago.Pagado)
+                throw new ArgumentException($"El período {pago} ya está pagado.");
+            if (pago.EstadoPago != EstadoPago.EnMora)
+                throw new ArgumentException($"Solo se puede escalar a legal un período En Mora (el {pago} está {pago.EstadoPago}).");
+
+            if (!pagoDAL.ActualizarEstado(idPago, EstadoPago.EnLitigio, pago.RecargoAplicado))
+                throw new Exception("No se pudo escalar el pago a legal.");
+
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Escalamiento Legal",
+                $"Contrato N° {pago.IdContrato}, período {pago}: En Mora -> En Litigio (escalado manualmente, " +
+                $"{DiasEnMora(pago.MesCorrespondiente, pago.AnioCorrespondiente, DateTime.Now)} días en mora).");
+        }
+
         public void Eliminar(int idPago)
         {
             if (!pagoDAL.Eliminar(idPago))

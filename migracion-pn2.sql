@@ -91,7 +91,34 @@ INSERT INTO @Nuevos VALUES
     ('lblRecargo', 'FormRegistrarPago', 'Recargo (10%):', 'Surcharge (10%):'),
     ('lblTotal', 'FormRegistrarPago', 'Total a pagar:', 'Total due:'),
     ('grpResumen', 'FormRegistrarPago', 'Resumen del pago', 'Payment summary'),
-    ('btnRegistrar', 'FormRegistrarPago', 'Registrar Pago', 'Register Payment');
+    ('btnRegistrar', 'FormRegistrarPago', 'Registrar Pago', 'Register Payment'),
+    -- FormGestionarMora
+    ('grpInquilino', 'FormGestionarMora', 'Inquilino', 'Tenant'),
+    ('lblNombre', 'FormGestionarMora', 'Nombre:', 'First Name:'),
+    ('lblApellido', 'FormGestionarMora', 'Apellido:', 'Last Name:'),
+    ('lblDni', 'FormGestionarMora', 'DNI:', 'ID Number:'),
+    ('lblTelefono', 'FormGestionarMora', N'Teléfono:', 'Phone:'),
+    ('lblEmail', 'FormGestionarMora', 'Email:', 'Email:'),
+    ('grpContrato', 'FormGestionarMora', 'Contrato y deuda', 'Contract and debt'),
+    ('lblDireccion', 'FormGestionarMora', N'Dirección:', 'Address:'),
+    ('lblMontoMensual', 'FormGestionarMora', 'Monto mensual:', 'Monthly rent:'),
+    ('lblFechaFin', 'FormGestionarMora', 'Fin del contrato:', 'Contract end:'),
+    ('lblDiasMora', 'FormGestionarMora', N'Días en mora:', 'Days overdue:'),
+    ('lblMontoAdeudado', 'FormGestionarMora', 'Con recargo:', 'With surcharge:'),
+    ('btnEscalar', 'FormGestionarMora', 'Escalar a Legal', 'Escalate to Legal'),
+    ('grpContactos', 'FormGestionarMora', 'Contactos con el inquilino', 'Tenant contacts'),
+    ('lblFechaContacto', 'FormGestionarMora', 'Fecha:', 'Date:'),
+    ('lblDescripcion', 'FormGestionarMora', N'Qué se habló:', 'What was discussed:'),
+    ('btnRegistrarContacto', 'FormGestionarMora', 'Registrar Contacto', 'Register Contact'),
+    ('dgvPagos.nro', 'FormGestionarMora', 'Nro Contrato', 'Contract No.'),
+    ('dgvPagos.inquilino', 'FormGestionarMora', 'Inquilino', 'Tenant'),
+    ('dgvPagos.direccion', 'FormGestionarMora', N'Dirección', 'Address'),
+    ('dgvPagos.periodo', 'FormGestionarMora', N'Período', 'Period'),
+    ('dgvPagos.montoAdeudado', 'FormGestionarMora', 'Monto Adeudado', 'Amount Owed'),
+    ('dgvPagos.diasMora', 'FormGestionarMora', N'Días en Mora', 'Days Overdue'),
+    ('dgvContactos.fecha', 'FormGestionarMora', 'Fecha', 'Date'),
+    ('dgvContactos.descripcion', 'FormGestionarMora', N'Descripción', 'Description'),
+    ('dgvContactos.analista', 'FormGestionarMora', 'Analista', 'Analyst');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

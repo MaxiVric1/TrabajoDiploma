@@ -86,6 +86,7 @@
     <Compile Include="PagoAlquiler.cs" />
     <Compile Include="PeriodoAPagar.cs" />
     <Compile Include="AccionLegal.cs" />
+    <Compile Include="ContactoCobranza.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
