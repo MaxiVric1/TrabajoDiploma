@@ -1,12 +1,26 @@
+-- ====================================================
+-- TpIngSoft - Stored procedures (sistema base, PN1 y PN2), en su versión final
+-- Cada uno se borra (DROP PROCEDURE IF EXISTS) y se vuelve a crear: se puede ejecutar más de una vez.
+-- Ejecutar después de schema-init.sql.
+-- ====================================================
 USE [TpIngSoft];
 GO
+
+-- Cada SP guarda estas opciones al crearse; los que escriben en Contrato las necesitan por su índice filtrado
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
+-- ####################################################
+-- Sistema base (usuarios, sesiones, roles y permisos, bitácora, historial, dígitos verificadores, idiomas)
+-- ####################################################
 
 -- ====================================================
 -- BuscarUsuarioPorNombre
 -- ====================================================
-IF OBJECT_ID('[dbo].[BuscarUsuarioPorNombre]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[BuscarUsuarioPorNombre];
+DROP PROCEDURE IF EXISTS [dbo].[BuscarUsuarioPorNombre];
 GO
+
 
 CREATE PROCEDURE [dbo].[BuscarUsuarioPorNombre]
     @Nombre VARCHAR(50)
@@ -21,9 +35,9 @@ GO
 -- ====================================================
 -- BuscarUsuarioPorId
 -- ====================================================
-IF OBJECT_ID('[dbo].[BuscarUsuarioPorId]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[BuscarUsuarioPorId];
+DROP PROCEDURE IF EXISTS [dbo].[BuscarUsuarioPorId];
 GO
+
 
 CREATE PROCEDURE [dbo].[BuscarUsuarioPorId]
     @Id INT
@@ -38,9 +52,9 @@ GO
 -- ====================================================
 -- LeerUsuarios
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerUsuarios]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[LeerUsuarios];
+DROP PROCEDURE IF EXISTS [dbo].[LeerUsuarios];
 GO
+
 
 CREATE PROCEDURE [dbo].[LeerUsuarios]
 AS
@@ -53,9 +67,9 @@ GO
 -- ====================================================
 -- CrearUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[CrearUsuario]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[CrearUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[CrearUsuario];
 GO
+
 
 CREATE PROCEDURE [dbo].[CrearUsuario]
     @Nombre VARCHAR(50),
@@ -75,9 +89,9 @@ GO
 -- ====================================================
 -- ActualizarUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[ActualizarUsuario]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[ActualizarUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarUsuario];
 GO
+
 
 CREATE PROCEDURE [dbo].[ActualizarUsuario]
     @Id INT,
@@ -98,9 +112,9 @@ GO
 -- ====================================================
 -- ActualizarIntentosFallidos
 -- ====================================================
-IF OBJECT_ID('[dbo].[ActualizarIntentosFallidos]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[ActualizarIntentosFallidos];
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarIntentosFallidos];
 GO
+
 
 CREATE PROCEDURE [dbo].[ActualizarIntentosFallidos]
     @Nombre VARCHAR(50),
@@ -124,9 +138,9 @@ GO
 -- ====================================================
 -- LeerRolesPorUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerRolesPorUsuario]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[LeerRolesPorUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[LeerRolesPorUsuario];
 GO
+
 
 CREATE PROCEDURE [dbo].[LeerRolesPorUsuario]
     @IdUsuario INT
@@ -142,9 +156,9 @@ GO
 -- ====================================================
 -- LeerPermisosPorRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerPermisosPorRol]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[LeerPermisosPorRol];
+DROP PROCEDURE IF EXISTS [dbo].[LeerPermisosPorRol];
 GO
+
 
 CREATE PROCEDURE [dbo].[LeerPermisosPorRol]
     @IdRol INT
@@ -160,9 +174,9 @@ GO
 -- ====================================================
 -- CrearSesion
 -- ====================================================
-IF OBJECT_ID('[dbo].[CrearSesion]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[CrearSesion];
+DROP PROCEDURE IF EXISTS [dbo].[CrearSesion];
 GO
+
 
 CREATE PROCEDURE [dbo].[CrearSesion]
     @IdUsuario INT,
@@ -178,9 +192,9 @@ GO
 -- ====================================================
 -- CerrarSesion
 -- ====================================================
-IF OBJECT_ID('[dbo].[CerrarSesion]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[CerrarSesion];
+DROP PROCEDURE IF EXISTS [dbo].[CerrarSesion];
 GO
+
 
 CREATE PROCEDURE [dbo].[CerrarSesion]
     @IdSesion INT
@@ -195,9 +209,9 @@ GO
 -- ====================================================
 -- LeerRoles
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerRoles]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[LeerRoles];
+DROP PROCEDURE IF EXISTS [dbo].[LeerRoles];
 GO
+
 
 CREATE PROCEDURE [dbo].[LeerRoles]
 AS
@@ -210,9 +224,9 @@ GO
 -- ====================================================
 -- AsignarRolUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[AsignarRolUsuario]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[AsignarRolUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[AsignarRolUsuario];
 GO
+
 
 CREATE PROCEDURE [dbo].[AsignarRolUsuario]
     @IdUsuario INT,
@@ -230,9 +244,9 @@ GO
 -- ====================================================
 -- ValidarYRefrescarSesion
 -- ====================================================
-IF OBJECT_ID('[dbo].[ValidarYRefrescarSesion]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[ValidarYRefrescarSesion];
+DROP PROCEDURE IF EXISTS [dbo].[ValidarYRefrescarSesion];
 GO
+
 
 CREATE PROCEDURE [dbo].[ValidarYRefrescarSesion]
     @IdSesion INT,
@@ -259,9 +273,9 @@ GO
 -- ====================================================
 -- InsertarBitacora
 -- ====================================================
-IF OBJECT_ID('[dbo].[InsertarBitacora]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[InsertarBitacora];
+DROP PROCEDURE IF EXISTS [dbo].[InsertarBitacora];
 GO
+
 
 CREATE PROCEDURE [dbo].[InsertarBitacora]
     @IdUsuario INT = NULL,
@@ -277,9 +291,9 @@ GO
 -- ====================================================
 -- BuscarBitacora
 -- ====================================================
-IF OBJECT_ID('[dbo].[BuscarBitacora]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[BuscarBitacora];
+DROP PROCEDURE IF EXISTS [dbo].[BuscarBitacora];
 GO
+
 
 CREATE PROCEDURE [dbo].[BuscarBitacora]
     @IdUsuario INT = NULL,
@@ -302,9 +316,9 @@ GO
 -- ====================================================
 -- InsertarUsuarioHistorial
 -- ====================================================
-IF OBJECT_ID('[dbo].[InsertarUsuarioHistorial]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[InsertarUsuarioHistorial];
+DROP PROCEDURE IF EXISTS [dbo].[InsertarUsuarioHistorial];
 GO
+
 
 CREATE PROCEDURE [dbo].[InsertarUsuarioHistorial]
     @IdUsuario INT, 
@@ -326,9 +340,9 @@ GO
 -- ====================================================
 -- LeerHistorialUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerHistorialUsuario]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[LeerHistorialUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[LeerHistorialUsuario];
 GO
+
 
 CREATE PROCEDURE [dbo].[LeerHistorialUsuario]
     @IdUsuario INT
@@ -341,9 +355,9 @@ GO
 -- ====================================================
 -- BuscarHistorialPorId
 -- ====================================================
-IF OBJECT_ID('[dbo].[BuscarHistorialPorId]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[BuscarHistorialPorId];
+DROP PROCEDURE IF EXISTS [dbo].[BuscarHistorialPorId];
 GO
+
 
 CREATE PROCEDURE [dbo].[BuscarHistorialPorId]
     @IdHistorial INT
@@ -356,9 +370,9 @@ GO
 -- ====================================================
 -- LeerDVV
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerDVV]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[LeerDVV];
+DROP PROCEDURE IF EXISTS [dbo].[LeerDVV];
 GO
+
 
 CREATE PROCEDURE [dbo].[LeerDVV]
     @Tabla VARCHAR(50)
@@ -371,9 +385,9 @@ GO
 -- ====================================================
 -- ActualizarDVV
 -- ====================================================
-IF OBJECT_ID('[dbo].[ActualizarDVV]', 'P') IS NOT NULL 
-    DROP PROCEDURE [dbo].[ActualizarDVV];
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarDVV];
 GO
+
 
 CREATE PROCEDURE [dbo].[ActualizarDVV]
     @Tabla VARCHAR(50),
@@ -387,8 +401,9 @@ GO
 -- ====================================================
 -- AsignarPermisoARol
 -- ====================================================
-IF OBJECT_ID('[dbo].[AsignarPermisoARol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[AsignarPermisoARol];
+DROP PROCEDURE IF EXISTS [dbo].[AsignarPermisoARol];
 GO
+
 CREATE PROCEDURE [dbo].[AsignarPermisoARol]
     @IdRol INT, @IdPermiso INT
 AS BEGIN
@@ -400,8 +415,9 @@ GO
 -- ====================================================
 -- RemoverPermisoDeRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[RemoverPermisoDeRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[RemoverPermisoDeRol];
+DROP PROCEDURE IF EXISTS [dbo].[RemoverPermisoDeRol];
 GO
+
 CREATE PROCEDURE [dbo].[RemoverPermisoDeRol]
     @IdRol INT, @IdPermiso INT
 AS BEGIN
@@ -412,8 +428,9 @@ GO
 -- ====================================================
 -- AsignarSubRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[AsignarSubRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[AsignarSubRol];
+DROP PROCEDURE IF EXISTS [dbo].[AsignarSubRol];
 GO
+
 CREATE PROCEDURE [dbo].[AsignarSubRol]
     @IdPadre INT, @IdHijo INT
 AS BEGIN
@@ -425,8 +442,9 @@ GO
 -- ====================================================
 -- RemoverSubRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[RemoverSubRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[RemoverSubRol];
+DROP PROCEDURE IF EXISTS [dbo].[RemoverSubRol];
 GO
+
 CREATE PROCEDURE [dbo].[RemoverSubRol]
     @IdPadre INT, @IdHijo INT
 AS BEGIN
@@ -437,8 +455,9 @@ GO
 -- ====================================================
 -- LeerSubRolesPorRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerSubRolesPorRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerSubRolesPorRol];
+DROP PROCEDURE IF EXISTS [dbo].[LeerSubRolesPorRol];
 GO
+
 CREATE PROCEDURE [dbo].[LeerSubRolesPorRol]
     @IdRol INT
 AS BEGIN
@@ -452,8 +471,9 @@ GO
 -- ====================================================
 -- CrearRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[CrearRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[CrearRol];
+DROP PROCEDURE IF EXISTS [dbo].[CrearRol];
 GO
+
 CREATE PROCEDURE [dbo].[CrearRol]
     @Nombre NVARCHAR(100), @NuevoId INT OUTPUT
 AS BEGIN
@@ -465,8 +485,9 @@ GO
 -- ====================================================
 -- ActualizarRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[ActualizarRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[ActualizarRol];
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarRol];
 GO
+
 CREATE PROCEDURE [dbo].[ActualizarRol]
     @Id INT, @Nombre NVARCHAR(100)
 AS BEGIN
@@ -477,8 +498,9 @@ GO
 -- ====================================================
 -- EliminarRol
 -- ====================================================
-IF OBJECT_ID('[dbo].[EliminarRol]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[EliminarRol];
+DROP PROCEDURE IF EXISTS [dbo].[EliminarRol];
 GO
+
 CREATE PROCEDURE [dbo].[EliminarRol]
     @Id INT
 AS BEGIN
@@ -492,8 +514,9 @@ GO
 -- ====================================================
 -- LeerRolPorId
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerRolPorId]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerRolPorId];
+DROP PROCEDURE IF EXISTS [dbo].[LeerRolPorId];
 GO
+
 CREATE PROCEDURE [dbo].[LeerRolPorId]
     @Id INT
 AS BEGIN
@@ -502,11 +525,11 @@ END
 GO
 
 -- ====================================================
--- ====================================================
 -- LeerPermisos
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerPermisos]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerPermisos];
+DROP PROCEDURE IF EXISTS [dbo].[LeerPermisos];
 GO
+
 CREATE PROCEDURE [dbo].[LeerPermisos]
 AS BEGIN
     SELECT id, nombre FROM Permiso;
@@ -516,8 +539,9 @@ GO
 -- ====================================================
 -- LeerIdiomasActivos
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerIdiomasActivos]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerIdiomasActivos];
+DROP PROCEDURE IF EXISTS [dbo].[LeerIdiomasActivos];
 GO
+
 CREATE PROCEDURE [dbo].[LeerIdiomasActivos]
 AS BEGIN
     SELECT id, nombre, activo FROM Idioma WHERE activo = 1;
@@ -527,8 +551,9 @@ GO
 -- ====================================================
 -- LeerTodosIdiomas
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerTodosIdiomas]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerTodosIdiomas];
+DROP PROCEDURE IF EXISTS [dbo].[LeerTodosIdiomas];
 GO
+
 CREATE PROCEDURE [dbo].[LeerTodosIdiomas]
 AS BEGIN
     SELECT id, nombre, activo FROM Idioma;
@@ -538,8 +563,9 @@ GO
 -- ====================================================
 -- ToggleEstadoIdioma
 -- ====================================================
-IF OBJECT_ID('[dbo].[ToggleEstadoIdioma]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[ToggleEstadoIdioma];
+DROP PROCEDURE IF EXISTS [dbo].[ToggleEstadoIdioma];
 GO
+
 CREATE PROCEDURE [dbo].[ToggleEstadoIdioma]
     @IdIdioma INT
 AS BEGIN
@@ -550,8 +576,9 @@ GO
 -- ====================================================
 -- LeerTraduccionesPorIdioma
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerTraduccionesPorIdioma]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerTraduccionesPorIdioma];
+DROP PROCEDURE IF EXISTS [dbo].[LeerTraduccionesPorIdioma];
 GO
+
 CREATE PROCEDURE [dbo].[LeerTraduccionesPorIdioma]
     @IdIdioma INT
 AS BEGIN
@@ -565,8 +592,9 @@ GO
 -- ====================================================
 -- CrearIdioma
 -- ====================================================
-IF OBJECT_ID('[dbo].[CrearIdioma]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[CrearIdioma];
+DROP PROCEDURE IF EXISTS [dbo].[CrearIdioma];
 GO
+
 CREATE PROCEDURE [dbo].[CrearIdioma]
     @Nombre NVARCHAR(50),
     @NuevoId INT OUTPUT
@@ -579,8 +607,9 @@ GO
 -- ====================================================
 -- ActualizarTraduccion
 -- ====================================================
-IF OBJECT_ID('[dbo].[ActualizarTraduccion]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[ActualizarTraduccion];
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarTraduccion];
 GO
+
 CREATE PROCEDURE [dbo].[ActualizarTraduccion]
     @IdControl INT,
     @IdIdioma INT,
@@ -596,8 +625,9 @@ GO
 -- ====================================================
 -- LeerControles
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerControles]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerControles];
+DROP PROCEDURE IF EXISTS [dbo].[LeerControles];
 GO
+
 CREATE PROCEDURE [dbo].[LeerControles]
 AS BEGIN
     SELECT id, nombre, formulario FROM Control;
@@ -607,8 +637,9 @@ GO
 -- ====================================================
 -- CrearControl
 -- ====================================================
-IF OBJECT_ID('[dbo].[CrearControl]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[CrearControl];
+DROP PROCEDURE IF EXISTS [dbo].[CrearControl];
 GO
+
 CREATE PROCEDURE [dbo].[CrearControl]
     @Nombre NVARCHAR(100),
     @Formulario NVARCHAR(100),
@@ -626,8 +657,9 @@ GO
 -- ====================================================
 -- GuardarIdiomaUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[GuardarIdiomaUsuario]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[GuardarIdiomaUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[GuardarIdiomaUsuario];
 GO
+
 CREATE PROCEDURE [dbo].[GuardarIdiomaUsuario]
     @IdUsuario INT,
     @IdIdioma INT
@@ -639,8 +671,9 @@ GO
 -- ====================================================
 -- LeerIdiomaUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[LeerIdiomaUsuario]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[LeerIdiomaUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[LeerIdiomaUsuario];
 GO
+
 CREATE PROCEDURE [dbo].[LeerIdiomaUsuario]
     @IdUsuario INT
 AS BEGIN
@@ -654,8 +687,9 @@ GO
 -- ====================================================
 -- RemoverRolesUsuario
 -- ====================================================
-IF OBJECT_ID('[dbo].[RemoverRolesUsuario]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[RemoverRolesUsuario];
+DROP PROCEDURE IF EXISTS [dbo].[RemoverRolesUsuario];
 GO
+
 CREATE PROCEDURE [dbo].[RemoverRolesUsuario]
     @IdUsuario INT
 AS BEGIN
@@ -666,8 +700,9 @@ GO
 -- ====================================================
 -- BloquearUsuarioManual
 -- ====================================================
-IF OBJECT_ID('[dbo].[BloquearUsuarioManual]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[BloquearUsuarioManual];
+DROP PROCEDURE IF EXISTS [dbo].[BloquearUsuarioManual];
 GO
+
 CREATE PROCEDURE [dbo].[BloquearUsuarioManual]
     @Nombre VARCHAR(50),
     @Minutos INT
@@ -681,8 +716,9 @@ GO
 -- ====================================================
 -- EliminarIdioma
 -- ====================================================
-IF OBJECT_ID('[dbo].[EliminarIdioma]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[EliminarIdioma];
+DROP PROCEDURE IF EXISTS [dbo].[EliminarIdioma];
 GO
+
 CREATE PROCEDURE [dbo].[EliminarIdioma]
     @IdIdioma INT
 AS BEGIN
@@ -694,12 +730,1308 @@ GO
 -- ====================================================
 -- ReasignarUsuariosIdioma
 -- ====================================================
-IF OBJECT_ID('[dbo].[ReasignarUsuariosIdioma]', 'P') IS NOT NULL DROP PROCEDURE [dbo].[ReasignarUsuariosIdioma];
+DROP PROCEDURE IF EXISTS [dbo].[ReasignarUsuariosIdioma];
 GO
+
 CREATE PROCEDURE [dbo].[ReasignarUsuariosIdioma]
     @IdIdiomaDesactivado INT,
     @IdIdiomaFallback INT
 AS BEGIN
     UPDATE Usuario SET id_idioma = @IdIdiomaFallback WHERE id_idioma = @IdIdiomaDesactivado;
+END
+GO
+
+-- ####################################################
+-- PN1 - Captación de propiedades
+-- ####################################################
+
+-- ====================================================
+-- CrearCliente
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearCliente];
+GO
+
+CREATE PROCEDURE [dbo].[CrearCliente]
+    @Dni VARCHAR(15),
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Telefono VARCHAR(30) = NULL,
+    @Email VARCHAR(100) = NULL,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Cliente (dni, nombre, apellido, telefono, email)
+    VALUES (@Dni, @Nombre, @Apellido, @Telefono, @Email);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarCliente
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarCliente];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarCliente]
+    @Id INT,
+    @Dni VARCHAR(15),
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Telefono VARCHAR(30) = NULL,
+    @Email VARCHAR(100) = NULL
+AS BEGIN
+    UPDATE Cliente
+    SET dni = @Dni, nombre = @Nombre, apellido = @Apellido, telefono = @Telefono, email = @Email
+    WHERE id_cliente = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarCliente
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarCliente];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarCliente]
+    @Id INT
+AS BEGIN
+    DELETE FROM Cliente WHERE id_cliente = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerClientes
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerClientes];
+GO
+
+CREATE PROCEDURE [dbo].[LeerClientes]
+AS BEGIN
+    SELECT id_cliente, dni, nombre, apellido, telefono, email
+    FROM Cliente;
+END
+GO
+
+-- ====================================================
+-- BuscarClientePorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarClientePorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarClientePorId]
+    @Id INT
+AS BEGIN
+    SELECT id_cliente, dni, nombre, apellido, telefono, email
+    FROM Cliente
+    WHERE id_cliente = @Id;
+END
+GO
+
+-- ====================================================
+-- BuscarClientePorDni
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarClientePorDni];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarClientePorDni]
+    @Dni VARCHAR(15)
+AS BEGIN
+    SELECT id_cliente, dni, nombre, apellido, telefono, email
+    FROM Cliente
+    WHERE dni = @Dni;
+END
+GO
+
+-- ====================================================
+-- CrearInmueble
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[CrearInmueble]
+    @TipoInmueble VARCHAR(50),
+    @Direccion NVARCHAR(200),
+    @MetrosCuadrados DECIMAL(10,2),
+    @CantidadAmbientes INT,
+    @TextoComercial NVARCHAR(2000) = NULL,
+    @IdCliente INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Inmueble (tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial, id_cliente)
+    VALUES (@TipoInmueble, @Direccion, @MetrosCuadrados, @CantidadAmbientes, 'Captado', @TextoComercial, @IdCliente);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarInmueble
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarInmueble]
+    @Id INT,
+    @TipoInmueble VARCHAR(50),
+    @Direccion NVARCHAR(200),
+    @MetrosCuadrados DECIMAL(10,2),
+    @CantidadAmbientes INT,
+    @EstadoActual VARCHAR(20),
+    @TextoComercial NVARCHAR(2000),
+    @IdCliente INT
+AS BEGIN
+    UPDATE Inmueble
+    SET tipo_inmueble = @TipoInmueble, direccion = @Direccion, metros_cuadrados = @MetrosCuadrados,
+        cantidad_ambientes = @CantidadAmbientes, estado_actual = @EstadoActual,
+        texto_comercial = @TextoComercial, id_cliente = @IdCliente
+    WHERE id_inmueble = @Id;
+END
+GO
+
+-- ====================================================
+-- ActualizarEstadoInmueble
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarEstadoInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarEstadoInmueble]
+    @Id INT,
+    @EstadoActual VARCHAR(20)
+AS BEGIN
+    UPDATE Inmueble SET estado_actual = @EstadoActual WHERE id_inmueble = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarInmueble
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarInmueble]
+    @Id INT
+AS BEGIN
+    DELETE FROM Inmueble WHERE id_inmueble = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerInmuebles
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerInmuebles];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInmuebles]
+AS BEGIN
+    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial,
+           fecha_publicacion, fecha_despublicacion, id_cliente
+    FROM Inmueble;
+END
+GO
+
+-- ====================================================
+-- BuscarInmueblePorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInmueblePorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInmueblePorId]
+    @Id INT
+AS BEGIN
+    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial,
+           fecha_publicacion, fecha_despublicacion, id_cliente
+    FROM Inmueble
+    WHERE id_inmueble = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerInmueblesPorCliente
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerInmueblesPorCliente];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInmueblesPorCliente]
+    @IdCliente INT
+AS BEGIN
+    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial,
+           fecha_publicacion, fecha_despublicacion, id_cliente
+    FROM Inmueble
+    WHERE id_cliente = @IdCliente;
+END
+GO
+
+-- ====================================================
+-- CrearCaptacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearCaptacion];
+GO
+
+CREATE PROCEDURE [dbo].[CrearCaptacion]
+    @ValorPretendido DECIMAL(18,2),
+    @IdInmueble INT,
+    @IdUsuarioAgente INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Captacion (fecha_registro, valor_pretendido, id_inmueble, id_usuario_agente)
+    VALUES (GETDATE(), @ValorPretendido, @IdInmueble, @IdUsuarioAgente);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarCaptacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarCaptacion];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarCaptacion]
+    @NroCaptacion INT,
+    @ValorPretendido DECIMAL(18,2),
+    @IdInmueble INT,
+    @IdUsuarioAgente INT
+AS BEGIN
+    UPDATE Captacion
+    SET valor_pretendido = @ValorPretendido, id_inmueble = @IdInmueble, id_usuario_agente = @IdUsuarioAgente
+    WHERE nro_captacion = @NroCaptacion;
+END
+GO
+
+-- ====================================================
+-- EliminarCaptacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarCaptacion];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarCaptacion]
+    @NroCaptacion INT
+AS BEGIN
+    DELETE FROM Captacion WHERE nro_captacion = @NroCaptacion;
+END
+GO
+
+-- ====================================================
+-- LeerCaptaciones
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerCaptaciones];
+GO
+
+CREATE PROCEDURE [dbo].[LeerCaptaciones]
+AS BEGIN
+    SELECT nro_captacion, fecha_registro, valor_pretendido, id_inmueble, id_usuario_agente
+    FROM Captacion
+    ORDER BY fecha_registro DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarCaptacionPorNro
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarCaptacionPorNro];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarCaptacionPorNro]
+    @NroCaptacion INT
+AS BEGIN
+    SELECT nro_captacion, fecha_registro, valor_pretendido, id_inmueble, id_usuario_agente
+    FROM Captacion
+    WHERE nro_captacion = @NroCaptacion;
+END
+GO
+
+-- ====================================================
+-- CrearTasacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearTasacion];
+GO
+
+CREATE PROCEDURE [dbo].[CrearTasacion]
+    @EstadoDictamen VARCHAR(20),
+    @MotivoRechazo NVARCHAR(500) = NULL,
+    @ValorFinal DECIMAL(18,2) = NULL,
+    @ValorSugerido DECIMAL(18,2) = NULL,
+    @IdCaptacion INT,
+    @IdUsuarioTasador INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Tasacion (fecha_dictamen, estado_dictamen, motivo_rechazo, valor_final, valor_sugerido, id_captacion, id_usuario_tasador)
+    VALUES (GETDATE(), @EstadoDictamen, @MotivoRechazo, @ValorFinal, @ValorSugerido, @IdCaptacion, @IdUsuarioTasador);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarTasacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarTasacion];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarTasacion]
+    @NroTasacion INT,
+    @EstadoDictamen VARCHAR(20),
+    @MotivoRechazo NVARCHAR(500) = NULL,
+    @ValorFinal DECIMAL(18,2) = NULL,
+    @ValorSugerido DECIMAL(18,2) = NULL,
+    @IdUsuarioTasador INT
+AS BEGIN
+    UPDATE Tasacion
+    SET fecha_dictamen = GETDATE(), estado_dictamen = @EstadoDictamen, motivo_rechazo = @MotivoRechazo,
+        valor_final = @ValorFinal, valor_sugerido = @ValorSugerido, id_usuario_tasador = @IdUsuarioTasador
+    WHERE nro_tasacion = @NroTasacion;
+END
+GO
+
+-- ====================================================
+-- EliminarTasacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarTasacion];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarTasacion]
+    @NroTasacion INT
+AS BEGIN
+    DELETE FROM Tasacion WHERE nro_tasacion = @NroTasacion;
+END
+GO
+
+-- ====================================================
+-- LeerTasaciones
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerTasaciones];
+GO
+
+CREATE PROCEDURE [dbo].[LeerTasaciones]
+AS BEGIN
+    SELECT nro_tasacion, fecha_dictamen, estado_dictamen, motivo_rechazo, valor_final, valor_sugerido, id_captacion, id_usuario_tasador
+    FROM Tasacion
+    ORDER BY fecha_dictamen DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarTasacionPorNro
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarTasacionPorNro];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarTasacionPorNro]
+    @NroTasacion INT
+AS BEGIN
+    SELECT nro_tasacion, fecha_dictamen, estado_dictamen, motivo_rechazo, valor_final, valor_sugerido, id_captacion, id_usuario_tasador
+    FROM Tasacion
+    WHERE nro_tasacion = @NroTasacion;
+END
+GO
+
+-- ====================================================
+-- LeerTasacionesPorCaptacion
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerTasacionesPorCaptacion];
+GO
+
+CREATE PROCEDURE [dbo].[LeerTasacionesPorCaptacion]
+    @IdCaptacion INT
+AS BEGIN
+    SELECT nro_tasacion, fecha_dictamen, estado_dictamen, motivo_rechazo, valor_final, valor_sugerido, id_captacion, id_usuario_tasador
+    FROM Tasacion
+    WHERE id_captacion = @IdCaptacion
+    ORDER BY fecha_dictamen DESC, nro_tasacion DESC;
+END
+GO
+
+-- ====================================================
+-- CrearMaterialAudiovisual
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearMaterialAudiovisual];
+GO
+
+CREATE PROCEDURE [dbo].[CrearMaterialAudiovisual]
+    @TipoArchivo VARCHAR(20),
+    @RutaArchivo NVARCHAR(500),
+    @IdInmueble INT,
+    @IdUsuarioMarketing INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO MaterialAudiovisual (tipo_archivo, ruta_archivo, fecha_carga, id_inmueble, id_usuario_marketing)
+    VALUES (@TipoArchivo, @RutaArchivo, GETDATE(), @IdInmueble, @IdUsuarioMarketing);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarMaterialAudiovisual
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarMaterialAudiovisual];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarMaterialAudiovisual]
+    @Id INT,
+    @TipoArchivo VARCHAR(20),
+    @RutaArchivo NVARCHAR(500),
+    @IdInmueble INT,
+    @IdUsuarioMarketing INT
+AS BEGIN
+    UPDATE MaterialAudiovisual
+    SET tipo_archivo = @TipoArchivo, ruta_archivo = @RutaArchivo,
+        id_inmueble = @IdInmueble, id_usuario_marketing = @IdUsuarioMarketing
+    WHERE id_material = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarMaterialAudiovisual
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarMaterialAudiovisual];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarMaterialAudiovisual]
+    @Id INT
+AS BEGIN
+    DELETE FROM MaterialAudiovisual WHERE id_material = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerMaterialesAudiovisuales
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerMaterialesAudiovisuales];
+GO
+
+CREATE PROCEDURE [dbo].[LeerMaterialesAudiovisuales]
+AS BEGIN
+    SELECT id_material, tipo_archivo, ruta_archivo, fecha_carga, id_inmueble, id_usuario_marketing
+    FROM MaterialAudiovisual
+    ORDER BY fecha_carga DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarMaterialAudiovisualPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarMaterialAudiovisualPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarMaterialAudiovisualPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_material, tipo_archivo, ruta_archivo, fecha_carga, id_inmueble, id_usuario_marketing
+    FROM MaterialAudiovisual
+    WHERE id_material = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerMaterialPorInmueble
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerMaterialPorInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[LeerMaterialPorInmueble]
+    @IdInmueble INT
+AS BEGIN
+    SELECT id_material, tipo_archivo, ruta_archivo, fecha_carga, id_inmueble, id_usuario_marketing
+    FROM MaterialAudiovisual
+    WHERE id_inmueble = @IdInmueble
+    ORDER BY fecha_carga DESC;
+END
+GO
+
+-- ====================================================
+-- ActualizarTextoComercialInmueble
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarTextoComercialInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarTextoComercialInmueble]
+    @Id INT,
+    @TextoComercial NVARCHAR(2000)
+AS BEGIN
+    UPDATE Inmueble SET texto_comercial = @TextoComercial WHERE id_inmueble = @Id;
+END
+GO
+
+-- ====================================================
+-- CambiarPublicacionInmueble
+-- Publicar: Tasado -> Publicado (registra la fecha). Despublicar: Publicado -> Tasado.
+-- Solo actúa si el inmueble está en el estado esperado: devuelve 1 fila afectada o 0.
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CambiarPublicacionInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[CambiarPublicacionInmueble]
+    @Id INT,
+    @Publicar BIT
+AS BEGIN
+    IF @Publicar = 1
+        UPDATE Inmueble
+        SET estado_actual = 'Publicado', fecha_publicacion = GETDATE(), fecha_despublicacion = NULL
+        WHERE id_inmueble = @Id AND estado_actual = 'Tasado';
+    ELSE
+        UPDATE Inmueble
+        SET estado_actual = 'Tasado', fecha_despublicacion = GETDATE()
+        WHERE id_inmueble = @Id AND estado_actual = 'Publicado';
+END
+GO
+
+-- ####################################################
+-- PN2 - Seguimiento de alquileres
+-- ####################################################
+
+-- ====================================================
+-- CrearInquilino
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearInquilino];
+GO
+
+CREATE PROCEDURE [dbo].[CrearInquilino]
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Dni VARCHAR(15),
+    @Telefono VARCHAR(30) = NULL,
+    @Email VARCHAR(100) = NULL,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Inquilino (nombre, apellido, dni, telefono, email)
+    VALUES (@Nombre, @Apellido, @Dni, @Telefono, @Email);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarInquilino
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarInquilino];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarInquilino]
+    @Id INT,
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Dni VARCHAR(15),
+    @Telefono VARCHAR(30) = NULL,
+    @Email VARCHAR(100) = NULL
+AS BEGIN
+    UPDATE Inquilino
+    SET nombre = @Nombre, apellido = @Apellido, dni = @Dni, telefono = @Telefono, email = @Email
+    WHERE id_inquilino = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarInquilino
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarInquilino];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarInquilino]
+    @Id INT
+AS BEGIN
+    DELETE FROM Inquilino WHERE id_inquilino = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerInquilinos
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerInquilinos];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInquilinos]
+AS BEGIN
+    SELECT id_inquilino, nombre, apellido, dni, telefono, email
+    FROM Inquilino;
+END
+GO
+
+-- ====================================================
+-- BuscarInquilinoPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInquilinoPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInquilinoPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_inquilino, nombre, apellido, dni, telefono, email
+    FROM Inquilino
+    WHERE id_inquilino = @Id;
+END
+GO
+
+-- ====================================================
+-- BuscarInquilinoPorDni
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInquilinoPorDni];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInquilinoPorDni]
+    @Dni VARCHAR(15)
+AS BEGIN
+    SELECT id_inquilino, nombre, apellido, dni, telefono, email
+    FROM Inquilino
+    WHERE dni = @Dni;
+END
+GO
+
+-- ====================================================
+-- CrearInmuebleAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearInmuebleAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[CrearInmuebleAlquiler]
+    @Direccion NVARCHAR(200),
+    @TipoInmueble VARCHAR(50),
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO InmuebleAlquiler (direccion, tipo_inmueble)
+    VALUES (@Direccion, @TipoInmueble);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarInmuebleAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarInmuebleAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarInmuebleAlquiler]
+    @Id INT,
+    @Direccion NVARCHAR(200),
+    @TipoInmueble VARCHAR(50)
+AS BEGIN
+    UPDATE InmuebleAlquiler
+    SET direccion = @Direccion, tipo_inmueble = @TipoInmueble
+    WHERE id_inmueble_alquiler = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarInmuebleAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarInmuebleAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarInmuebleAlquiler]
+    @Id INT
+AS BEGIN
+    DELETE FROM InmuebleAlquiler WHERE id_inmueble_alquiler = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerInmueblesAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerInmueblesAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInmueblesAlquiler]
+AS BEGIN
+    SELECT id_inmueble_alquiler, direccion, tipo_inmueble
+    FROM InmuebleAlquiler;
+END
+GO
+
+-- ====================================================
+-- BuscarInmuebleAlquilerPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInmuebleAlquilerPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInmuebleAlquilerPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_inmueble_alquiler, direccion, tipo_inmueble
+    FROM InmuebleAlquiler
+    WHERE id_inmueble_alquiler = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerInmueblesAlquilerDisponibles (sin contrato vigente; para Registrar Contrato)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerInmueblesAlquilerDisponibles];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInmueblesAlquilerDisponibles]
+AS BEGIN
+    SELECT i.id_inmueble_alquiler, i.direccion, i.tipo_inmueble
+    FROM InmuebleAlquiler i
+    WHERE NOT EXISTS (
+        SELECT 1 FROM Contrato c
+        WHERE c.id_inmueble_alquiler = i.id_inmueble_alquiler AND c.estado_contrato <> 'Finalizado'
+    );
+END
+GO
+
+-- ====================================================
+-- CrearContrato
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearContrato];
+GO
+
+CREATE PROCEDURE [dbo].[CrearContrato]
+    @FechaInicio DATE,
+    @DuracionMeses INT,
+    @MontoMensual DECIMAL(18,2),
+    @IdInquilino INT,
+    @IdInmuebleAlquiler INT,
+    @IdUsuarioAgente INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Contrato (fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
+                          id_inquilino, id_inmueble_alquiler, id_usuario_agente)
+    VALUES (@FechaInicio, @DuracionMeses, @MontoMensual, 'Activo', 0,
+            @IdInquilino, @IdInmuebleAlquiler, @IdUsuarioAgente);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarContrato
+-- @AvisoDesocupacion NULL conserva el aviso actual; 0 lo quita (renovación); 1 lo registra
+-- (con @FechaAvisoDesocupacion, o la fecha actual si no se indica).
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarContrato];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarContrato]
+    @Id INT,
+    @FechaInicio DATE,
+    @DuracionMeses INT,
+    @MontoMensual DECIMAL(18,2),
+    @EstadoContrato VARCHAR(20),
+    @AlertaVencimiento BIT,
+    @IdInquilino INT,
+    @IdInmuebleAlquiler INT,
+    @IdUsuarioAgente INT,
+    @AvisoDesocupacion BIT = NULL,
+    @FechaAvisoDesocupacion DATETIME = NULL
+AS BEGIN
+    UPDATE Contrato
+    SET fecha_inicio = @FechaInicio, duracion_meses = @DuracionMeses, monto_mensual = @MontoMensual,
+        estado_contrato = @EstadoContrato, alerta_vencimiento = @AlertaVencimiento,
+        id_inquilino = @IdInquilino, id_inmueble_alquiler = @IdInmuebleAlquiler, id_usuario_agente = @IdUsuarioAgente,
+        aviso_desocupacion = ISNULL(@AvisoDesocupacion, aviso_desocupacion),
+        fecha_aviso_desocupacion = CASE
+            WHEN @AvisoDesocupacion IS NULL THEN fecha_aviso_desocupacion
+            WHEN @AvisoDesocupacion = 1 THEN ISNULL(@FechaAvisoDesocupacion, GETDATE())
+            ELSE NULL END
+    WHERE id_contrato = @Id;
+END
+GO
+
+-- ====================================================
+-- RegistrarAvisoDesocupacion
+-- Solo contratos vigentes y sin aviso previo: 0 filas afectadas si no corresponde.
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[RegistrarAvisoDesocupacion];
+GO
+
+CREATE PROCEDURE [dbo].[RegistrarAvisoDesocupacion]
+    @Id INT
+AS BEGIN
+    UPDATE Contrato
+    SET aviso_desocupacion = 1, fecha_aviso_desocupacion = GETDATE()
+    WHERE id_contrato = @Id
+      AND estado_contrato <> 'Finalizado'
+      AND aviso_desocupacion = 0;
+END
+GO
+
+-- ====================================================
+-- ActualizarEstadoContrato
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarEstadoContrato];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarEstadoContrato]
+    @Id INT,
+    @EstadoContrato VARCHAR(20),
+    @AlertaVencimiento BIT
+AS BEGIN
+    UPDATE Contrato
+    SET estado_contrato = @EstadoContrato, alerta_vencimiento = @AlertaVencimiento
+    WHERE id_contrato = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarContrato
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarContrato];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarContrato]
+    @Id INT
+AS BEGIN
+    DELETE FROM Contrato WHERE id_contrato = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerContratos
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerContratos];
+GO
+
+CREATE PROCEDURE [dbo].[LeerContratos]
+AS BEGIN
+    SELECT id_contrato, fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
+           aviso_desocupacion, fecha_aviso_desocupacion,
+           id_inquilino, id_inmueble_alquiler, id_usuario_agente,
+           DATEADD(MONTH, duracion_meses, fecha_inicio) AS fecha_fin
+    FROM Contrato
+    ORDER BY fecha_inicio DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarContratoPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarContratoPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarContratoPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_contrato, fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
+           aviso_desocupacion, fecha_aviso_desocupacion,
+           id_inquilino, id_inmueble_alquiler, id_usuario_agente,
+           DATEADD(MONTH, duracion_meses, fecha_inicio) AS fecha_fin
+    FROM Contrato
+    WHERE id_contrato = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerContratosDetalle (para grillas: contrato + inquilino + inmueble; @Estado NULL = todos)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerContratosDetalle];
+GO
+
+CREATE PROCEDURE [dbo].[LeerContratosDetalle]
+    @Estado VARCHAR(20) = NULL
+AS BEGIN
+    SELECT c.id_contrato, c.fecha_inicio, c.duracion_meses, c.monto_mensual, c.estado_contrato, c.alerta_vencimiento,
+           c.aviso_desocupacion, c.fecha_aviso_desocupacion,
+           DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) AS fecha_fin,
+           c.id_inquilino, q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino,
+           c.id_inmueble_alquiler, i.direccion, i.tipo_inmueble, c.id_usuario_agente
+    FROM Contrato c
+    INNER JOIN Inquilino q ON q.id_inquilino = c.id_inquilino
+    INNER JOIN InmuebleAlquiler i ON i.id_inmueble_alquiler = c.id_inmueble_alquiler
+    WHERE @Estado IS NULL OR c.estado_contrato = @Estado
+    ORDER BY c.fecha_inicio DESC;
+END
+GO
+
+-- ====================================================
+-- LeerContratosPorVencer (vigentes que terminan dentro de @DiasAnticipacion días)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerContratosPorVencer];
+GO
+
+CREATE PROCEDURE [dbo].[LeerContratosPorVencer]
+    @DiasAnticipacion INT = 60
+AS BEGIN
+    SELECT c.id_contrato, c.fecha_inicio, c.duracion_meses, c.monto_mensual, c.estado_contrato, c.alerta_vencimiento,
+           c.aviso_desocupacion, c.fecha_aviso_desocupacion,
+           DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) AS fecha_fin,
+           DATEDIFF(DAY, CAST(GETDATE() AS DATE), DATEADD(MONTH, c.duracion_meses, c.fecha_inicio)) AS dias_restantes,
+           c.id_inquilino, q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino, q.telefono, q.email,
+           c.id_inmueble_alquiler, i.direccion, i.tipo_inmueble, c.id_usuario_agente
+    FROM Contrato c
+    INNER JOIN Inquilino q ON q.id_inquilino = c.id_inquilino
+    INNER JOIN InmuebleAlquiler i ON i.id_inmueble_alquiler = c.id_inmueble_alquiler
+    WHERE c.estado_contrato <> 'Finalizado'
+      AND DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) <= DATEADD(DAY, @DiasAnticipacion, CAST(GETDATE() AS DATE))
+    ORDER BY fecha_fin;
+END
+GO
+
+-- ====================================================
+-- ActualizarVencimientoContratos
+-- Activo -> Por Vencer (con alerta) si termina dentro de @DiasAnticipacion días;
+-- vigentes con fecha de fin pasada -> Finalizado (sin alerta).
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarVencimientoContratos];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarVencimientoContratos]
+    @DiasAnticipacion INT = 60
+AS BEGIN
+    DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
+
+    UPDATE Contrato
+    SET estado_contrato = 'Finalizado', alerta_vencimiento = 0
+    WHERE estado_contrato <> 'Finalizado'
+      AND DATEADD(MONTH, duracion_meses, fecha_inicio) < @Hoy;
+
+    UPDATE Contrato
+    SET estado_contrato = 'Por Vencer', alerta_vencimiento = 1
+    WHERE estado_contrato = 'Activo'
+      AND DATEADD(MONTH, duracion_meses, fecha_inicio) <= DATEADD(DAY, @DiasAnticipacion, @Hoy);
+END
+GO
+
+-- ====================================================
+-- CrearPagoAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearPagoAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[CrearPagoAlquiler]
+    @MesCorrespondiente INT,
+    @AnioCorrespondiente INT,
+    @FechaPago DATETIME = NULL,
+    @MontoPagado DECIMAL(18,2),
+    @EstadoPago NVARCHAR(20),
+    @RecargoAplicado DECIMAL(18,2) = 0,
+    @IdContrato INT,
+    @IdUsuarioAnalista INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO PagoAlquiler (mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
+                              recargo_aplicado, id_contrato, id_usuario_analista)
+    VALUES (@MesCorrespondiente, @AnioCorrespondiente, @FechaPago, @MontoPagado, @EstadoPago,
+            @RecargoAplicado, @IdContrato, @IdUsuarioAnalista);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarPagoAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarPagoAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarPagoAlquiler]
+    @Id INT,
+    @MesCorrespondiente INT,
+    @AnioCorrespondiente INT,
+    @FechaPago DATETIME = NULL,
+    @MontoPagado DECIMAL(18,2),
+    @EstadoPago NVARCHAR(20),
+    @RecargoAplicado DECIMAL(18,2),
+    @IdUsuarioAnalista INT
+AS BEGIN
+    UPDATE PagoAlquiler
+    SET mes_correspondiente = @MesCorrespondiente, anio_correspondiente = @AnioCorrespondiente,
+        fecha_pago = @FechaPago, monto_pagado = @MontoPagado, estado_pago = @EstadoPago,
+        recargo_aplicado = @RecargoAplicado, id_usuario_analista = @IdUsuarioAnalista
+    WHERE id_pago = @Id;
+END
+GO
+
+-- ====================================================
+-- ActualizarEstadoPago (Gestionar Mora / Litigios: cambia el estado y el recargo)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarEstadoPago];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarEstadoPago]
+    @Id INT,
+    @EstadoPago NVARCHAR(20),
+    @RecargoAplicado DECIMAL(18,2)
+AS BEGIN
+    UPDATE PagoAlquiler
+    SET estado_pago = @EstadoPago, recargo_aplicado = @RecargoAplicado
+    WHERE id_pago = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarPagoAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarPagoAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarPagoAlquiler]
+    @Id INT
+AS BEGIN
+    DELETE FROM PagoAlquiler WHERE id_pago = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerPagosAlquiler
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerPagosAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[LeerPagosAlquiler]
+AS BEGIN
+    SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
+           recargo_aplicado, id_contrato, id_usuario_analista
+    FROM PagoAlquiler
+    ORDER BY anio_correspondiente DESC, mes_correspondiente DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarPagoAlquilerPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarPagoAlquilerPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarPagoAlquilerPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
+           recargo_aplicado, id_contrato, id_usuario_analista
+    FROM PagoAlquiler
+    WHERE id_pago = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerPagosPorContrato (historial de pagos de un contrato)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerPagosPorContrato];
+GO
+
+CREATE PROCEDURE [dbo].[LeerPagosPorContrato]
+    @IdContrato INT
+AS BEGIN
+    SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
+           recargo_aplicado, id_contrato, id_usuario_analista
+    FROM PagoAlquiler
+    WHERE id_contrato = @IdContrato
+    ORDER BY anio_correspondiente DESC, mes_correspondiente DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarPagoPorPeriodo (para Registrar Pago: si el mes ya tiene registro, se actualiza)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarPagoPorPeriodo];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarPagoPorPeriodo]
+    @IdContrato INT,
+    @MesCorrespondiente INT,
+    @AnioCorrespondiente INT
+AS BEGIN
+    SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
+           recargo_aplicado, id_contrato, id_usuario_analista
+    FROM PagoAlquiler
+    WHERE id_contrato = @IdContrato
+      AND mes_correspondiente = @MesCorrespondiente
+      AND anio_correspondiente = @AnioCorrespondiente;
+END
+GO
+
+-- ====================================================
+-- LeerPagosDetalle (Gestionar Mora / Litigios: pago + contrato + inquilino + inmueble; @Estado NULL = todos)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerPagosDetalle];
+GO
+
+CREATE PROCEDURE [dbo].[LeerPagosDetalle]
+    @EstadoPago NVARCHAR(20) = NULL
+AS BEGIN
+    SELECT p.id_pago, p.mes_correspondiente, p.anio_correspondiente, p.fecha_pago, p.monto_pagado, p.estado_pago,
+           p.recargo_aplicado, p.id_contrato, p.id_usuario_analista,
+           c.monto_mensual, c.estado_contrato,
+           q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino, q.telefono, q.email,
+           i.direccion, i.tipo_inmueble
+    FROM PagoAlquiler p
+    INNER JOIN Contrato c ON c.id_contrato = p.id_contrato
+    INNER JOIN Inquilino q ON q.id_inquilino = c.id_inquilino
+    INNER JOIN InmuebleAlquiler i ON i.id_inmueble_alquiler = c.id_inmueble_alquiler
+    WHERE @EstadoPago IS NULL OR p.estado_pago = @EstadoPago
+    ORDER BY p.anio_correspondiente DESC, p.mes_correspondiente DESC;
+END
+GO
+
+-- ====================================================
+-- CrearAccionLegal
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearAccionLegal];
+GO
+
+CREATE PROCEDURE [dbo].[CrearAccionLegal]
+    @Descripcion NVARCHAR(1000),
+    @TipoAccion VARCHAR(20),
+    @IdContrato INT,
+    @IdUsuarioLegal INT,
+    @FechaAccion DATETIME = NULL,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO AccionLegal (fecha_accion, descripcion, tipo_accion, id_contrato, id_usuario_legal)
+    VALUES (ISNULL(@FechaAccion, GETDATE()), @Descripcion, @TipoAccion, @IdContrato, @IdUsuarioLegal);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarAccionLegal
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarAccionLegal];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarAccionLegal]
+    @Id INT,
+    @Descripcion NVARCHAR(1000),
+    @TipoAccion VARCHAR(20),
+    @IdUsuarioLegal INT
+AS BEGIN
+    UPDATE AccionLegal
+    SET descripcion = @Descripcion, tipo_accion = @TipoAccion, id_usuario_legal = @IdUsuarioLegal
+    WHERE id_accion = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarAccionLegal
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarAccionLegal];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarAccionLegal]
+    @Id INT
+AS BEGIN
+    DELETE FROM AccionLegal WHERE id_accion = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerAccionesLegales
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerAccionesLegales];
+GO
+
+CREATE PROCEDURE [dbo].[LeerAccionesLegales]
+AS BEGIN
+    SELECT id_accion, fecha_accion, descripcion, tipo_accion, id_contrato, id_usuario_legal
+    FROM AccionLegal
+    ORDER BY fecha_accion DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarAccionLegalPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarAccionLegalPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarAccionLegalPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_accion, fecha_accion, descripcion, tipo_accion, id_contrato, id_usuario_legal
+    FROM AccionLegal
+    WHERE id_accion = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerAccionesPorContrato (historial legal de un contrato, para Gestionar Litigios)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerAccionesPorContrato];
+GO
+
+CREATE PROCEDURE [dbo].[LeerAccionesPorContrato]
+    @IdContrato INT
+AS BEGIN
+    SELECT id_accion, fecha_accion, descripcion, tipo_accion, id_contrato, id_usuario_legal
+    FROM AccionLegal
+    WHERE id_contrato = @IdContrato
+    ORDER BY fecha_accion DESC;
+END
+GO
+
+-- ====================================================
+-- CrearContactoCobranza
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearContactoCobranza];
+GO
+
+CREATE PROCEDURE [dbo].[CrearContactoCobranza]
+    @FechaContacto DATETIME,
+    @Descripcion NVARCHAR(1000),
+    @IdContrato INT,
+    @IdUsuarioAnalista INT,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO ContactoCobranza (fecha_contacto, descripcion, id_contrato, id_usuario_analista)
+    VALUES (@FechaContacto, @Descripcion, @IdContrato, @IdUsuarioAnalista);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ActualizarContactoCobranza
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarContactoCobranza];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarContactoCobranza]
+    @Id INT,
+    @FechaContacto DATETIME,
+    @Descripcion NVARCHAR(1000)
+AS BEGIN
+    UPDATE ContactoCobranza
+    SET fecha_contacto = @FechaContacto, descripcion = @Descripcion
+    WHERE id_contacto = @Id;
+END
+GO
+
+-- ====================================================
+-- EliminarContactoCobranza
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[EliminarContactoCobranza];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarContactoCobranza]
+    @Id INT
+AS BEGIN
+    DELETE FROM ContactoCobranza WHERE id_contacto = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerContactosCobranza
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerContactosCobranza];
+GO
+
+CREATE PROCEDURE [dbo].[LeerContactosCobranza]
+AS BEGIN
+    SELECT id_contacto, fecha_contacto, descripcion, id_contrato, id_usuario_analista
+    FROM ContactoCobranza
+    ORDER BY fecha_contacto DESC;
+END
+GO
+
+-- ====================================================
+-- BuscarContactoCobranzaPorId
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarContactoCobranzaPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarContactoCobranzaPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_contacto, fecha_contacto, descripcion, id_contrato, id_usuario_analista
+    FROM ContactoCobranza
+    WHERE id_contacto = @Id;
+END
+GO
+
+-- ====================================================
+-- LeerContactosPorContrato (historial de contactos de un contrato, con el nombre del analista)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerContactosPorContrato];
+GO
+
+CREATE PROCEDURE [dbo].[LeerContactosPorContrato]
+    @IdContrato INT
+AS BEGIN
+    SELECT cc.id_contacto, cc.fecha_contacto, cc.descripcion, cc.id_contrato, cc.id_usuario_analista,
+           u.nombre AS analista
+    FROM ContactoCobranza cc
+    INNER JOIN Usuario u ON u.id = cc.id_usuario_analista
+    WHERE cc.id_contrato = @IdContrato
+    ORDER BY cc.fecha_contacto DESC;
 END
 GO

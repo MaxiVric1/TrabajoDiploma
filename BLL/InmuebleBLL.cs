@@ -55,7 +55,6 @@ namespace BLL
             if (materialDAL.LeerPorInmueble(idInmueble).Count == 0)
                 throw new Exception("El inmueble no tiene material audiovisual cargado.");
 
-            // migracion-pn1-publicacion.sql busca este texto en bitácora para recuperar fechas de publicación
             CambiarPublicacion(inmueble, true, "Publicación Inmueble", $"Inmueble {idInmueble} publicado: {inmueble.Direccion}.",
                 "No se pudo publicar el inmueble. No se guardó ningún cambio.");
         }
