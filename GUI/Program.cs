@@ -18,9 +18,10 @@ namespace TpIngSoft
             }
             catch (Exception ex)
             {
+                // Es la primera operación contra la base: si falla, casi siempre es la conexión (ver DAL/ServidorSql.cs)
                 MessageBox.Show(
-                    "Error al intentar realizar la comprobación de integridad: " + ex.Message,
-                    "Error Crítico",
+                    "No se pudo conectar con la base de datos." + Environment.NewLine + Environment.NewLine + ex.Message,
+                    "Error de conexión",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );

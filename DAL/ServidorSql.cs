@@ -14,14 +14,19 @@ namespace DAL
     //   3. Prefiere la que ya tiene la base de la aplicación; si ninguna la tiene, la primera que respondió.
     //   4. Guarda el resultado: la búsqueda se hace una sola vez por ejecución.
     // De App.config se toman la base y la seguridad; la detección solo reemplaza el servidor (Data Source).
-    // Si no se detecta ninguna instancia (p. ej. SQL Server en otra PC), se usa la cadena de App.config tal cual.
+    // El servidor de App.config se prueba como un candidato más (es el único si SQL Server está en otra PC).
+    // Si ningún candidato acepta la conexión, se informa el error real de cada uno (permiso, servicio detenido, etc.).
     internal static class ServidorSql
     {
         // Nombre de la cadena en <connectionStrings> del .config del ejecutable (TpIngSoft.exe.config, BackupCLI.exe.config)
         internal const string NOMBRE_CONEXION = "TpIngSoft";
 
+        // Mismo nombre que crean schema-init.sql y los demás scripts (importa si el servidor distingue mayúsculas)
+        internal const string BASE_DATOS = "TpIngSoft";
+
         // Si App.config no tiene la cadena, se usa esta como base (el servidor lo pone la detección)
-        private const string CADENA_POR_DEFECTO = "Initial Catalog=tpingsoft;Integrated Security=True;";
+        //private const string CADENA_POR_DEFECTO = "Initial Catalog=tpingsoft;Integrated Security=True;";
+        private const string CADENA_POR_DEFECTO = "Initial Catalog=" + BASE_DATOS + ";Integrated Security=True;";
         private const string CLAVE_INSTANCIAS = @"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL";
         private const string INSTANCIA_POR_DEFECTO = "MSSQLSERVER";
         private const int SEGUNDOS_PRUEBA = 3;
@@ -47,22 +52,41 @@ namespace DAL
             var plantilla = new SqlConnectionStringBuilder(delConfig ?? CADENA_POR_DEFECTO);
             string baseDatos = plantilla.InitialCatalog;
 
+            // Candidatos: las instancias del registro y, al final, el servidor de App.config (si no es una de ellas)
+            var candidatos = InstanciasInstaladas();
+            string servidorConfig = delConfig != null ? new SqlConnectionStringBuilder(delConfig).DataSource : null;
+            if (!string.IsNullOrWhiteSpace(servidorConfig) && !candidatos.Contains(servidorConfig, StringComparer.OrdinalIgnoreCase))
+                candidatos.Add(servidorConfig);
+
             string primeraQueResponde = null;
-            foreach (string servidor in InstanciasInstaladas())
+            var errores = new List<string>();
+            foreach (string servidor in candidatos)
             {
-                bool? tieneLaBase = Probar(plantilla, servidor, baseDatos);
-                if (tieneLaBase == null) continue; // no respondió
+                bool? tieneLaBase = Probar(plantilla, servidor, baseDatos, out string error);
+                if (tieneLaBase == null)
+                {
+                    string origen = servidor.Equals(servidorConfig, StringComparison.OrdinalIgnoreCase) ? " (App.config)" : "";
+                    errores.Add($"  - {servidor}{origen}: {error}");
+                    continue;
+                }
                 if (tieneLaBase.Value) return ConServidor(plantilla, servidor);
                 if (primeraQueResponde == null) primeraQueResponde = servidor;
             }
+            // Ninguna tiene la base (p. ej. todavía no se instaló, o se va a restaurar un backup): la primera que respondió
             if (primeraQueResponde != null)
                 return ConServidor(plantilla, primeraQueResponde);
 
-            // Sin instancias locales que respondan: la cadena de App.config, si existe
-            if (delConfig != null) return delConfig;
+            //// Sin instancias locales que respondan: la cadena de App.config, si existe
+            //if (delConfig != null) return delConfig;
+            if (candidatos.Count == 0)
+                throw new InvalidOperationException(
+                    "No se encontró ninguna instancia de SQL Server instalada en esta PC y el archivo .config no indica " +
+                    $"la cadena de conexión '{NOMBRE_CONEXION}'.");
             throw new InvalidOperationException(
-                "No se encontró ninguna instancia de SQL Server que responda en esta PC y el archivo .config no indica " +
-                $"la cadena de conexión '{NOMBRE_CONEXION}'. Verifique que el servicio de SQL Server esté iniciado.");
+                "No se pudo conectar con SQL Server. Instancias probadas:" + Environment.NewLine +
+                string.Join(Environment.NewLine, errores) + Environment.NewLine +
+                "Verifique que el servicio de SQL Server esté iniciado y que el usuario de Windows tenga permiso " +
+                "(volver a ejecutar el instalador otorga los permisos).");
         }
 
         // Nombres de servidor de las instancias instaladas: "." para la instancia por defecto, ".\NOMBRE" para las con nombre
@@ -95,9 +119,10 @@ namespace DAL
             return servidores;
         }
 
-        // null si la instancia no responde; true/false según tenga la base de la aplicación
-        private static bool? Probar(SqlConnectionStringBuilder plantilla, string servidor, string baseDatos)
+        // null si la instancia no acepta la conexión (error: el motivo real); true/false según tenga la base de la aplicación
+        private static bool? Probar(SqlConnectionStringBuilder plantilla, string servidor, string baseDatos, out string error)
         {
+            error = null;
             var prueba = new SqlConnectionStringBuilder(plantilla.ConnectionString)
             {
                 DataSource = servidor,
@@ -115,8 +140,15 @@ namespace DAL
                     return Convert.ToInt32(comando.ExecuteScalar()) == 1;
                 }
             }
-            catch (Exception)
+            catch (SqlException ex)
             {
+                // Número de SQL Server (p. ej. 18456 = inicio de sesión rechazado) + mensaje; -1 / 2 / 53 = no se encontró el servidor
+                error = $"[error {ex.Number}] {ex.Message}";
+                return null;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
                 return null;
             }
         }
