@@ -67,6 +67,8 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblDni, BE.NombreControl.FormGestionarContratos_lblDni));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblTelefono, BE.NombreControl.FormGestionarContratos_lblTelefono));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblEmail, BE.NombreControl.FormGestionarContratos_lblEmail));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblDomicilio, BE.NombreControl.FormGestionarContratos_lblDomicilio));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnCompletarDomicilio, BE.NombreControl.FormGestionarContratos_btnCompletarDomicilio));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpCondiciones, BE.NombreControl.FormGestionarContratos_grpCondiciones));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblDeposito, BE.NombreControl.FormGestionarContratos_lblDeposito));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblComision, BE.NombreControl.FormGestionarContratos_lblComision));
@@ -249,6 +251,8 @@ namespace TpIngSoft
         {
             Contrato contrato = ContratoSeleccionado();
             lblNombreValor.Text = lblApellidoValor.Text = lblDniValor.Text = lblTelefonoValor.Text = lblEmailValor.Text = "-";
+            lblDomicilioValor.Text = "-";
+            btnCompletarDomicilio.Visible = false;
             lblMesActualValor.Text = "-";
             lblDepositoValor.Text = lblComisionValor.Text = lblMetodoPagoValor.Text = lblIndiceValor.Text = lblGaranteValor.Text = "-";
             lblMesesRestantesValor.Text = lblPenalidadValor.Text = "-";
@@ -277,6 +281,9 @@ namespace TpIngSoft
                     lblDniValor.Text = inquilino.Dni;
                     lblTelefonoValor.Text = string.IsNullOrEmpty(inquilino.Telefono) ? "-" : inquilino.Telefono;
                     lblEmailValor.Text = string.IsNullOrEmpty(inquilino.Email) ? "-" : inquilino.Email;
+                    lblDomicilioValor.Text = string.IsNullOrEmpty(inquilino.Domicilio) ? "-" : inquilino.Domicilio;
+                    // Inquilinos anteriores al campo domicilio: se puede completar (va en el contrato en PDF)
+                    btnCompletarDomicilio.Visible = string.IsNullOrEmpty(inquilino.Domicilio);
                 }
 
                 List<PagoAlquiler> pagos = pagoBLL.LeerPorContrato(contrato.IdContrato);
@@ -399,6 +406,72 @@ namespace TpIngSoft
                 MessageBox.Show("Error al rescindir el contrato: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             CargarContratos(contrato.IdContrato);
+        }
+
+        private void btnCompletarDomicilio_Click(object sender, EventArgs e)
+        {
+            Contrato contrato = ContratoSeleccionado();
+            if (contrato == null) return;
+
+            string domicilio = PedirTexto("Completar domicilio",
+                $"Domicilio de {lblNombreValor.Text} {lblApellidoValor.Text} (DNI {lblDniValor.Text}):", 200);
+            if (domicilio == null) return;
+
+            try
+            {
+                inquilinoBLL.CompletarDomicilio(contrato.IdInquilino, domicilio);
+                MessageBox.Show("Domicilio guardado.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MostrarDetalle();
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar el domicilio: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Diálogo de un solo campo con el estilo del formulario; null si se cancela
+        private string PedirTexto(string titulo, string etiqueta, int largoMaximo)
+        {
+            using (Form dialogo = new Form
+            {
+                Text = titulo,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterParent,
+                MinimizeBox = false,
+                MaximizeBox = false,
+                ShowInTaskbar = false,
+                ClientSize = new System.Drawing.Size(420, 110),
+                BackColor = System.Drawing.Color.FromArgb(38, 31, 50),
+                ForeColor = System.Drawing.Color.White
+            })
+            {
+                Label lbl = new Label { Text = etiqueta, Location = new System.Drawing.Point(12, 12), Size = new System.Drawing.Size(396, 20) };
+                TextBox txt = new TextBox
+                {
+                    Location = new System.Drawing.Point(12, 36),
+                    Size = new System.Drawing.Size(396, 20),
+                    MaxLength = largoMaximo,
+                    BackColor = System.Drawing.Color.FromArgb(65, 57, 79),
+                    ForeColor = System.Drawing.Color.White,
+                    BorderStyle = BorderStyle.FixedSingle
+                };
+                Button aceptar = new Button { Text = "Guardar", DialogResult = DialogResult.OK, Location = new System.Drawing.Point(222, 70), Size = new System.Drawing.Size(90, 28) };
+                Button cancelar = new Button { Text = "Cancelar", DialogResult = DialogResult.Cancel, Location = new System.Drawing.Point(318, 70), Size = new System.Drawing.Size(90, 28) };
+                foreach (Button b in new[] { aceptar, cancelar })
+                {
+                    b.FlatStyle = FlatStyle.Popup;
+                    b.BackColor = System.Drawing.Color.FromArgb(89, 75, 160);
+                    b.ForeColor = System.Drawing.Color.White;
+                }
+                dialogo.Controls.AddRange(new Control[] { lbl, txt, aceptar, cancelar });
+                dialogo.AcceptButton = aceptar;
+                dialogo.CancelButton = cancelar;
+                return dialogo.ShowDialog(this) == DialogResult.OK ? txt.Text : null;
+            }
         }
 
         private void nudMesesExtension_ValueChanged(object sender, EventArgs e)

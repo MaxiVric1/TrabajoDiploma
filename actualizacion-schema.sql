@@ -351,7 +351,9 @@ INSERT INTO @Nuevos VALUES
     -- Mora con la TIM del BCRA (paso 5)
     ('lblTasa', 'FormRegistrarPago', 'Tasa de mora:', 'Late interest rate:'),
     -- Domicilio del inquilino (paso 6: va en el PDF del contrato)
-    ('lblDomicilio', 'FormRegistrarContrato', 'Domicilio:', 'Address:');
+    ('lblDomicilio', 'FormRegistrarContrato', 'Domicilio:', 'Address:'),
+    ('lblDomicilio', 'FormGestionarContratos', 'Domicilio:', 'Address:'),
+    ('btnCompletarDomicilio', 'FormGestionarContratos', 'Completar domicilio', 'Add address');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

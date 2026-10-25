@@ -67,6 +67,9 @@ namespace TpIngSoft
             ((System.ComponentModel.ISupportInitialize)(this.dgvContratos)).BeginInit();
             this.grpCondiciones.SuspendLayout();
             this.grpRescision.SuspendLayout();
+            this.lblDomicilio = new System.Windows.Forms.Label();
+            this.lblDomicilioValor = new System.Windows.Forms.Label();
+            this.btnCompletarDomicilio = new System.Windows.Forms.Button();
             this.grpInquilino.SuspendLayout();
             this.grpRenovacion.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudMesesExtension)).BeginInit();
@@ -179,6 +182,9 @@ namespace TpIngSoft
             this.grpInquilino.Controls.Add(this.lblTelefonoValor);
             this.grpInquilino.Controls.Add(this.lblEmail);
             this.grpInquilino.Controls.Add(this.lblEmailValor);
+            this.grpInquilino.Controls.Add(this.lblDomicilio);
+            this.grpInquilino.Controls.Add(this.lblDomicilioValor);
+            this.grpInquilino.Controls.Add(this.btnCompletarDomicilio);
             this.grpInquilino.ForeColor = System.Drawing.Color.White;
             this.grpInquilino.Location = new System.Drawing.Point(12, 276);
             this.grpInquilino.Name = "grpInquilino";
@@ -189,7 +195,7 @@ namespace TpIngSoft
             //
             // lblNombre
             //
-            this.lblNombre.Location = new System.Drawing.Point(6, 22);
+            this.lblNombre.Location = new System.Drawing.Point(6, 20);
             this.lblNombre.Name = "lblNombre";
             this.lblNombre.Size = new System.Drawing.Size(80, 20);
             this.lblNombre.TabIndex = 0;
@@ -199,7 +205,7 @@ namespace TpIngSoft
             // lblNombreValor
             //
             this.lblNombreValor.AutoEllipsis = true;
-            this.lblNombreValor.Location = new System.Drawing.Point(92, 22);
+            this.lblNombreValor.Location = new System.Drawing.Point(92, 20);
             this.lblNombreValor.Name = "lblNombreValor";
             this.lblNombreValor.Size = new System.Drawing.Size(220, 20);
             this.lblNombreValor.TabIndex = 1;
@@ -208,7 +214,7 @@ namespace TpIngSoft
             //
             // lblApellido
             //
-            this.lblApellido.Location = new System.Drawing.Point(6, 45);
+            this.lblApellido.Location = new System.Drawing.Point(6, 41);
             this.lblApellido.Name = "lblApellido";
             this.lblApellido.Size = new System.Drawing.Size(80, 20);
             this.lblApellido.TabIndex = 2;
@@ -218,7 +224,7 @@ namespace TpIngSoft
             // lblApellidoValor
             //
             this.lblApellidoValor.AutoEllipsis = true;
-            this.lblApellidoValor.Location = new System.Drawing.Point(92, 45);
+            this.lblApellidoValor.Location = new System.Drawing.Point(92, 41);
             this.lblApellidoValor.Name = "lblApellidoValor";
             this.lblApellidoValor.Size = new System.Drawing.Size(220, 20);
             this.lblApellidoValor.TabIndex = 3;
@@ -227,7 +233,7 @@ namespace TpIngSoft
             //
             // lblDni
             //
-            this.lblDni.Location = new System.Drawing.Point(6, 68);
+            this.lblDni.Location = new System.Drawing.Point(6, 62);
             this.lblDni.Name = "lblDni";
             this.lblDni.Size = new System.Drawing.Size(80, 20);
             this.lblDni.TabIndex = 4;
@@ -236,7 +242,7 @@ namespace TpIngSoft
             //
             // lblDniValor
             //
-            this.lblDniValor.Location = new System.Drawing.Point(92, 68);
+            this.lblDniValor.Location = new System.Drawing.Point(92, 62);
             this.lblDniValor.Name = "lblDniValor";
             this.lblDniValor.Size = new System.Drawing.Size(220, 20);
             this.lblDniValor.TabIndex = 5;
@@ -245,7 +251,7 @@ namespace TpIngSoft
             //
             // lblTelefono
             //
-            this.lblTelefono.Location = new System.Drawing.Point(6, 91);
+            this.lblTelefono.Location = new System.Drawing.Point(6, 83);
             this.lblTelefono.Name = "lblTelefono";
             this.lblTelefono.Size = new System.Drawing.Size(80, 20);
             this.lblTelefono.TabIndex = 6;
@@ -254,7 +260,7 @@ namespace TpIngSoft
             //
             // lblTelefonoValor
             //
-            this.lblTelefonoValor.Location = new System.Drawing.Point(92, 91);
+            this.lblTelefonoValor.Location = new System.Drawing.Point(92, 83);
             this.lblTelefonoValor.Name = "lblTelefonoValor";
             this.lblTelefonoValor.Size = new System.Drawing.Size(220, 20);
             this.lblTelefonoValor.TabIndex = 7;
@@ -263,7 +269,7 @@ namespace TpIngSoft
             //
             // lblEmail
             //
-            this.lblEmail.Location = new System.Drawing.Point(6, 114);
+            this.lblEmail.Location = new System.Drawing.Point(6, 104);
             this.lblEmail.Name = "lblEmail";
             this.lblEmail.Size = new System.Drawing.Size(80, 20);
             this.lblEmail.TabIndex = 8;
@@ -273,12 +279,42 @@ namespace TpIngSoft
             // lblEmailValor
             //
             this.lblEmailValor.AutoEllipsis = true;
-            this.lblEmailValor.Location = new System.Drawing.Point(92, 114);
+            this.lblEmailValor.Location = new System.Drawing.Point(92, 104);
             this.lblEmailValor.Name = "lblEmailValor";
             this.lblEmailValor.Size = new System.Drawing.Size(220, 20);
             this.lblEmailValor.TabIndex = 9;
             this.lblEmailValor.Text = "-";
             this.lblEmailValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblDomicilio
+            //
+            this.lblDomicilio.Location = new System.Drawing.Point(6, 125);
+            this.lblDomicilio.Name = "lblDomicilio";
+            this.lblDomicilio.Size = new System.Drawing.Size(80, 20);
+            this.lblDomicilio.Text = "Domicilio:";
+            this.lblDomicilio.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblDomicilioValor
+            //
+            this.lblDomicilioValor.AutoEllipsis = true;
+            this.lblDomicilioValor.Location = new System.Drawing.Point(92, 125);
+            this.lblDomicilioValor.Name = "lblDomicilioValor";
+            this.lblDomicilioValor.Size = new System.Drawing.Size(220, 20);
+            this.lblDomicilioValor.Text = "-";
+            this.lblDomicilioValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // btnCompletarDomicilio
+            //
+            this.btnCompletarDomicilio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnCompletarDomicilio.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnCompletarDomicilio.ForeColor = System.Drawing.Color.White;
+            this.btnCompletarDomicilio.Location = new System.Drawing.Point(192, 122);
+            this.btnCompletarDomicilio.Name = "btnCompletarDomicilio";
+            this.btnCompletarDomicilio.Size = new System.Drawing.Size(120, 24);
+            this.btnCompletarDomicilio.Text = "Completar domicilio";
+            this.btnCompletarDomicilio.UseVisualStyleBackColor = false;
+            this.btnCompletarDomicilio.Visible = false;
+            this.btnCompletarDomicilio.Click += new System.EventHandler(this.btnCompletarDomicilio_Click);
             //
             // grpRenovacion
             //
@@ -696,6 +732,9 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblPenalidad;
         private System.Windows.Forms.Label lblPenalidadValor;
         private System.Windows.Forms.Button btnRescindir;
+        private System.Windows.Forms.Label lblDomicilio;
+        private System.Windows.Forms.Label lblDomicilioValor;
+        private System.Windows.Forms.Button btnCompletarDomicilio;
         private System.Windows.Forms.GroupBox grpRenovacion;
         private System.Windows.Forms.Label lblMesesExtension;
         private System.Windows.Forms.NumericUpDown nudMesesExtension;

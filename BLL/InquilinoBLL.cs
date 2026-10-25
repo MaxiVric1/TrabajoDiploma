@@ -41,6 +41,32 @@ namespace BLL
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Modificación Inquilino", $"Inquilino DNI {inquilino.Dni} actualizado.");
         }
 
+        // Inquilinos registrados antes de que existiera el domicilio: se completa una sola vez (no reemplaza uno cargado)
+        public void CompletarDomicilio(int idInquilino, string domicilio)
+        {
+            if (string.IsNullOrWhiteSpace(domicilio))
+                throw new ArgumentException("Ingrese el domicilio del inquilino.");
+            domicilio = domicilio.Trim();
+            if (domicilio.Length > 200)
+                throw new ArgumentException("El domicilio no puede superar los 200 caracteres.");
+
+            Inquilino inquilino = inquilinoDAL.BuscarPorId(idInquilino);
+            if (inquilino == null)
+                throw new Exception("El inquilino no existe.");
+            if (!string.IsNullOrWhiteSpace(inquilino.Domicilio))
+                throw new ArgumentException($"El inquilino ya tiene domicilio cargado: {inquilino.Domicilio}.");
+
+            inquilino.Domicilio = domicilio;
+            // La lectura trae "" donde la base tiene NULL: se vuelven a guardar como NULL
+            if (string.IsNullOrEmpty(inquilino.Telefono)) inquilino.Telefono = null;
+            if (string.IsNullOrEmpty(inquilino.Email)) inquilino.Email = null;
+            if (!inquilinoDAL.Actualizar(inquilino))
+                throw new Exception("No se pudo guardar el domicilio.");
+
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Modificación Inquilino",
+                $"Inquilino DNI {inquilino.Dni}: domicilio completado.");
+        }
+
         public void Eliminar(int idInquilino)
         {
             if (contratoDAL.LeerTodos().Any(c => c.IdInquilino == idInquilino))

@@ -227,6 +227,8 @@ namespace BE
         public const string FormGestionarContratos_lblDni = "FormGestionarContratos.lblDni";
         public const string FormGestionarContratos_lblTelefono = "FormGestionarContratos.lblTelefono";
         public const string FormGestionarContratos_lblEmail = "FormGestionarContratos.lblEmail";
+        public const string FormGestionarContratos_lblDomicilio = "FormGestionarContratos.lblDomicilio";
+        public const string FormGestionarContratos_btnCompletarDomicilio = "FormGestionarContratos.btnCompletarDomicilio";
         public const string FormGestionarContratos_grpRenovacion = "FormGestionarContratos.grpRenovacion";
         public const string FormGestionarContratos_lblMesesExtension = "FormGestionarContratos.lblMesesExtension";
         public const string FormGestionarContratos_lblNuevoMonto = "FormGestionarContratos.lblNuevoMonto";

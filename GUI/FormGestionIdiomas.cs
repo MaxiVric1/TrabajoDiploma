@@ -333,6 +333,8 @@ namespace TpIngSoft
                 ("FormGestionarContratos", "lblDni"),
                 ("FormGestionarContratos", "lblTelefono"),
                 ("FormGestionarContratos", "lblEmail"),
+                ("FormGestionarContratos", "lblDomicilio"),
+                ("FormGestionarContratos", "btnCompletarDomicilio"),
                 ("FormGestionarContratos", "grpRenovacion"),
                 ("FormGestionarContratos", "lblMesesExtension"),
                 ("FormGestionarContratos", "lblNuevoMonto"),
