@@ -196,10 +196,10 @@ begin
   ExtractTemporaryFile('schema-init.sql');
   ExtractTemporaryFile('stored-procedures.sql');
   ExtractTemporaryFile('permisos.sql');
-  FileCopy(ExpandConstant('{tmp}\DbInstaller.exe'), CarpetaTrabajo + '\DbInstaller.exe', False);
-  FileCopy(ExpandConstant('{tmp}\schema-init.sql'), CarpetaTrabajo + '\schema-init.sql', False);
-  FileCopy(ExpandConstant('{tmp}\stored-procedures.sql'), CarpetaTrabajo + '\stored-procedures.sql', False);
-  FileCopy(ExpandConstant('{tmp}\permisos.sql'), CarpetaTrabajo + '\permisos.sql', False);
+  CopyFile(ExpandConstant('{tmp}\DbInstaller.exe'), CarpetaTrabajo + '\DbInstaller.exe', False);
+  CopyFile(ExpandConstant('{tmp}\schema-init.sql'), CarpetaTrabajo + '\schema-init.sql', False);
+  CopyFile(ExpandConstant('{tmp}\stored-procedures.sql'), CarpetaTrabajo + '\stored-procedures.sql', False);
+  CopyFile(ExpandConstant('{tmp}\permisos.sql'), CarpetaTrabajo + '\permisos.sql', False);
   RegistrarLog('==== {#AppNombre} {#AppVersion} ====');
   RegistrarLog('Cuenta que ejecuta el instalador (elevada): ' + GetUserNameString());
 end;
@@ -480,7 +480,12 @@ begin
   if Tipo = OP_MANUAL then
     Servidor := Trim(EditServidor.Text);
   EsLocalDb := Pos('(localdb)', Lowercase(Servidor)) = 1;
-  InstalarLocalDb := (Tipo = OP_INSTALAR_LOCALDB) or (EsLocalDb and not LocalDbInstalado() and CON_LOCALDB);
+  // Si el instalador no incluye LocalDB, nunca se instala (solo se puede usar uno ya instalado)
+#if ConLocalDb == "True"
+  InstalarLocalDb := (Tipo = OP_INSTALAR_LOCALDB) or (EsLocalDb and not LocalDbInstalado());
+#else
+  InstalarLocalDb := False;
+#endif
 end;
 
 // Servicio iniciado (lo inicia si está detenido) y conexión con permisos para crear la base.
@@ -610,9 +615,9 @@ var
 begin
   RegistrarLog('INSTALACIÓN CANCELADA: ' + Mensaje);
   Destino := ExpandConstant('{userdocs}\{#AppNombre}_instalacion_fallida.log');
-  FileCopy(ArchivoLog, Destino, False);
+  CopyFile(ArchivoLog, Destino, False);
   if FileExists(CarpetaTrabajo + '\localdb-msi.log') then
-    FileCopy(CarpetaTrabajo + '\localdb-msi.log', ExpandConstant('{userdocs}\{#AppNombre}_localdb-msi.log'), False);
+    CopyFile(CarpetaTrabajo + '\localdb-msi.log', ExpandConstant('{userdocs}\{#AppNombre}_localdb-msi.log'), False);
   Result :=Mensaje + #13#10#13#10 + 'No se instaló ningún archivo y la base de datos quedó como estaba.' + #13#10#13#10 +
             FinalDelLog() + #13#10#13#10 + 'Log completo: ' + Destino;
 end;
@@ -768,7 +773,7 @@ begin
          ' /grant ' + Comillas('NT SERVICE\' + Servicio + ':(OI)(CI)M'), '', SW_HIDE, ewWaitUntilTerminated, Codigo);
 
   RegistrarLog('Instalación terminada en ' + ExpandConstant('{app}') + '.');
-  FileCopy(ArchivoLog, ExpandConstant('{app}\BaseDeDatos\instalacion.log'), False);
+  CopyFile(ArchivoLog, ExpandConstant('{app}\BaseDeDatos\instalacion.log'), False);
 end;
 
 procedure RegisterPreviousData(PreviousDataKey: Integer);
