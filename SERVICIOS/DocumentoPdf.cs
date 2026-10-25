@@ -1,14 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SERVICIOS
 {
-    // Generador mínimo de PDF de texto (A4, Helvetica, sin dependencias externas): títulos, párrafos con
-    // ajuste de línea, pares "campo: valor", separadores y salto de página automático. Los textos se guardan
-    // en WinAnsiEncoding, que cubre los acentos, la ñ y los signos del español.
+    // Generador mínimo de PDF (A4, Helvetica, sin dependencias externas): encabezado con logo, títulos, párrafos
+    // con ajuste de línea, pares "campo: valor", separadores, firmas y salto de página automático. Los textos se
+    // guardan en WinAnsiEncoding, que cubre los acentos, la ñ y los signos del español. Las imágenes van
+    // incrustadas en el PDF (RGB comprimido con Flate), no como archivos externos.
     public class DocumentoPdf
     {
         private const float ANCHO = 595f, ALTO = 842f, MARGEN = 56f, PIE = 40f;
@@ -27,7 +32,14 @@ namespace SERVICIOS
 
         private static readonly Encoding WinAnsi = Encoding.GetEncoding(1252);
 
+        private class ImagenPdf
+        {
+            public int Ancho, Alto;
+            public byte[] Datos; // RGB de 8 bits por canal, comprimido con zlib (FlateDecode)
+        }
+
         private readonly List<StringBuilder> _paginas = new List<StringBuilder>();
+        private readonly List<ImagenPdf> _imagenes = new List<ImagenPdf>();
         private StringBuilder _actual;
         private float _y;
         private readonly string _pie;
@@ -39,14 +51,43 @@ namespace SERVICIOS
             NuevaPagina();
         }
 
+        // Encabezado de la primera página: logo a la izquierda (recortado a su contenido, con el fondo claro pasado a
+        // blanco), título centrado y dos renglones alineados a la derecha (por ejemplo número y fecha)
+        public void Encabezado(byte[] logo, string titulo, string derechaArriba, string derechaAbajo)
+        {
+            const float altoLogo = 62f;
+            float arriba = ALTO - MARGEN + 16;
+            float abajo = arriba - altoLogo;
+            if (logo != null)
+            {
+                ImagenPdf imagen = PrepararLogo(logo);
+                _imagenes.Add(imagen);
+                float anchoLogo = altoLogo * imagen.Ancho / imagen.Alto;
+                _actual.AppendFormat(CultureInfo.InvariantCulture, "q {0:0.##} 0 0 {1:0.##} {2:0.##} {3:0.##} cm /Im{4} Do Q\n",
+                    anchoLogo, altoLogo, MARGEN, abajo, _imagenes.Count);
+            }
+
+            float medio = abajo + altoLogo / 2;
+            Escribir(titulo, (ANCHO - AnchoTexto(titulo, 17, true)) / 2, medio - 6, 17, true);
+            float derecha = ANCHO - MARGEN;
+            Escribir(derechaArriba, derecha - AnchoTexto(derechaArriba, 11, true), medio + 4, 11, true);
+            Escribir(derechaAbajo, derecha - AnchoTexto(derechaAbajo, 8.5f, false), medio - 10, 8.5f, false);
+
+            _y = abajo - 8;
+            Linea();
+            Espacio(6);
+        }
+
         public void Titulo(string texto)
         {
             Parrafo(texto, 16, true, centrado: true);
             Espacio(6);
         }
 
-        public void Subtitulo(string texto)
+        // reservar: lugar mínimo para el título y lo que le sigue, para que no quede solo al pie de una página
+        public void Subtitulo(string texto, float reservar = 60)
         {
+            AsegurarLugar(reservar);
             Espacio(8);
             Parrafo(texto, 12, true);
             Linea();
@@ -108,6 +149,30 @@ namespace SERVICIOS
             _y -= 14;
         }
 
+        // Firmas lado a lado: por cada una, el rótulo ("El LOCADOR:"), la firma tipeada en letra inclinada (o el
+        // espacio en blanco para firmar a mano), la línea y la aclaración debajo
+        public void Firmas(params (string Rotulo, string FirmaTipeada, string Aclaracion)[] firmas)
+        {
+            const float separacion = 18f;
+            float ancho = (ANCHO - 2 * MARGEN - separacion * (firmas.Length - 1)) / firmas.Length;
+            AsegurarLugar(95);
+            float y = _y;
+            int renglonesMax = 1;
+            for (int i = 0; i < firmas.Length; i++)
+            {
+                float x = MARGEN + i * (ancho + separacion);
+                Escribir(firmas[i].Rotulo, x, y, 9.5f, true);
+                if (!string.IsNullOrWhiteSpace(firmas[i].FirmaTipeada))
+                    Escribir(firmas[i].FirmaTipeada.Trim(), x + 6, y - 34, 13, false, oblicua: true);
+                _actual.AppendFormat(CultureInfo.InvariantCulture, "0.5 w {0:0.##} {1:0.##} m {2:0.##} {1:0.##} l S\n", x, y - 42, x + ancho);
+                List<string> aclaracion = Ajustar(firmas[i].Aclaracion ?? "", 8.5f, false, ancho);
+                for (int r = 0; r < aclaracion.Count; r++)
+                    Escribir(aclaracion[r], x, y - 54 - r * 11, 8.5f, false);
+                renglonesMax = Math.Max(renglonesMax, aclaracion.Count);
+            }
+            _y = y - 54 - renglonesMax * 11 - 6;
+        }
+
         public void Guardar(string ruta)
         {
             File.WriteAllBytes(ruta, Generar());
@@ -135,20 +200,34 @@ namespace SERVICIOS
             };
 
             escribir("%PDF-1.4\n");
-            int total = 4 + _paginas.Count * 2;
+            int primeraPagina = 5 + _imagenes.Count;
+            int total = 4 + _imagenes.Count + _paginas.Count * 2;
             StringBuilder kids = new StringBuilder();
-            for (int i = 0; i < _paginas.Count; i++) kids.Append($"{5 + i * 2} 0 R ");
+            for (int i = 0; i < _paginas.Count; i++) kids.Append($"{primeraPagina + i * 2} 0 R ");
+            StringBuilder xobjects = new StringBuilder();
+            for (int i = 0; i < _imagenes.Count; i++) xobjects.Append($"/Im{i + 1} {5 + i} 0 R ");
+            string recursos = $"/Font << /{NORMAL} 3 0 R /{NEGRITA} 4 0 R >>" +
+                              (_imagenes.Count > 0 ? $" /XObject << {xobjects.ToString().Trim()} >>" : "");
 
             objeto(1, "<< /Type /Catalog /Pages 2 0 R >>");
             objeto(2, $"<< /Type /Pages /Kids [{kids.ToString().Trim()}] /Count {_paginas.Count} >>");
             objeto(3, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
             objeto(4, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+            for (int i = 0; i < _imagenes.Count; i++)
+            {
+                ImagenPdf imagen = _imagenes[i];
+                posiciones.Add(salida.Position);
+                escribir($"{5 + i} 0 obj\n<< /Type /XObject /Subtype /Image /Width {imagen.Ancho} /Height {imagen.Alto} " +
+                         $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length {imagen.Datos.Length} >>\nstream\n");
+                salida.Write(imagen.Datos, 0, imagen.Datos.Length);
+                escribir("\nendstream\nendobj\n");
+            }
             for (int i = 0; i < _paginas.Count; i++)
             {
-                int pagina = 5 + i * 2;
+                int pagina = primeraPagina + i * 2;
                 byte[] contenido = WinAnsi.GetBytes(_paginas[i].ToString());
                 objeto(pagina, $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {ANCHO:0} {ALTO:0}] " +
-                               $"/Resources << /Font << /{NORMAL} 3 0 R /{NEGRITA} 4 0 R >> >> /Contents {pagina + 1} 0 R >>");
+                               $"/Resources << {recursos} >> /Contents {pagina + 1} 0 R >>");
                 posiciones.Add(salida.Position);
                 escribir($"{pagina + 1} 0 obj\n<< /Length {contenido.Length} >>\nstream\n");
                 salida.Write(contenido, 0, contenido.Length);
@@ -163,6 +242,103 @@ namespace SERVICIOS
         }
 
         // ---------- Internos ----------
+
+        // Logo listo para incrustar: recortado a lo que no es fondo (con un pequeño margen), fondo casi blanco
+        // pasado a blanco puro (si no, se ve un recuadro gris sobre la hoja) y achicado a 400 px de ancho como máximo
+        private static ImagenPdf PrepararLogo(byte[] archivo)
+        {
+            const int umbralFondo = 225;
+            using (MemoryStream ms = new MemoryStream(archivo))
+            using (Bitmap original = new Bitmap(ms))
+            using (Bitmap rgb = new Bitmap(original.Width, original.Height, PixelFormat.Format24bppRgb))
+            {
+                using (Graphics g = Graphics.FromImage(rgb))
+                {
+                    g.Clear(Color.White); // las zonas transparentes quedan blancas
+                    g.DrawImage(original, 0, 0, original.Width, original.Height);
+                }
+                byte[] px = Pixeles(rgb, out int paso);
+
+                int minX = rgb.Width, minY = rgb.Height, maxX = -1, maxY = -1;
+                for (int y = 0; y < rgb.Height; y++)
+                    for (int x = 0; x < rgb.Width; x++)
+                    {
+                        int i = y * paso + x * 3;
+                        if (Math.Min(px[i], Math.Min(px[i + 1], px[i + 2])) < umbralFondo)
+                        {
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
+                        }
+                    }
+                Rectangle contenido = maxX < 0 ? new Rectangle(0, 0, rgb.Width, rgb.Height)
+                    : Rectangle.FromLTRB(minX, minY, maxX + 1, maxY + 1);
+                contenido.Inflate(contenido.Width / 40, contenido.Height / 40);
+                contenido.Intersect(new Rectangle(0, 0, rgb.Width, rgb.Height));
+
+                float escala = Math.Min(1f, 400f / contenido.Width);
+                int ancho = Math.Max(1, (int)(contenido.Width * escala)), alto = Math.Max(1, (int)(contenido.Height * escala));
+                using (Bitmap final = new Bitmap(ancho, alto, PixelFormat.Format24bppRgb))
+                {
+                    using (Graphics g = Graphics.FromImage(final))
+                    {
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(rgb, new Rectangle(0, 0, ancho, alto), contenido, GraphicsUnit.Pixel);
+                    }
+                    byte[] datos = Pixeles(final, out int pasoFinal);
+                    byte[] filas = new byte[ancho * alto * 3];
+                    for (int y = 0; y < alto; y++)
+                        for (int x = 0; x < ancho; x++)
+                        {
+                            int o = y * pasoFinal + x * 3, d = (y * ancho + x) * 3;
+                            byte b = datos[o], gr = datos[o + 1], r = datos[o + 2]; // GDI+ guarda BGR
+                            bool fondo = Math.Min(r, Math.Min(gr, b)) >= umbralFondo;
+                            filas[d] = fondo ? (byte)255 : r;
+                            filas[d + 1] = fondo ? (byte)255 : gr;
+                            filas[d + 2] = fondo ? (byte)255 : b;
+                        }
+                    return new ImagenPdf { Ancho = ancho, Alto = alto, Datos = Zlib(filas) };
+                }
+            }
+        }
+
+        private static byte[] Pixeles(Bitmap bmp, out int paso)
+        {
+            BitmapData datos = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            try
+            {
+                paso = datos.Stride;
+                byte[] px = new byte[datos.Stride * bmp.Height];
+                Marshal.Copy(datos.Scan0, px, 0, px.Length);
+                return px;
+            }
+            finally { bmp.UnlockBits(datos); }
+        }
+
+        // Formato zlib (encabezado + deflate + Adler-32), que es lo que espera el filtro FlateDecode del PDF
+        private static byte[] Zlib(byte[] datos)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.WriteByte(0x78);
+                ms.WriteByte(0x9C);
+                using (DeflateStream deflate = new DeflateStream(ms, CompressionLevel.Optimal, true))
+                    deflate.Write(datos, 0, datos.Length);
+                uint a = 1, b = 0;
+                foreach (byte x in datos)
+                {
+                    a = (a + x) % 65521;
+                    b = (b + a) % 65521;
+                }
+                uint adler = (b << 16) | a;
+                ms.WriteByte((byte)(adler >> 24));
+                ms.WriteByte((byte)(adler >> 16));
+                ms.WriteByte((byte)(adler >> 8));
+                ms.WriteByte((byte)adler);
+                return ms.ToArray();
+            }
+        }
 
         private void NuevaPagina()
         {

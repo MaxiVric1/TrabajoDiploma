@@ -8,6 +8,7 @@ namespace BE
         public string Dni { get; set; }
         public string Telefono { get; set; }
         public string Email { get; set; }
+        public string Domicilio { get; set; }
 
         // Las consultas con detalle de contratos y pagos traen el nombre ya concatenado en Nombre (Apellido vacío)
         public string NombreCompleto => string.IsNullOrEmpty(Apellido) ? Nombre : $"{Nombre} {Apellido}";

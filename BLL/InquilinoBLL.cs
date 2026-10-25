@@ -73,6 +73,9 @@ namespace BLL
             inquilino.Apellido = inquilino.Apellido.Trim();
             inquilino.Telefono = string.IsNullOrWhiteSpace(inquilino.Telefono) ? null : inquilino.Telefono.Trim();
             inquilino.Email = string.IsNullOrWhiteSpace(inquilino.Email) ? null : inquilino.Email.Trim();
+            inquilino.Domicilio = string.IsNullOrWhiteSpace(inquilino.Domicilio) ? null : inquilino.Domicilio.Trim();
+            if (inquilino.Domicilio != null && inquilino.Domicilio.Length > 200)
+                throw new ArgumentException("El domicilio no puede superar los 200 caracteres.");
         }
     }
 }

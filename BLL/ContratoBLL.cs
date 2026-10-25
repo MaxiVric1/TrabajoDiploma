@@ -77,6 +77,8 @@ namespace BLL
             if (inquilinoNuevo != null)
             {
                 new InquilinoBLL().Validar(inquilinoNuevo);
+                if (inquilinoNuevo.Domicilio == null)
+                    throw new ArgumentException("El domicilio del inquilino es obligatorio: figura en el contrato.");
                 if (inquilinoDAL.BuscarPorDni(inquilinoNuevo.Dni) != null)
                     throw new ArgumentException($"Ya existe un inquilino con DNI {inquilinoNuevo.Dni}: búsquelo para usar sus datos.");
             }
@@ -266,8 +268,9 @@ namespace BLL
             return string.Join(" ", sinAcentos.ToLowerInvariant().Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
         }
 
-        // Genera el contrato registrado en PDF con los datos guardados (partes, inmueble, garantes y condiciones) y la
-        // firma del inquilino, que debe coincidir con su nombre y apellido
+        // Genera el contrato registrado en PDF con los datos guardados: encabezado con el logo de LandSmart, partes,
+        // inmueble, condiciones económicas, duración, cláusulas y firmas. La firma del locatario es su nombre y apellido
+        // tipeados en el formulario y debe coincidir con los del inquilino.
         public void GenerarPdf(int idContrato, string firmaInquilino, string ruta)
         {
             if (string.IsNullOrWhiteSpace(ruta))
@@ -283,64 +286,86 @@ namespace BLL
             Inmueble inmueble = alquiler?.IdInmueble != null ? inmueblePN1DAL.BuscarPorId(alquiler.IdInmueble.Value) : null;
             Cliente propietario = inmueble != null ? new ClienteDAL().BuscarPorId(inmueble.IdCliente) : null;
             List<Garante> garantes = garanteDAL.LeerPorContrato(idContrato);
+            // El monto inicial es el anterior a la primera actualización por IPC (si ya hubo alguna)
+            List<ActualizacionContrato> actualizaciones = new ActualizacionContratoDAL().LeerPorContrato(idContrato);
+            decimal montoInicial = actualizaciones.Count > 0 ? actualizaciones[0].MontoAnterior : contrato.MontoMensual;
+            string nombrePropietario = propietario != null ? $"{propietario.Nombre} {propietario.Apellido}" : "-";
+            string nombreInquilino = $"{inquilino.Nombre} {inquilino.Apellido}";
 
             DocumentoPdf pdf = new DocumentoPdf($"LandSmart - Contrato de locación N° {idContrato}");
-            pdf.Titulo("CONTRATO DE LOCACIÓN");
-            pdf.Parrafo($"Contrato N° {idContrato} - generado el {DateTime.Now:dd/MM/yyyy HH:mm}", 9, centrado: true);
+            pdf.Encabezado(Logo(), "CONTRATO DE LOCACIÓN", $"Contrato N° {idContrato}", $"Generado el {DateTime.Now:dd/MM/yyyy HH:mm}");
 
-            pdf.Subtitulo("1. Partes");
-            pdf.Campo("Locador (propietario)", propietario != null
-                ? $"{propietario.Nombre} {propietario.Apellido}, DNI {propietario.Dni}" : "-");
-            pdf.Campo("Locatario (inquilino)", $"{inquilino.Nombre} {inquilino.Apellido}, DNI {inquilino.Dni}");
-            pdf.Campo("Contacto del locatario", string.Join(" / ", new[] { inquilino.Telefono, inquilino.Email }.Where(s => !string.IsNullOrWhiteSpace(s))));
-
-            pdf.Subtitulo("2. Inmueble");
-            pdf.Campo("Dirección", inmueble?.Direccion ?? alquiler?.Direccion);
-            pdf.Campo("Tipo", inmueble?.TipoInmueble ?? alquiler?.TipoInmueble.ToString());
-            if (inmueble != null)
-                pdf.Campo("Superficie / ambientes", $"{inmueble.MetrosCuadrados:N0} m² - {inmueble.CantidadAmbientes} ambiente(s)");
-
-            pdf.Subtitulo("3. Garantes");
-            if (garantes.Count == 0) pdf.Parrafo("Sin garantes registrados.");
+            pdf.Subtitulo("1. Las partes");
+            pdf.Campo("Locador (propietario)", propietario != null ? $"{nombrePropietario}, DNI {propietario.Dni}" : "-");
+            pdf.Campo("Locatario (inquilino)", $"{nombreInquilino}, DNI {inquilino.Dni}");
+            pdf.Campo("Domicilio del locatario", inquilino.Domicilio);
             foreach (Garante g in garantes)
             {
                 pdf.Campo("Garante", $"{g.Nombre} {g.Apellido}, DNI {g.Dni}");
-                pdf.Campo("Domicilio", g.Domicilio);
+                pdf.Campo("Domicilio del garante", g.Domicilio);
                 pdf.Campo("Propiedad en garantía", g.PropiedadGarantia);
-                pdf.Espacio(4);
             }
+            pdf.Espacio(3);
+            pdf.Parrafo("LandSmart actúa como inmobiliaria intermediaria entre las partes: administra el contrato, percibe los " +
+                        "pagos del locatario y rinde al locador lo cobrado, descontada su comisión.");
 
-            pdf.Subtitulo("4. Condiciones");
-            pdf.Campo("Plazo", $"{contrato.DuracionMeses} meses, del {contrato.FechaInicio:dd/MM/yyyy} al {contrato.FechaFin:dd/MM/yyyy}");
-            pdf.Campo("Alquiler mensual", $"${contrato.MontoMensual:N2}, pagadero del 1 al {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes");
+            pdf.Subtitulo("2. El inmueble");
+            pdf.Campo("Dirección", inmueble?.Direccion ?? alquiler?.Direccion);
+            pdf.Campo("Tipo", inmueble?.TipoInmueble ?? alquiler?.TipoInmueble.ToString());
+            pdf.Campo("Ambientes", inmueble != null ? inmueble.CantidadAmbientes.ToString() : "-");
+            pdf.Campo("Superficie", inmueble != null ? $"{inmueble.MetrosCuadrados:N0} m²" : "-");
+
+            pdf.Subtitulo("3. Condiciones económicas");
+            pdf.Campo("Monto mensual inicial", $"${montoInicial:N2}, pagadero del 1 al {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes");
+            pdf.Campo("Depósito de garantía", $"${contrato.DepositoGarantia:N2} ({MESES_DEPOSITO} mes de alquiler)");
+            pdf.Campo("Comisión inmobiliaria", $"{contrato.ComisionInmobiliaria:0.##}% mensual, retenido de cada pago " +
+                $"(${CalcularComision(montoInicial, contrato.ComisionInmobiliaria):N2} sobre ${montoInicial:N2})");
+            pdf.Campo("Actualización", $"Trimestral por {contrato.IndiceActualizacion} (BCRA), cada {contrato.PeriodicidadActualizacionMeses} meses");
+            pdf.Campo("Mora", "Intereses según la TIM, art. 768 inc. c CCyC (BCRA)");
+
+            pdf.Subtitulo("4. Duración");
+            pdf.Campo("Fecha de inicio", contrato.FechaInicio.ToString("dd/MM/yyyy"));
+            pdf.Campo("Fecha de finalización", contrato.FechaFin.ToString("dd/MM/yyyy"));
+            pdf.Campo("Duración", $"{contrato.DuracionMeses} meses");
             pdf.Campo("Método de pago", contrato.MetodoPago.ToString());
-            pdf.Campo("Depósito de garantía", $"${contrato.DepositoGarantia:N2}");
-            pdf.Campo("Comisión inmobiliaria", $"{contrato.ComisionInmobiliaria:0.##}% de cada pago, retenido por la inmobiliaria " +
-                $"(${CalcularComision(contrato.MontoMensual, contrato.ComisionInmobiliaria):N2} de cada alquiler de ${contrato.MontoMensual:N2}; " +
-                $"neto al propietario ${NetoPropietario(contrato.MontoMensual, contrato.ComisionInmobiliaria):N2})");
-            pdf.Campo("Actualización", $"Por índice {contrato.IndiceActualizacion}, cada {contrato.PeriodicidadActualizacionMeses} meses");
 
             pdf.Subtitulo("5. Cláusulas");
-            pdf.Parrafo($"Mora: el pago posterior al día {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes devenga intereses moratorios " +
-                        "sobre el alquiler del mes, a la Tasa de Intereses Moratorios (TIM) que publica el BCRA (art. 768 inc. c del " +
-                        "Código Civil y Comercial), desde el vencimiento hasta el día del pago.");
+            pdf.Parrafo($"Rescisión anticipada: la parte que rescinda el contrato antes de su vencimiento abonará una penalidad del " +
+                        $"{PORCENTAJE_PENALIDAD_RESCISION:P0} del canon restante, conforme al art. 1221 del Código Civil y Comercial de la Nación.");
             pdf.Espacio(3);
-            pdf.Parrafo($"Actualización: el alquiler mensual se ajusta cada {contrato.PeriodicidadActualizacionMeses} meses según la " +
+            pdf.Parrafo("Reparaciones: las reparaciones estructurales del inmueble están a cargo del locador; las originadas en el " +
+                        "desgaste por el uso normal y las mejoras menores, a cargo del locatario.");
+            pdf.Espacio(3);
+            pdf.Parrafo($"Actualización: el alquiler se actualiza automáticamente cada {contrato.PeriodicidadActualizacionMeses} meses según la " +
                         $"variación acumulada del {contrato.IndiceActualizacion} publicada por el BCRA.");
             pdf.Espacio(3);
-            pdf.Parrafo($"Rescisión anticipada: la parte que rescinda el contrato antes de su vencimiento abonará una penalidad del " +
-                        $"{PORCENTAJE_PENALIDAD_RESCISION:P0} del canon restante.");
-            pdf.Espacio(3);
-            pdf.Parrafo("Depósito: se devuelve al finalizar el contrato, descontados los daños que presente el inmueble al momento de la entrega.");
-            pdf.Espacio(3);
-            pdf.Parrafo("Garantía: los garantes se constituyen en fiadores solidarios de todas las obligaciones del locatario.");
+            pdf.Parrafo($"Mora: el pago posterior al día {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes devenga intereses moratorios a la Tasa " +
+                        "de Intereses Moratorios (TIM) que publica el BCRA (art. 768 inc. c CCyC), desde el vencimiento hasta el día del pago.");
 
-            pdf.Subtitulo("6. Firma");
-            pdf.Firma($"Locatario: {inquilino.Nombre} {inquilino.Apellido} - DNI {inquilino.Dni}", firmaInquilino.Trim());
+            pdf.Subtitulo("6. Firmas", reservar: 130); // el título va en la misma página que las firmas
+            pdf.Espacio(6);
+            pdf.Firmas(
+                ("El LOCADOR:", null, nombrePropietario),
+                ("El LOCATARIO:", firmaInquilino.Trim(), $"{nombreInquilino} - DNI {inquilino.Dni}"),
+                ("Por LandSmart:", null, "Firma y aclaración"));
 
             pdf.Guardar(ruta);
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "PDF Contrato",
                 $"Contrato N° {idContrato}: PDF generado y firmado por el inquilino.");
+        }
+
+        // Logo de LandSmart incrustado en BLL.dll (GUI\Resources\logo-landsmart.png); null si no estuviera
+        private static byte[] Logo()
+        {
+            using (System.IO.Stream recurso = typeof(ContratoBLL).Assembly.GetManifestResourceStream("BLL.logo-landsmart.png"))
+            {
+                if (recurso == null) return null;
+                using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
+                {
+                    recurso.CopyTo(ms);
+                    return ms.ToArray();
+                }
+            }
         }
 
         // Baja del contrato junto con sus garantes (una transacción). Si estaba vigente, el inmueble del PN1 vuelve

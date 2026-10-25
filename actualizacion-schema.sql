@@ -213,6 +213,14 @@ JOIN [dbo].[Contrato] c ON c.[id_contrato] = p.[id_contrato]
 WHERE p.[fecha_pago] IS NOT NULL AND p.[monto_pagado] > 0 AND p.[comision_inmobiliaria] = 0 AND c.[comision_inmobiliaria] > 0;
 GO
 
+-- Inquilino: domicilio (para el contrato); los existentes quedan sin domicilio cargado
+IF COL_LENGTH('dbo.Inquilino', 'domicilio') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[Inquilino] ADD [domicilio] NVARCHAR(200) NULL;
+    PRINT N'Inquilino: columna domicilio agregada.';
+END
+GO
+
 -- ====================================================
 -- 4. Garante (PN2)
 -- ====================================================
@@ -341,7 +349,9 @@ INSERT INTO @Nuevos VALUES
     ('lblComision', 'FormRegistrarPago', N'Comisión:', 'Agency fee:'),
     ('lblNeto', 'FormRegistrarPago', 'Neto propietario:', 'Net to owner:'),
     -- Mora con la TIM del BCRA (paso 5)
-    ('lblTasa', 'FormRegistrarPago', 'Tasa de mora:', 'Late interest rate:');
+    ('lblTasa', 'FormRegistrarPago', 'Tasa de mora:', 'Late interest rate:'),
+    -- Domicilio del inquilino (paso 6: va en el PDF del contrato)
+    ('lblDomicilio', 'FormRegistrarContrato', 'Domicilio:', 'Address:');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

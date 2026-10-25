@@ -51,6 +51,8 @@ namespace TpIngSoft
             this.txtTelefono = new System.Windows.Forms.TextBox();
             this.lblEmail = new System.Windows.Forms.Label();
             this.txtEmail = new System.Windows.Forms.TextBox();
+            this.lblDomicilio = new System.Windows.Forms.Label();
+            this.txtDomicilio = new System.Windows.Forms.TextBox();
             this.tabGarante = new System.Windows.Forms.TabPage();
             this.grpGarante = new System.Windows.Forms.GroupBox();
             this.lblGaranteNombre = new System.Windows.Forms.Label();
@@ -374,10 +376,12 @@ namespace TpIngSoft
             this.grpInquilino.Controls.Add(this.txtTelefono);
             this.grpInquilino.Controls.Add(this.lblEmail);
             this.grpInquilino.Controls.Add(this.txtEmail);
+            this.grpInquilino.Controls.Add(this.lblDomicilio);
+            this.grpInquilino.Controls.Add(this.txtDomicilio);
             this.grpInquilino.ForeColor = System.Drawing.Color.White;
             this.grpInquilino.Location = new System.Drawing.Point(10, 15);
             this.grpInquilino.Name = "grpInquilino";
-            this.grpInquilino.Size = new System.Drawing.Size(646, 130);
+            this.grpInquilino.Size = new System.Drawing.Size(646, 165);
             this.grpInquilino.TabStop = false;
             this.grpInquilino.Text = "Inquilino";
             //
@@ -483,6 +487,24 @@ namespace TpIngSoft
             this.txtEmail.MaxLength = 100;
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Size = new System.Drawing.Size(200, 20);
+            //
+            // lblDomicilio
+            //
+            this.lblDomicilio.Location = new System.Drawing.Point(6, 130);
+            this.lblDomicilio.Name = "lblDomicilio";
+            this.lblDomicilio.Size = new System.Drawing.Size(130, 20);
+            this.lblDomicilio.Text = "Domicilio:";
+            this.lblDomicilio.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // txtDomicilio
+            //
+            this.txtDomicilio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.txtDomicilio.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtDomicilio.ForeColor = System.Drawing.Color.White;
+            this.txtDomicilio.Location = new System.Drawing.Point(142, 130);
+            this.txtDomicilio.MaxLength = 200;
+            this.txtDomicilio.Name = "txtDomicilio";
+            this.txtDomicilio.Size = new System.Drawing.Size(490, 20);
             //
             // tabGarante
             //
@@ -1007,6 +1029,8 @@ namespace TpIngSoft
         private System.Windows.Forms.TextBox txtTelefono;
         private System.Windows.Forms.Label lblEmail;
         private System.Windows.Forms.TextBox txtEmail;
+        private System.Windows.Forms.Label lblDomicilio;
+        private System.Windows.Forms.TextBox txtDomicilio;
         private System.Windows.Forms.TabPage tabGarante;
         private System.Windows.Forms.GroupBox grpGarante;
         private System.Windows.Forms.Label lblGaranteNombre;

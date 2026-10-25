@@ -285,6 +285,7 @@ namespace TpIngSoft
                 ("FormRegistrarContrato", "lblApellido"),
                 ("FormRegistrarContrato", "lblTelefono"),
                 ("FormRegistrarContrato", "lblEmail"),
+                ("FormRegistrarContrato", "lblDomicilio"),
                 ("FormRegistrarContrato", "lblInmueble"),
                 ("FormRegistrarContrato", "grpContrato"),
                 ("FormRegistrarContrato", "lblFechaInicio"),

@@ -34,6 +34,7 @@ namespace DAL
                 acceso.CrearParametro("@Dni", inquilino.Dni),
                 acceso.CrearParametro("@Telefono", inquilino.Telefono),
                 acceso.CrearParametro("@Email", inquilino.Email),
+                acceso.CrearParametro("@Domicilio", inquilino.Domicilio),
                 outParam
             };
 
@@ -58,7 +59,8 @@ namespace DAL
                     acceso.CrearParametro("@Apellido", inquilino.Apellido),
                     acceso.CrearParametro("@Dni", inquilino.Dni),
                     acceso.CrearParametro("@Telefono", inquilino.Telefono),
-                    acceso.CrearParametro("@Email", inquilino.Email)
+                    acceso.CrearParametro("@Email", inquilino.Email),
+                    acceso.CrearParametro("@Domicilio", inquilino.Domicilio)
                 };
                 return acceso.Escribir("ActualizarInquilino", parameters) != -1;
             }
@@ -125,7 +127,8 @@ namespace DAL
                 Apellido = row["apellido"].ToString(),
                 Dni = row["dni"].ToString(),
                 Telefono = row["telefono"] != DBNull.Value ? row["telefono"].ToString() : "",
-                Email = row["email"] != DBNull.Value ? row["email"].ToString() : ""
+                Email = row["email"] != DBNull.Value ? row["email"].ToString() : "",
+                Domicilio = row.Table.Columns.Contains("domicilio") && row["domicilio"] != DBNull.Value ? row["domicilio"].ToString() : ""
             };
         }
     }

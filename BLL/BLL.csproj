@@ -87,6 +87,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Logo del encabezado del PDF del contrato: va dentro de BLL.dll (no hay que distribuir el archivo aparte) -->
+    <EmbeddedResource Include="..\GUI\Resources\logo-landsmart.png">
+      <Link>Resources\logo-landsmart.png</Link>
+      <LogicalName>BLL.logo-landsmart.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\BE\BE.csproj">
       <Project>{9b893465-df84-4301-8f6e-d62355dd02fe}</Project>
       <Name>BE</Name>

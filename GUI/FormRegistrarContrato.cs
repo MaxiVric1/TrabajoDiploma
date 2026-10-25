@@ -68,6 +68,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblApellido, BE.NombreControl.FormRegistrarContrato_lblApellido));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblTelefono, BE.NombreControl.FormRegistrarContrato_lblTelefono));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblEmail, BE.NombreControl.FormRegistrarContrato_lblEmail));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblDomicilio, BE.NombreControl.FormRegistrarContrato_lblDomicilio));
             // 3. Garante
             _controlesTraducibles.Add(new EtiquetaTraducible(grpGarante, BE.NombreControl.FormRegistrarContrato_grpGarante));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblGaranteNombre, BE.NombreControl.FormRegistrarContrato_lblGaranteNombre));
@@ -176,6 +177,8 @@ namespace TpIngSoft
                     if (string.IsNullOrWhiteSpace(txtDni.Text)) return "Ingrese el DNI del inquilino.";
                     if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtApellido.Text))
                         return "Busque al inquilino por DNI o complete su nombre y apellido.";
+                    if (_inquilinoEncontrado == null && string.IsNullOrWhiteSpace(txtDomicilio.Text))
+                        return "Ingrese el domicilio del inquilino: figura en el contrato.";
                     return null;
                 case 2:
                     if (new[] { txtGaranteNombre, txtGaranteApellido, txtGaranteDni, txtGaranteDomicilio, txtPropiedadGarantia }
@@ -305,20 +308,22 @@ namespace TpIngSoft
             txtApellido.Text = inquilino.Apellido;
             txtTelefono.Text = inquilino.Telefono;
             txtEmail.Text = inquilino.Email;
+            txtDomicilio.Text = inquilino.Domicilio;
             // Los datos de un inquilino existente no se modifican desde este formulario
-            txtNombre.ReadOnly = txtApellido.ReadOnly = txtTelefono.ReadOnly = txtEmail.ReadOnly = true;
+            txtNombre.ReadOnly = txtApellido.ReadOnly = txtTelefono.ReadOnly = txtEmail.ReadOnly = txtDomicilio.ReadOnly = true;
         }
 
         private void LiberarDatosInquilino(bool limpiar)
         {
             _inquilinoEncontrado = null;
-            txtNombre.ReadOnly = txtApellido.ReadOnly = txtTelefono.ReadOnly = txtEmail.ReadOnly = false;
+            txtNombre.ReadOnly = txtApellido.ReadOnly = txtTelefono.ReadOnly = txtEmail.ReadOnly = txtDomicilio.ReadOnly = false;
             if (limpiar)
             {
                 txtNombre.Clear();
                 txtApellido.Clear();
                 txtTelefono.Clear();
                 txtEmail.Clear();
+                txtDomicilio.Clear();
             }
         }
 
@@ -381,6 +386,7 @@ namespace TpIngSoft
             sb.AppendLine("INQUILINO" + (_inquilinoEncontrado != null ? " (ya registrado)" : string.IsNullOrWhiteSpace(txtDni.Text) ? "" : " (nuevo)"));
             sb.AppendLine($"  {Texto(txtNombre)} {Texto(txtApellido)}, DNI {Texto(txtDni)}");
             sb.AppendLine($"  Teléfono: {Texto(txtTelefono)}   Email: {Texto(txtEmail)}");
+            sb.AppendLine($"  Domicilio: {Texto(txtDomicilio)}");
             sb.AppendLine();
             sb.AppendLine("GARANTE");
             sb.AppendLine($"  {Texto(txtGaranteNombre)} {Texto(txtGaranteApellido)}, DNI {Texto(txtGaranteDni)}");
@@ -458,7 +464,8 @@ namespace TpIngSoft
                         Nombre = txtNombre.Text,
                         Apellido = txtApellido.Text,
                         Telefono = txtTelefono.Text,
-                        Email = txtEmail.Text
+                        Email = txtEmail.Text,
+                        Domicilio = txtDomicilio.Text
                     };
                 }
 

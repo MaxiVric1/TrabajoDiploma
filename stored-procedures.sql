@@ -1292,10 +1292,11 @@ CREATE PROCEDURE [dbo].[CrearInquilino]
     @Dni VARCHAR(15),
     @Telefono VARCHAR(30) = NULL,
     @Email VARCHAR(100) = NULL,
+    @Domicilio NVARCHAR(200) = NULL,
     @NuevoId INT OUTPUT
 AS BEGIN
-    INSERT INTO Inquilino (nombre, apellido, dni, telefono, email)
-    VALUES (@Nombre, @Apellido, @Dni, @Telefono, @Email);
+    INSERT INTO Inquilino (nombre, apellido, dni, telefono, email, domicilio)
+    VALUES (@Nombre, @Apellido, @Dni, @Telefono, @Email, @Domicilio);
     SET @NuevoId = SCOPE_IDENTITY();
 END
 GO
@@ -1312,10 +1313,12 @@ CREATE PROCEDURE [dbo].[ActualizarInquilino]
     @Apellido NVARCHAR(100),
     @Dni VARCHAR(15),
     @Telefono VARCHAR(30) = NULL,
-    @Email VARCHAR(100) = NULL
+    @Email VARCHAR(100) = NULL,
+    @Domicilio NVARCHAR(200) = NULL -- NULL conserva el guardado
 AS BEGIN
     UPDATE Inquilino
-    SET nombre = @Nombre, apellido = @Apellido, dni = @Dni, telefono = @Telefono, email = @Email
+    SET nombre = @Nombre, apellido = @Apellido, dni = @Dni, telefono = @Telefono, email = @Email,
+        domicilio = ISNULL(@Domicilio, domicilio)
     WHERE id_inquilino = @Id;
 END
 GO
@@ -1341,7 +1344,7 @@ GO
 
 CREATE PROCEDURE [dbo].[LeerInquilinos]
 AS BEGIN
-    SELECT id_inquilino, nombre, apellido, dni, telefono, email
+    SELECT id_inquilino, nombre, apellido, dni, telefono, email, domicilio
     FROM Inquilino;
 END
 GO
@@ -1355,7 +1358,7 @@ GO
 CREATE PROCEDURE [dbo].[BuscarInquilinoPorId]
     @Id INT
 AS BEGIN
-    SELECT id_inquilino, nombre, apellido, dni, telefono, email
+    SELECT id_inquilino, nombre, apellido, dni, telefono, email, domicilio
     FROM Inquilino
     WHERE id_inquilino = @Id;
 END
@@ -1370,7 +1373,7 @@ GO
 CREATE PROCEDURE [dbo].[BuscarInquilinoPorDni]
     @Dni VARCHAR(15)
 AS BEGIN
-    SELECT id_inquilino, nombre, apellido, dni, telefono, email
+    SELECT id_inquilino, nombre, apellido, dni, telefono, email, domicilio
     FROM Inquilino
     WHERE dni = @Dni;
 END

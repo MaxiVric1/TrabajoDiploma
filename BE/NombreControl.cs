@@ -177,6 +177,7 @@ namespace BE
         public const string FormRegistrarContrato_lblApellido = "FormRegistrarContrato.lblApellido";
         public const string FormRegistrarContrato_lblTelefono = "FormRegistrarContrato.lblTelefono";
         public const string FormRegistrarContrato_lblEmail = "FormRegistrarContrato.lblEmail";
+        public const string FormRegistrarContrato_lblDomicilio = "FormRegistrarContrato.lblDomicilio";
         public const string FormRegistrarContrato_lblInmueble = "FormRegistrarContrato.lblInmueble";
         public const string FormRegistrarContrato_grpContrato = "FormRegistrarContrato.grpContrato";
         public const string FormRegistrarContrato_lblFechaInicio = "FormRegistrarContrato.lblFechaInicio";
