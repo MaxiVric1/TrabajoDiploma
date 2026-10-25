@@ -119,6 +119,17 @@ namespace TpIngSoft
                 {
                     col.Visible = visibles.Contains(col.Name);
                 }
+                // Proporción del ancho (la grilla reparte todo el ancho): más para la dirección, menos para los datos cortos
+                var proporciones = new Dictionary<string, float>
+                {
+                    { "NroCaptacion", 70 }, { "Cliente", 100 }, { "Direccion", 175 }, { "TipoInmueble", 85 },
+                    { "TipoPublicacion", 70 }, { "ValorFinal", 105 }, { "EstadoPublicacion", 85 },
+                    { "FechaPublicacion", 100 }, { "FechaDespublicacion", 100 }
+                };
+                foreach (var p in proporciones)
+                {
+                    if (dgvInmuebles.Columns[p.Key] != null) dgvInmuebles.Columns[p.Key].FillWeight = p.Value;
+                }
                 if (dgvInmuebles.Columns["ValorFinal"] != null)
                 {
                     dgvInmuebles.Columns["ValorFinal"].DefaultCellStyle.Format = "N2";
