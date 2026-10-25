@@ -45,6 +45,8 @@ namespace TpIngSoft
             this.lblResumenValor = new System.Windows.Forms.Label();
             this.btnRegistrar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudNroContrato)).BeginInit();
+            this.lblMora = new System.Windows.Forms.Label();
+            this.lblMoraValor = new System.Windows.Forms.Label();
             this.grpContrato.SuspendLayout();
             this.grpPeriodo.SuspendLayout();
             this.grpResumen.SuspendLayout();
@@ -75,10 +77,12 @@ namespace TpIngSoft
             this.grpContrato.Controls.Add(this.lblMontoMensualValor);
             this.grpContrato.Controls.Add(this.lblEstadoContrato);
             this.grpContrato.Controls.Add(this.lblEstadoContratoValor);
+            this.grpContrato.Controls.Add(this.lblMora);
+            this.grpContrato.Controls.Add(this.lblMoraValor);
             this.grpContrato.ForeColor = System.Drawing.Color.White;
             this.grpContrato.Location = new System.Drawing.Point(12, 32);
             this.grpContrato.Name = "grpContrato";
-            this.grpContrato.Size = new System.Drawing.Size(616, 132);
+            this.grpContrato.Size = new System.Drawing.Size(616, 154);
             this.grpContrato.TabIndex = 1;
             this.grpContrato.TabStop = false;
             this.grpContrato.Text = "Contrato";
@@ -192,6 +196,23 @@ namespace TpIngSoft
             this.lblEstadoContratoValor.Text = "-";
             this.lblEstadoContratoValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
+            // lblMora
+            //
+            this.lblMora.Location = new System.Drawing.Point(6, 124);
+            this.lblMora.Name = "lblMora";
+            this.lblMora.Size = new System.Drawing.Size(100, 20);
+            this.lblMora.Text = "Mora:";
+            this.lblMora.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblMoraValor
+            //
+            this.lblMoraValor.AutoEllipsis = true;
+            this.lblMoraValor.Location = new System.Drawing.Point(112, 124);
+            this.lblMoraValor.Name = "lblMoraValor";
+            this.lblMoraValor.Size = new System.Drawing.Size(490, 20);
+            this.lblMoraValor.Text = "-";
+            this.lblMoraValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
             // grpPeriodo
             //
             this.grpPeriodo.BackColor = System.Drawing.Color.Transparent;
@@ -209,7 +230,7 @@ namespace TpIngSoft
             this.grpPeriodo.Controls.Add(this.lblTotalValor);
             this.grpPeriodo.Enabled = false;
             this.grpPeriodo.ForeColor = System.Drawing.Color.White;
-            this.grpPeriodo.Location = new System.Drawing.Point(12, 172);
+            this.grpPeriodo.Location = new System.Drawing.Point(12, 194);
             this.grpPeriodo.Name = "grpPeriodo";
             this.grpPeriodo.Size = new System.Drawing.Size(616, 150);
             this.grpPeriodo.TabIndex = 2;
@@ -339,7 +360,7 @@ namespace TpIngSoft
             this.grpResumen.BackColor = System.Drawing.Color.Transparent;
             this.grpResumen.Controls.Add(this.lblResumenValor);
             this.grpResumen.ForeColor = System.Drawing.Color.White;
-            this.grpResumen.Location = new System.Drawing.Point(12, 330);
+            this.grpResumen.Location = new System.Drawing.Point(12, 352);
             this.grpResumen.Name = "grpResumen";
             this.grpResumen.Size = new System.Drawing.Size(616, 100);
             this.grpResumen.TabIndex = 3;
@@ -360,7 +381,7 @@ namespace TpIngSoft
             this.btnRegistrar.Enabled = false;
             this.btnRegistrar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnRegistrar.ForeColor = System.Drawing.Color.White;
-            this.btnRegistrar.Location = new System.Drawing.Point(468, 440);
+            this.btnRegistrar.Location = new System.Drawing.Point(468, 462);
             this.btnRegistrar.Name = "btnRegistrar";
             this.btnRegistrar.Size = new System.Drawing.Size(160, 36);
             this.btnRegistrar.TabIndex = 4;
@@ -373,7 +394,7 @@ namespace TpIngSoft
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
-            this.ClientSize = new System.Drawing.Size(640, 488);
+            this.ClientSize = new System.Drawing.Size(640, 510);
             this.Controls.Add(this.lblActualizacion);
             this.Controls.Add(this.grpContrato);
             this.Controls.Add(this.grpPeriodo);
@@ -406,6 +427,8 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblMontoMensualValor;
         private System.Windows.Forms.Label lblEstadoContrato;
         private System.Windows.Forms.Label lblEstadoContratoValor;
+        private System.Windows.Forms.Label lblMora;
+        private System.Windows.Forms.Label lblMoraValor;
         private System.Windows.Forms.GroupBox grpPeriodo;
         private System.Windows.Forms.Label lblPeriodo;
         private System.Windows.Forms.ComboBox cmbPeriodo;

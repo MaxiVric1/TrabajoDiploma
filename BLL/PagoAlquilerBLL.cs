@@ -79,6 +79,15 @@ namespace BLL
             return periodos;
         }
 
+        // Mora del contrato a la fecha: meses impagos En Mora y En Litigio y lo que se debe si se pagaran hoy
+        // (alquiler + recargo de cada mes)
+        public (int EnMora, int EnLitigio, decimal Deuda) ResumenMora(Contrato contrato, DateTime hoy)
+        {
+            List<PeriodoAPagar> vencidos = LeerPeriodosAPagar(contrato, hoy).Where(p => p.Estado.HasValue).ToList();
+            decimal deuda = vencidos.Sum(p => CalcularImporte(contrato, p.Mes, p.Anio, hoy).Total);
+            return (vencidos.Count(p => p.Estado == EstadoPago.EnMora), vencidos.Count(p => p.Estado == EstadoPago.EnLitigio), deuda);
+        }
+
         // Registra el pago de un mes. Hasta el día 10 se paga el monto mensual; después, monto + recargo del 10%.
         // Si el mes ya estaba En Mora o En Litigio, el pago lo regulariza (queda Al día con el recargo registrado).
         public int RegistrarPago(int idContrato, int mes, int anio, decimal montoPagado, DateTime fechaPago)

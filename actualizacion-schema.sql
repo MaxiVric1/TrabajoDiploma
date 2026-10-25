@@ -208,7 +208,54 @@ INSERT INTO @Nuevos VALUES
     ('dgvPendientes.tipoPublicacion', 'FormValidarTasacion', N'Operación', 'Listing type'),
     ('dgvInmuebles.tipoPublicacion', 'FormCargarMaterialAudiovisual', N'Operación', 'Listing type'),
     ('dgvInmuebles.tipoPublicacion', 'FormPublicarInmueble', N'Operación', 'Listing type'),
-    ('dgvInmuebles.tipoPublicacion', 'FormInmueblesPublicados', N'Operación', 'Listing type');
+    ('dgvInmuebles.tipoPublicacion', 'FormInmueblesPublicados', N'Operación', 'Listing type'),
+    -- PN2 (paso 4): FormRegistrarContrato
+    ('tabInmueble', 'FormRegistrarContrato', 'Inmueble y Propietario', 'Property and Owner'),
+    ('tabInquilino', 'FormRegistrarContrato', 'Inquilino', 'Tenant'),
+    ('tabGarante', 'FormRegistrarContrato', 'Garante', 'Guarantor'),
+    ('tabCondiciones', 'FormRegistrarContrato', 'Condiciones', 'Terms'),
+    ('tabResumen', 'FormRegistrarContrato', 'Resumen y PDF', 'Summary and PDF'),
+    ('grpDatosInmueble', 'FormRegistrarContrato', 'Datos del inmueble', 'Property details'),
+    ('lblTipoInmueble', 'FormRegistrarContrato', 'Tipo:', 'Type:'),
+    ('lblDireccion', 'FormRegistrarContrato', N'Dirección:', 'Address:'),
+    ('lblSuperficie', 'FormRegistrarContrato', 'Superficie:', 'Area:'),
+    ('lblAmbientes', 'FormRegistrarContrato', 'Ambientes:', 'Rooms:'),
+    ('lblValorTasado', 'FormRegistrarContrato', 'Valor tasado:', 'Appraised value:'),
+    ('grpPropietario', 'FormRegistrarContrato', 'Propietario', 'Owner'),
+    ('lblPropietarioNombre', 'FormRegistrarContrato', 'Nombre:', 'Name:'),
+    ('lblPropietarioDni', 'FormRegistrarContrato', 'DNI:', 'ID:'),
+    ('lblPropietarioTelefono', 'FormRegistrarContrato', N'Teléfono:', 'Phone:'),
+    ('lblPropietarioEmail', 'FormRegistrarContrato', 'Email:', 'Email:'),
+    ('grpGarante', 'FormRegistrarContrato', 'Garante (obligatorio)', 'Guarantor (required)'),
+    ('lblGaranteNombre', 'FormRegistrarContrato', 'Nombre:', 'First Name:'),
+    ('lblGaranteApellido', 'FormRegistrarContrato', 'Apellido:', 'Last Name:'),
+    ('lblGaranteDni', 'FormRegistrarContrato', 'DNI:', 'ID:'),
+    ('lblGaranteDomicilio', 'FormRegistrarContrato', 'Domicilio:', 'Address:'),
+    ('lblPropiedadGarantia', 'FormRegistrarContrato', N'Propiedad en garantía:', 'Collateral property:'),
+    ('lblMetodoPago', 'FormRegistrarContrato', N'Método de pago:', 'Payment method:'),
+    ('lblDeposito', 'FormRegistrarContrato', N'Depósito de garantía:', 'Security deposit:'),
+    ('lblComision', 'FormRegistrarContrato', N'Comisión inmobiliaria:', 'Agency fee:'),
+    ('lblActualizacion', 'FormRegistrarContrato', N'Actualización:', 'Rent adjustment:'),
+    ('lblFirma', 'FormRegistrarContrato', 'Firma del inquilino (nombre y apellido):', 'Tenant signature (full name):'),
+    ('btnRegistrar', 'FormRegistrarContrato', 'Registrar Contrato', 'Register Contract'),
+    ('btnGenerarPdf', 'FormRegistrarContrato', 'Generar PDF', 'Generate PDF'),
+    ('btnNuevoContrato', 'FormRegistrarContrato', 'Nuevo Contrato', 'New Contract'),
+    ('btnAnterior', 'FormRegistrarContrato', '< Anterior', '< Back'),
+    ('btnSiguiente', 'FormRegistrarContrato', 'Siguiente >', 'Next >'),
+    -- PN2 (paso 4): FormGestionarContratos
+    ('grpCondiciones', 'FormGestionarContratos', 'Condiciones', 'Terms'),
+    ('lblDeposito', 'FormGestionarContratos', N'Depósito:', 'Deposit:'),
+    ('lblComision', 'FormGestionarContratos', N'Comisión:', 'Agency fee:'),
+    ('lblMetodoPago', 'FormGestionarContratos', N'Método de pago:', 'Payment method:'),
+    ('lblIndice', 'FormGestionarContratos', N'Actualización:', 'Adjustment:'),
+    ('lblGarante', 'FormGestionarContratos', 'Garante:', 'Guarantor:'),
+    ('grpRescision', 'FormGestionarContratos', N'Rescisión', 'Early termination'),
+    ('lblIniciadaPor', 'FormGestionarContratos', 'Iniciada por:', 'Initiated by:'),
+    ('lblMesesRestantes', 'FormGestionarContratos', 'Canon restante:', 'Remaining rent:'),
+    ('lblPenalidad', 'FormGestionarContratos', 'Penalidad:', 'Penalty:'),
+    ('btnRescindir', 'FormGestionarContratos', 'Rescindir Contrato', 'Terminate Contract'),
+    -- PN2 (paso 4): FormRegistrarPago
+    ('lblMora', 'FormRegistrarPago', 'Mora:', 'Arrears:');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
@@ -237,7 +284,10 @@ INSERT INTO @Quitados VALUES
     ('btnNuevoInmueble', 'FormRegistrarContrato'),
     ('lblNuevaDireccion', 'FormRegistrarContrato'),
     ('btnAgregarInmueble', 'FormRegistrarContrato'),
-    ('btnCancelarInmueble', 'FormRegistrarContrato');
+    ('btnCancelarInmueble', 'FormRegistrarContrato'),
+    -- PN2 (paso 4): Registrar Contrato en pestañas
+    ('grpInmueble', 'FormRegistrarContrato'),
+    ('btnGuardar', 'FormRegistrarContrato');
 
 DELETE t FROM [dbo].[Traducciones] t
 JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]

@@ -41,6 +41,8 @@ namespace TpIngSoft
         private ContratoBLL contratoBLL = new ContratoBLL();
         private PagoAlquilerBLL pagoBLL = new PagoAlquilerBLL();
         private InquilinoBLL inquilinoBLL = new InquilinoBLL();
+        private GaranteBLL garanteBLL = new GaranteBLL();
+        private ToolTip toolTip = new ToolTip(); // detalle de todos los garantes sobre lblGaranteValor
         private List<IControlTraducible> _controlesTraducibles = new List<IControlTraducible>();
         private List<DataGridTraducible> _grillasTraducibles = new List<DataGridTraducible>();
         private bool _cargando; // evita refrescar el detalle mientras se rearma la grilla
@@ -64,6 +66,17 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblDni, BE.NombreControl.FormGestionarContratos_lblDni));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblTelefono, BE.NombreControl.FormGestionarContratos_lblTelefono));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblEmail, BE.NombreControl.FormGestionarContratos_lblEmail));
+            _controlesTraducibles.Add(new EtiquetaTraducible(grpCondiciones, BE.NombreControl.FormGestionarContratos_grpCondiciones));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblDeposito, BE.NombreControl.FormGestionarContratos_lblDeposito));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblComision, BE.NombreControl.FormGestionarContratos_lblComision));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblMetodoPago, BE.NombreControl.FormGestionarContratos_lblMetodoPago));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblIndice, BE.NombreControl.FormGestionarContratos_lblIndice));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblGarante, BE.NombreControl.FormGestionarContratos_lblGarante));
+            _controlesTraducibles.Add(new EtiquetaTraducible(grpRescision, BE.NombreControl.FormGestionarContratos_grpRescision));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblIniciadaPor, BE.NombreControl.FormGestionarContratos_lblIniciadaPor));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblMesesRestantes, BE.NombreControl.FormGestionarContratos_lblMesesRestantes));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblPenalidad, BE.NombreControl.FormGestionarContratos_lblPenalidad));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnRescindir, BE.NombreControl.FormGestionarContratos_btnRescindir));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpRenovacion, BE.NombreControl.FormGestionarContratos_grpRenovacion));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblMesesExtension, BE.NombreControl.FormGestionarContratos_lblMesesExtension));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblNuevoMonto, BE.NombreControl.FormGestionarContratos_lblNuevoMonto));
@@ -125,6 +138,12 @@ namespace TpIngSoft
             cmbFiltroEstado.Items.Clear();
             cmbFiltroEstado.Items.AddRange(new object[] { "Todos", EstadosPN2.Texto(EstadoContrato.Activo),
                 EstadosPN2.Texto(EstadoContrato.PorVencer), EstadosPN2.Texto(EstadoContrato.Finalizado) });
+            cmbIniciadaPor.Items.Clear();
+            foreach (IniciadorRescision iniciador in Enum.GetValues(typeof(IniciadorRescision)))
+            {
+                cmbIniciadaPor.Items.Add(iniciador);
+            }
+            cmbIniciadaPor.SelectedIndex = 0;
 
             ActualizarEstados();
             cmbFiltroEstado.SelectedIndex = 0; // dispara la primera carga
@@ -230,10 +249,13 @@ namespace TpIngSoft
             Contrato contrato = ContratoSeleccionado();
             lblNombreValor.Text = lblApellidoValor.Text = lblDniValor.Text = lblTelefonoValor.Text = lblEmailValor.Text = "-";
             lblMesActualValor.Text = "-";
+            lblDepositoValor.Text = lblComisionValor.Text = lblMetodoPagoValor.Text = lblIndiceValor.Text = lblGaranteValor.Text = "-";
+            lblMesesRestantesValor.Text = lblPenalidadValor.Text = "-";
+            toolTip.SetToolTip(lblGaranteValor, null);
             dgvPagos.DataSource = null;
 
-            // Renovar solo para contratos Activo o Por Vencer
-            grpRenovacion.Enabled = contrato != null && contrato.Vigente;
+            // Renovar y rescindir solo para contratos Activo o Por Vencer
+            grpRenovacion.Enabled = grpRescision.Enabled = contrato != null && contrato.Vigente;
             if (contrato == null)
             {
                 lblNuevoVencimientoValor.Text = "-";
@@ -241,6 +263,7 @@ namespace TpIngSoft
             }
             nudNuevoMonto.Value = Math.Min(contrato.MontoMensual, nudNuevoMonto.Maximum);
             ActualizarNuevoVencimiento();
+            MostrarCondiciones(contrato);
 
             try
             {
@@ -283,6 +306,77 @@ namespace TpIngSoft
             {
                 MessageBox.Show("Error al cargar el detalle del contrato: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // Condiciones económicas, garantes y rescisión (penalidad calculada a hoy, o la ya aplicada)
+        private void MostrarCondiciones(Contrato contrato)
+        {
+            lblDepositoValor.Text = $"${contrato.DepositoGarantia:N2}" +
+                (contrato.MontoDevolucionDeposito.HasValue ? $" (devuelto ${contrato.MontoDevolucionDeposito:N2})" : "");
+            lblComisionValor.Text = $"${contrato.ComisionInmobiliaria:N2}";
+            lblMetodoPagoValor.Text = contrato.MetodoPago.ToString();
+            lblIndiceValor.Text = $"{contrato.IndiceActualizacion} cada {contrato.PeriodicidadActualizacionMeses} meses";
+
+            if (contrato.Vigente)
+            {
+                int meses = ContratoBLL.MesesRestantes(contrato, DateTime.Now);
+                lblMesesRestantesValor.Text = $"{meses} mes(es): ${ContratoBLL.CanonRestante(contrato, DateTime.Now):N2}";
+                lblPenalidadValor.Text = $"${ContratoBLL.CalcularPenalidadRescision(contrato, DateTime.Now):N2} " +
+                                         $"({ContratoBLL.PORCENTAJE_PENALIDAD_RESCISION:P0})";
+            }
+            else if (contrato.RescisionIniciadaPor.HasValue)
+            {
+                lblMesesRestantesValor.Text = $"Rescindido por: {contrato.RescisionIniciadaPor}";
+                lblPenalidadValor.Text = contrato.PenalidadRescision.HasValue ? $"${contrato.PenalidadRescision:N2}" : "-";
+            }
+
+            try
+            {
+                List<Garante> garantes = garanteBLL.LeerPorContrato(contrato.IdContrato);
+                lblGaranteValor.Text = garantes.Count == 0 ? "Sin garantes"
+                    : garantes[0].ToString() + (garantes.Count > 1 ? $" y {garantes.Count - 1} más" : "");
+                toolTip.SetToolTip(lblGaranteValor, string.Join(Environment.NewLine, garantes.Select(g =>
+                    $"{g.NombreCompleto} (DNI {g.Dni}) - {g.Domicilio} - Garantía: {g.PropiedadGarantia}")));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar los garantes: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnRescindir_Click(object sender, EventArgs e)
+        {
+            Contrato contrato = ContratoSeleccionado();
+            if (contrato == null || !(cmbIniciadaPor.SelectedItem is IniciadorRescision iniciador)) return;
+
+            int meses = ContratoBLL.MesesRestantes(contrato, DateTime.Now);
+            decimal penalidad = ContratoBLL.CalcularPenalidadRescision(contrato, DateTime.Now);
+            string confirmacion =
+                $"¿Confirma la rescisión del Contrato N° {contrato.IdContrato}?\n\n" +
+                $"Inquilino: {contrato.Inquilino?.NombreCompleto}\n" +
+                $"Inmueble: {contrato.InmuebleAlquiler?.Direccion}\n" +
+                $"Iniciada por: {iniciador}\n" +
+                $"Canon restante: {meses} mes(es) x ${contrato.MontoMensual:N2} = ${ContratoBLL.CanonRestante(contrato, DateTime.Now):N2}\n" +
+                $"Penalidad ({ContratoBLL.PORCENTAJE_PENALIDAD_RESCISION:P0}), a cargo del {iniciador.ToString().ToLower()}: ${penalidad:N2}\n\n" +
+                "El contrato queda Finalizado y el inmueble vuelve a estar Publicado.";
+            if (MessageBox.Show(confirmacion, "Confirmar rescisión", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                return;
+
+            try
+            {
+                decimal aplicada = contratoBLL.Rescindir(contrato.IdContrato, iniciador);
+                MessageBox.Show($"Contrato N° {contrato.IdContrato} rescindido. Penalidad: ${aplicada:N2}.",
+                    "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al rescindir el contrato: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            CargarContratos(contrato.IdContrato);
         }
 
         private void nudMesesExtension_ValueChanged(object sender, EventArgs e)

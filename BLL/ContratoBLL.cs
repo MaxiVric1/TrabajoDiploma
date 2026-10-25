@@ -35,6 +35,31 @@ namespace BLL
 
         public static int DiasRestantes(Contrato contrato, DateTime hoy) => (contrato.FechaFin.Date - hoy.Date).Days;
 
+        // ---------- Condiciones económicas ----------
+
+        public const int MESES_DEPOSITO = 1;                        // depósito de garantía = 1 mes de alquiler
+        public const decimal PORCENTAJE_COMISION = 0.04m;           // comisión = 4% del valor total del contrato
+        public const int PERIODICIDAD_IPC_MESES = 3;                // actualización por IPC cada 3 meses
+        public const decimal PORCENTAJE_PENALIDAD_RESCISION = 0.10m; // rescisión = 10% del canon restante
+
+        public static decimal CalcularDeposito(decimal montoMensual) => Math.Round(montoMensual * MESES_DEPOSITO, 2);
+
+        // Sobre el valor total del contrato (monto mensual x duración)
+        public static decimal CalcularComision(decimal montoMensual, int duracionMeses) =>
+            Math.Round(montoMensual * duracionMeses * PORCENTAJE_COMISION, 2);
+
+        // Meses del contrato posteriores al mes en curso: los que quedan sin devengar si se rescinde hoy
+        public static int MesesRestantes(Contrato contrato, DateTime hoy)
+        {
+            DateTime mesEnCurso = new DateTime(hoy.Year, hoy.Month, 1);
+            return PagoAlquilerBLL.PeriodosDelContrato(contrato).Count(p => new DateTime(p.Anio, p.Mes, 1) > mesEnCurso);
+        }
+
+        public static decimal CanonRestante(Contrato contrato, DateTime hoy) => contrato.MontoMensual * MesesRestantes(contrato, hoy);
+
+        public static decimal CalcularPenalidadRescision(Contrato contrato, DateTime hoy) =>
+            Math.Round(CanonRestante(contrato, hoy) * PORCENTAJE_PENALIDAD_RESCISION, 2);
+
         // ---------- Operaciones ----------
 
         // Firma del contrato sobre un inmueble del PN1 (idInmueble): debe ser de alquiler, estar Publicado y sin
@@ -169,22 +194,25 @@ namespace BLL
                 $"Contrato N° {idContrato} finalizado antes de su vencimiento ({contrato.FechaFin:dd/MM/yyyy}).");
         }
 
-        // Rescisión anticipada: finaliza el contrato registrando quién la inició y la penalidad (null o 0 = sin
-        // penalidad). El inmueble del PN1 vuelve a Publicado.
-        public void Rescindir(int idContrato, IniciadorRescision iniciadaPor, decimal? penalidad)
+        // Rescisión anticipada: finaliza el contrato registrando quién la inició y la penalidad, que se calcula sola
+        // (PORCENTAJE_PENALIDAD_RESCISION del canon restante, a cargo de quien la inicia). El inmueble del PN1 vuelve
+        // a Publicado. Devuelve la penalidad aplicada.
+        public decimal Rescindir(int idContrato, IniciadorRescision iniciadaPor)
         {
             if (!Enum.IsDefined(typeof(IniciadorRescision), iniciadaPor))
                 throw new ArgumentException("Indique quién inició la rescisión.");
-            if (penalidad < 0)
-                throw new ArgumentException("La penalidad no puede ser negativa.");
             Contrato contrato = ContratoVigente(idContrato);
+            int mesesRestantes = MesesRestantes(contrato, DateTime.Now);
+            decimal penalidad = CalcularPenalidadRescision(contrato, DateTime.Now);
 
             if (!contratoDAL.Rescindir(idContrato, iniciadaPor, penalidad))
                 throw new Exception("No se pudo rescindir el contrato.");
 
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Rescisión Contrato",
                 $"Contrato N° {idContrato} rescindido por el {iniciadaPor.ToString().ToLower()} antes de su vencimiento " +
-                $"({contrato.FechaFin:dd/MM/yyyy})" + (penalidad > 0 ? $", penalidad ${penalidad:N2}." : ", sin penalidad."));
+                $"({contrato.FechaFin:dd/MM/yyyy}): {mesesRestantes} mes(es) restantes de ${contrato.MontoMensual:N2}, " +
+                $"penalidad ${penalidad:N2} ({PORCENTAJE_PENALIDAD_RESCISION:P0} del canon restante).");
+            return penalidad;
         }
 
         // Entrega del inmueble de un contrato finalizado: estado en que se recibió y cuánto del depósito se descuenta;
@@ -215,6 +243,99 @@ namespace BLL
                 $"Contrato N° {idContrato}: depósito ${contrato.DepositoGarantia:N2}, descuento ${montoDescuento:N2}, " +
                 $"devolución ${devolucion:N2}.");
             return devolucion;
+        }
+
+        // ---------- Documento PDF ----------
+
+        // La firma es el nombre y apellido del inquilino tipeados (en cualquier orden; sin distinguir mayúsculas,
+        // acentos ni espacios de más)
+        public static bool FirmaCoincide(string firma, Inquilino inquilino)
+        {
+            if (string.IsNullOrWhiteSpace(firma) || inquilino == null) return false;
+            string f = Normalizar(firma);
+            return f == Normalizar(inquilino.Nombre + " " + inquilino.Apellido) || f == Normalizar(inquilino.Apellido + " " + inquilino.Nombre);
+        }
+
+        private static string Normalizar(string texto)
+        {
+            string sinAcentos = new string(texto.Normalize(System.Text.NormalizationForm.FormD)
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                .ToArray());
+            return string.Join(" ", sinAcentos.ToLowerInvariant().Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
+        }
+
+        // Genera el contrato registrado en PDF con los datos guardados (partes, inmueble, garantes y condiciones) y la
+        // firma del inquilino, que debe coincidir con su nombre y apellido
+        public void GenerarPdf(int idContrato, string firmaInquilino, string ruta)
+        {
+            if (string.IsNullOrWhiteSpace(ruta))
+                throw new ArgumentException("Indique dónde guardar el PDF.");
+            Contrato contrato = contratoDAL.BuscarPorId(idContrato);
+            if (contrato == null)
+                throw new Exception("El contrato no existe.");
+            Inquilino inquilino = inquilinoDAL.BuscarPorId(contrato.IdInquilino);
+            if (!FirmaCoincide(firmaInquilino, inquilino))
+                throw new ArgumentException($"La firma debe ser el nombre y apellido del inquilino ({inquilino?.Nombre} {inquilino?.Apellido}).");
+
+            InmuebleAlquiler alquiler = inmuebleDAL.BuscarPorId(contrato.IdInmuebleAlquiler);
+            Inmueble inmueble = alquiler?.IdInmueble != null ? inmueblePN1DAL.BuscarPorId(alquiler.IdInmueble.Value) : null;
+            Cliente propietario = inmueble != null ? new ClienteDAL().BuscarPorId(inmueble.IdCliente) : null;
+            List<Garante> garantes = garanteDAL.LeerPorContrato(idContrato);
+
+            DocumentoPdf pdf = new DocumentoPdf($"LandSmart - Contrato de locación N° {idContrato}");
+            pdf.Titulo("CONTRATO DE LOCACIÓN");
+            pdf.Parrafo($"Contrato N° {idContrato} - generado el {DateTime.Now:dd/MM/yyyy HH:mm}", 9, centrado: true);
+
+            pdf.Subtitulo("1. Partes");
+            pdf.Campo("Locador (propietario)", propietario != null
+                ? $"{propietario.Nombre} {propietario.Apellido}, DNI {propietario.Dni}" : "-");
+            pdf.Campo("Locatario (inquilino)", $"{inquilino.Nombre} {inquilino.Apellido}, DNI {inquilino.Dni}");
+            pdf.Campo("Contacto del locatario", string.Join(" / ", new[] { inquilino.Telefono, inquilino.Email }.Where(s => !string.IsNullOrWhiteSpace(s))));
+
+            pdf.Subtitulo("2. Inmueble");
+            pdf.Campo("Dirección", inmueble?.Direccion ?? alquiler?.Direccion);
+            pdf.Campo("Tipo", inmueble?.TipoInmueble ?? alquiler?.TipoInmueble.ToString());
+            if (inmueble != null)
+                pdf.Campo("Superficie / ambientes", $"{inmueble.MetrosCuadrados:N0} m² - {inmueble.CantidadAmbientes} ambiente(s)");
+
+            pdf.Subtitulo("3. Garantes");
+            if (garantes.Count == 0) pdf.Parrafo("Sin garantes registrados.");
+            foreach (Garante g in garantes)
+            {
+                pdf.Campo("Garante", $"{g.Nombre} {g.Apellido}, DNI {g.Dni}");
+                pdf.Campo("Domicilio", g.Domicilio);
+                pdf.Campo("Propiedad en garantía", g.PropiedadGarantia);
+                pdf.Espacio(4);
+            }
+
+            pdf.Subtitulo("4. Condiciones");
+            pdf.Campo("Plazo", $"{contrato.DuracionMeses} meses, del {contrato.FechaInicio:dd/MM/yyyy} al {contrato.FechaFin:dd/MM/yyyy}");
+            pdf.Campo("Alquiler mensual", $"${contrato.MontoMensual:N2}, pagadero del 1 al {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes");
+            pdf.Campo("Método de pago", contrato.MetodoPago.ToString());
+            pdf.Campo("Depósito de garantía", $"${contrato.DepositoGarantia:N2}");
+            pdf.Campo("Comisión inmobiliaria", $"${contrato.ComisionInmobiliaria:N2}");
+            pdf.Campo("Actualización", $"Por índice {contrato.IndiceActualizacion}, cada {contrato.PeriodicidadActualizacionMeses} meses");
+
+            pdf.Subtitulo("5. Cláusulas");
+            pdf.Parrafo($"Mora: el pago posterior al día {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes devenga un recargo del " +
+                        $"{PagoAlquilerBLL.PORCENTAJE_RECARGO:P0} sobre el alquiler mensual.");
+            pdf.Espacio(3);
+            pdf.Parrafo($"Actualización: el alquiler mensual se ajusta cada {contrato.PeriodicidadActualizacionMeses} meses según la " +
+                        $"variación acumulada del {contrato.IndiceActualizacion} publicada por el BCRA.");
+            pdf.Espacio(3);
+            pdf.Parrafo($"Rescisión anticipada: la parte que rescinda el contrato antes de su vencimiento abonará una penalidad del " +
+                        $"{PORCENTAJE_PENALIDAD_RESCISION:P0} del canon restante.");
+            pdf.Espacio(3);
+            pdf.Parrafo("Depósito: se devuelve al finalizar el contrato, descontados los daños que presente el inmueble al momento de la entrega.");
+            pdf.Espacio(3);
+            pdf.Parrafo("Garantía: los garantes se constituyen en fiadores solidarios de todas las obligaciones del locatario.");
+
+            pdf.Subtitulo("6. Firma");
+            pdf.Firma($"Locatario: {inquilino.Nombre} {inquilino.Apellido} - DNI {inquilino.Dni}", firmaInquilino.Trim());
+
+            pdf.Guardar(ruta);
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "PDF Contrato",
+                $"Contrato N° {idContrato}: PDF generado y firmado por el inquilino.");
         }
 
         // Baja del contrato junto con sus garantes (una transacción). Si estaba vigente, el inmueble del PN1 vuelve
@@ -324,10 +445,12 @@ namespace BLL
             return inmueble;
         }
 
-        // Garantes del contrato que se registra: datos completos, sin repetir DNI y distintos del inquilino
+        // Garantes del contrato que se registra: al menos uno, con datos completos, sin repetir DNI y distintos
+        // del inquilino
         private void ValidarGarantes(Contrato contrato, string dniInquilino)
         {
-            if (contrato.Garantes == null) contrato.Garantes = new List<Garante>();
+            if (contrato.Garantes == null || contrato.Garantes.Count == 0)
+                throw new ArgumentException("El contrato debe tener al menos un garante.");
             GaranteBLL garanteBLL = new GaranteBLL();
             foreach (Garante garante in contrato.Garantes)
             {

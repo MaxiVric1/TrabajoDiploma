@@ -64,6 +64,7 @@
     <Compile Include="Encriptador.cs" />
     <Compile Include="SessionManager.cs" />
     <Compile Include="GestorDV.cs" />
+    <Compile Include="DocumentoPdf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

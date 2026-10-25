@@ -177,15 +177,45 @@ namespace BE
         public const string FormRegistrarContrato_lblApellido = "FormRegistrarContrato.lblApellido";
         public const string FormRegistrarContrato_lblTelefono = "FormRegistrarContrato.lblTelefono";
         public const string FormRegistrarContrato_lblEmail = "FormRegistrarContrato.lblEmail";
-        public const string FormRegistrarContrato_grpInmueble = "FormRegistrarContrato.grpInmueble";
         public const string FormRegistrarContrato_lblInmueble = "FormRegistrarContrato.lblInmueble";
         public const string FormRegistrarContrato_grpContrato = "FormRegistrarContrato.grpContrato";
         public const string FormRegistrarContrato_lblFechaInicio = "FormRegistrarContrato.lblFechaInicio";
         public const string FormRegistrarContrato_lblDuracion = "FormRegistrarContrato.lblDuracion";
         public const string FormRegistrarContrato_lblMonto = "FormRegistrarContrato.lblMonto";
         public const string FormRegistrarContrato_lblFechaFin = "FormRegistrarContrato.lblFechaFin";
-        public const string FormRegistrarContrato_btnGuardar = "FormRegistrarContrato.btnGuardar";
         public const string FormRegistrarContrato_btnCancelar = "FormRegistrarContrato.btnCancelar";
+        public const string FormRegistrarContrato_tabInmueble = "FormRegistrarContrato.tabInmueble";
+        public const string FormRegistrarContrato_tabInquilino = "FormRegistrarContrato.tabInquilino";
+        public const string FormRegistrarContrato_tabGarante = "FormRegistrarContrato.tabGarante";
+        public const string FormRegistrarContrato_tabCondiciones = "FormRegistrarContrato.tabCondiciones";
+        public const string FormRegistrarContrato_tabResumen = "FormRegistrarContrato.tabResumen";
+        public const string FormRegistrarContrato_grpDatosInmueble = "FormRegistrarContrato.grpDatosInmueble";
+        public const string FormRegistrarContrato_lblTipoInmueble = "FormRegistrarContrato.lblTipoInmueble";
+        public const string FormRegistrarContrato_lblDireccion = "FormRegistrarContrato.lblDireccion";
+        public const string FormRegistrarContrato_lblSuperficie = "FormRegistrarContrato.lblSuperficie";
+        public const string FormRegistrarContrato_lblAmbientes = "FormRegistrarContrato.lblAmbientes";
+        public const string FormRegistrarContrato_lblValorTasado = "FormRegistrarContrato.lblValorTasado";
+        public const string FormRegistrarContrato_grpPropietario = "FormRegistrarContrato.grpPropietario";
+        public const string FormRegistrarContrato_lblPropietarioNombre = "FormRegistrarContrato.lblPropietarioNombre";
+        public const string FormRegistrarContrato_lblPropietarioDni = "FormRegistrarContrato.lblPropietarioDni";
+        public const string FormRegistrarContrato_lblPropietarioTelefono = "FormRegistrarContrato.lblPropietarioTelefono";
+        public const string FormRegistrarContrato_lblPropietarioEmail = "FormRegistrarContrato.lblPropietarioEmail";
+        public const string FormRegistrarContrato_grpGarante = "FormRegistrarContrato.grpGarante";
+        public const string FormRegistrarContrato_lblGaranteNombre = "FormRegistrarContrato.lblGaranteNombre";
+        public const string FormRegistrarContrato_lblGaranteApellido = "FormRegistrarContrato.lblGaranteApellido";
+        public const string FormRegistrarContrato_lblGaranteDni = "FormRegistrarContrato.lblGaranteDni";
+        public const string FormRegistrarContrato_lblGaranteDomicilio = "FormRegistrarContrato.lblGaranteDomicilio";
+        public const string FormRegistrarContrato_lblPropiedadGarantia = "FormRegistrarContrato.lblPropiedadGarantia";
+        public const string FormRegistrarContrato_lblMetodoPago = "FormRegistrarContrato.lblMetodoPago";
+        public const string FormRegistrarContrato_lblDeposito = "FormRegistrarContrato.lblDeposito";
+        public const string FormRegistrarContrato_lblComision = "FormRegistrarContrato.lblComision";
+        public const string FormRegistrarContrato_lblActualizacion = "FormRegistrarContrato.lblActualizacion";
+        public const string FormRegistrarContrato_lblFirma = "FormRegistrarContrato.lblFirma";
+        public const string FormRegistrarContrato_btnRegistrar = "FormRegistrarContrato.btnRegistrar";
+        public const string FormRegistrarContrato_btnGenerarPdf = "FormRegistrarContrato.btnGenerarPdf";
+        public const string FormRegistrarContrato_btnNuevoContrato = "FormRegistrarContrato.btnNuevoContrato";
+        public const string FormRegistrarContrato_btnAnterior = "FormRegistrarContrato.btnAnterior";
+        public const string FormRegistrarContrato_btnSiguiente = "FormRegistrarContrato.btnSiguiente";
 
         // FormGestionarContratos
         public const string FormGestionarContratos_lblFiltroEstado = "FormGestionarContratos.lblFiltroEstado";
@@ -218,6 +248,17 @@ namespace BE
         public const string FormGestionarContratos_dgvPagos_monto = "FormGestionarContratos.dgvPagos.monto";
         public const string FormGestionarContratos_dgvPagos_recargo = "FormGestionarContratos.dgvPagos.recargo";
         public const string FormGestionarContratos_dgvPagos_fechaPago = "FormGestionarContratos.dgvPagos.fechaPago";
+        public const string FormGestionarContratos_grpCondiciones = "FormGestionarContratos.grpCondiciones";
+        public const string FormGestionarContratos_lblDeposito = "FormGestionarContratos.lblDeposito";
+        public const string FormGestionarContratos_lblComision = "FormGestionarContratos.lblComision";
+        public const string FormGestionarContratos_lblMetodoPago = "FormGestionarContratos.lblMetodoPago";
+        public const string FormGestionarContratos_lblIndice = "FormGestionarContratos.lblIndice";
+        public const string FormGestionarContratos_lblGarante = "FormGestionarContratos.lblGarante";
+        public const string FormGestionarContratos_grpRescision = "FormGestionarContratos.grpRescision";
+        public const string FormGestionarContratos_lblIniciadaPor = "FormGestionarContratos.lblIniciadaPor";
+        public const string FormGestionarContratos_lblMesesRestantes = "FormGestionarContratos.lblMesesRestantes";
+        public const string FormGestionarContratos_lblPenalidad = "FormGestionarContratos.lblPenalidad";
+        public const string FormGestionarContratos_btnRescindir = "FormGestionarContratos.btnRescindir";
 
         // FormRegistrarPago
         public const string FormRegistrarPago_grpContrato = "FormRegistrarPago.grpContrato";
@@ -236,6 +277,7 @@ namespace BE
         public const string FormRegistrarPago_lblTotal = "FormRegistrarPago.lblTotal";
         public const string FormRegistrarPago_grpResumen = "FormRegistrarPago.grpResumen";
         public const string FormRegistrarPago_btnRegistrar = "FormRegistrarPago.btnRegistrar";
+        public const string FormRegistrarPago_lblMora = "FormRegistrarPago.lblMora";
 
         // FormGestionarMora
         public const string FormGestionarMora_grpInquilino = "FormGestionarMora.grpInquilino";

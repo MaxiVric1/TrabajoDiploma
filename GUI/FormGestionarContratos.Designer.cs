@@ -45,7 +45,28 @@ namespace TpIngSoft
             this.lblMesActual = new System.Windows.Forms.Label();
             this.lblMesActualValor = new System.Windows.Forms.Label();
             this.dgvPagos = new System.Windows.Forms.DataGridView();
+            this.grpCondiciones = new System.Windows.Forms.GroupBox();
+            this.lblDeposito = new System.Windows.Forms.Label();
+            this.lblDepositoValor = new System.Windows.Forms.Label();
+            this.lblComision = new System.Windows.Forms.Label();
+            this.lblComisionValor = new System.Windows.Forms.Label();
+            this.lblMetodoPago = new System.Windows.Forms.Label();
+            this.lblMetodoPagoValor = new System.Windows.Forms.Label();
+            this.lblIndice = new System.Windows.Forms.Label();
+            this.lblIndiceValor = new System.Windows.Forms.Label();
+            this.lblGarante = new System.Windows.Forms.Label();
+            this.lblGaranteValor = new System.Windows.Forms.Label();
+            this.grpRescision = new System.Windows.Forms.GroupBox();
+            this.lblIniciadaPor = new System.Windows.Forms.Label();
+            this.cmbIniciadaPor = new System.Windows.Forms.ComboBox();
+            this.lblMesesRestantes = new System.Windows.Forms.Label();
+            this.lblMesesRestantesValor = new System.Windows.Forms.Label();
+            this.lblPenalidad = new System.Windows.Forms.Label();
+            this.lblPenalidadValor = new System.Windows.Forms.Label();
+            this.btnRescindir = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvContratos)).BeginInit();
+            this.grpCondiciones.SuspendLayout();
+            this.grpRescision.SuspendLayout();
             this.grpInquilino.SuspendLayout();
             this.grpRenovacion.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudMesesExtension)).BeginInit();
@@ -140,7 +161,7 @@ namespace TpIngSoft
             this.dgvContratos.Name = "dgvContratos";
             this.dgvContratos.ReadOnly = true;
             this.dgvContratos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvContratos.Size = new System.Drawing.Size(976, 252);
+            this.dgvContratos.Size = new System.Drawing.Size(976, 220);
             this.dgvContratos.TabIndex = 4;
             this.dgvContratos.SelectionChanged += new System.EventHandler(this.dgvContratos_SelectionChanged);
             //
@@ -159,7 +180,7 @@ namespace TpIngSoft
             this.grpInquilino.Controls.Add(this.lblEmail);
             this.grpInquilino.Controls.Add(this.lblEmailValor);
             this.grpInquilino.ForeColor = System.Drawing.Color.White;
-            this.grpInquilino.Location = new System.Drawing.Point(12, 308);
+            this.grpInquilino.Location = new System.Drawing.Point(12, 276);
             this.grpInquilino.Name = "grpInquilino";
             this.grpInquilino.Size = new System.Drawing.Size(320, 148);
             this.grpInquilino.TabIndex = 5;
@@ -271,7 +292,7 @@ namespace TpIngSoft
             this.grpRenovacion.Controls.Add(this.lblNuevoVencimientoValor);
             this.grpRenovacion.Controls.Add(this.btnRenovar);
             this.grpRenovacion.ForeColor = System.Drawing.Color.White;
-            this.grpRenovacion.Location = new System.Drawing.Point(12, 464);
+            this.grpRenovacion.Location = new System.Drawing.Point(12, 432);
             this.grpRenovacion.Name = "grpRenovacion";
             this.grpRenovacion.Size = new System.Drawing.Size(320, 164);
             this.grpRenovacion.TabIndex = 6;
@@ -364,9 +385,9 @@ namespace TpIngSoft
             this.grpPagos.Controls.Add(this.lblMesActualValor);
             this.grpPagos.Controls.Add(this.dgvPagos);
             this.grpPagos.ForeColor = System.Drawing.Color.White;
-            this.grpPagos.Location = new System.Drawing.Point(342, 308);
+            this.grpPagos.Location = new System.Drawing.Point(342, 432);
             this.grpPagos.Name = "grpPagos";
-            this.grpPagos.Size = new System.Drawing.Size(646, 320);
+            this.grpPagos.Size = new System.Drawing.Size(646, 276);
             this.grpPagos.TabIndex = 7;
             this.grpPagos.TabStop = false;
             this.grpPagos.Text = "Historial de pagos";
@@ -413,30 +434,224 @@ namespace TpIngSoft
             this.dgvPagos.ReadOnly = true;
             this.dgvPagos.RowHeadersVisible = false;
             this.dgvPagos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvPagos.Size = new System.Drawing.Size(626, 264);
+            this.dgvPagos.Size = new System.Drawing.Size(626, 220);
             this.dgvPagos.TabIndex = 2;
+            //
+            // grpCondiciones
+            //
+            this.grpCondiciones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.grpCondiciones.BackColor = System.Drawing.Color.Transparent;
+            this.grpCondiciones.Controls.Add(this.lblDeposito);
+            this.grpCondiciones.Controls.Add(this.lblDepositoValor);
+            this.grpCondiciones.Controls.Add(this.lblComision);
+            this.grpCondiciones.Controls.Add(this.lblComisionValor);
+            this.grpCondiciones.Controls.Add(this.lblMetodoPago);
+            this.grpCondiciones.Controls.Add(this.lblMetodoPagoValor);
+            this.grpCondiciones.Controls.Add(this.lblIndice);
+            this.grpCondiciones.Controls.Add(this.lblIndiceValor);
+            this.grpCondiciones.Controls.Add(this.lblGarante);
+            this.grpCondiciones.Controls.Add(this.lblGaranteValor);
+            this.grpCondiciones.ForeColor = System.Drawing.Color.White;
+            this.grpCondiciones.Location = new System.Drawing.Point(342, 276);
+            this.grpCondiciones.Name = "grpCondiciones";
+            this.grpCondiciones.Size = new System.Drawing.Size(320, 148);
+            this.grpCondiciones.TabStop = false;
+            this.grpCondiciones.Text = "Condiciones";
+            //
+            // lblDeposito
+            //
+            this.lblDeposito.Location = new System.Drawing.Point(6, 22);
+            this.lblDeposito.Name = "lblDeposito";
+            this.lblDeposito.Size = new System.Drawing.Size(100, 20);
+            this.lblDeposito.Text = "Depósito:";
+            this.lblDeposito.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblDepositoValor
+            //
+            this.lblDepositoValor.AutoEllipsis = true;
+            this.lblDepositoValor.Location = new System.Drawing.Point(112, 22);
+            this.lblDepositoValor.Name = "lblDepositoValor";
+            this.lblDepositoValor.Size = new System.Drawing.Size(200, 20);
+            this.lblDepositoValor.Text = "-";
+            this.lblDepositoValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblComision
+            //
+            this.lblComision.Location = new System.Drawing.Point(6, 45);
+            this.lblComision.Name = "lblComision";
+            this.lblComision.Size = new System.Drawing.Size(100, 20);
+            this.lblComision.Text = "Comisión:";
+            this.lblComision.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblComisionValor
+            //
+            this.lblComisionValor.AutoEllipsis = true;
+            this.lblComisionValor.Location = new System.Drawing.Point(112, 45);
+            this.lblComisionValor.Name = "lblComisionValor";
+            this.lblComisionValor.Size = new System.Drawing.Size(200, 20);
+            this.lblComisionValor.Text = "-";
+            this.lblComisionValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblMetodoPago
+            //
+            this.lblMetodoPago.Location = new System.Drawing.Point(6, 68);
+            this.lblMetodoPago.Name = "lblMetodoPago";
+            this.lblMetodoPago.Size = new System.Drawing.Size(100, 20);
+            this.lblMetodoPago.Text = "Método de pago:";
+            this.lblMetodoPago.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblMetodoPagoValor
+            //
+            this.lblMetodoPagoValor.AutoEllipsis = true;
+            this.lblMetodoPagoValor.Location = new System.Drawing.Point(112, 68);
+            this.lblMetodoPagoValor.Name = "lblMetodoPagoValor";
+            this.lblMetodoPagoValor.Size = new System.Drawing.Size(200, 20);
+            this.lblMetodoPagoValor.Text = "-";
+            this.lblMetodoPagoValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblIndice
+            //
+            this.lblIndice.Location = new System.Drawing.Point(6, 91);
+            this.lblIndice.Name = "lblIndice";
+            this.lblIndice.Size = new System.Drawing.Size(100, 20);
+            this.lblIndice.Text = "Actualización:";
+            this.lblIndice.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblIndiceValor
+            //
+            this.lblIndiceValor.AutoEllipsis = true;
+            this.lblIndiceValor.Location = new System.Drawing.Point(112, 91);
+            this.lblIndiceValor.Name = "lblIndiceValor";
+            this.lblIndiceValor.Size = new System.Drawing.Size(200, 20);
+            this.lblIndiceValor.Text = "-";
+            this.lblIndiceValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblGarante
+            //
+            this.lblGarante.Location = new System.Drawing.Point(6, 114);
+            this.lblGarante.Name = "lblGarante";
+            this.lblGarante.Size = new System.Drawing.Size(100, 20);
+            this.lblGarante.Text = "Garante:";
+            this.lblGarante.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblGaranteValor
+            //
+            this.lblGaranteValor.AutoEllipsis = true;
+            this.lblGaranteValor.Location = new System.Drawing.Point(112, 114);
+            this.lblGaranteValor.Name = "lblGaranteValor";
+            this.lblGaranteValor.Size = new System.Drawing.Size(200, 20);
+            this.lblGaranteValor.Text = "-";
+            this.lblGaranteValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // grpRescision
+            //
+            this.grpRescision.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.grpRescision.BackColor = System.Drawing.Color.Transparent;
+            this.grpRescision.Controls.Add(this.lblIniciadaPor);
+            this.grpRescision.Controls.Add(this.cmbIniciadaPor);
+            this.grpRescision.Controls.Add(this.lblMesesRestantes);
+            this.grpRescision.Controls.Add(this.lblMesesRestantesValor);
+            this.grpRescision.Controls.Add(this.lblPenalidad);
+            this.grpRescision.Controls.Add(this.lblPenalidadValor);
+            this.grpRescision.Controls.Add(this.btnRescindir);
+            this.grpRescision.ForeColor = System.Drawing.Color.White;
+            this.grpRescision.Location = new System.Drawing.Point(672, 276);
+            this.grpRescision.Name = "grpRescision";
+            this.grpRescision.Size = new System.Drawing.Size(316, 148);
+            this.grpRescision.TabStop = false;
+            this.grpRescision.Text = "Rescisión";
+            //
+            // lblIniciadaPor
+            //
+            this.lblIniciadaPor.Location = new System.Drawing.Point(6, 22);
+            this.lblIniciadaPor.Name = "lblIniciadaPor";
+            this.lblIniciadaPor.Size = new System.Drawing.Size(110, 21);
+            this.lblIniciadaPor.Text = "Iniciada por:";
+            this.lblIniciadaPor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // cmbIniciadaPor
+            //
+            this.cmbIniciadaPor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.cmbIniciadaPor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbIniciadaPor.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmbIniciadaPor.ForeColor = System.Drawing.Color.White;
+            this.cmbIniciadaPor.FormattingEnabled = true;
+            this.cmbIniciadaPor.Location = new System.Drawing.Point(122, 22);
+            this.cmbIniciadaPor.Name = "cmbIniciadaPor";
+            this.cmbIniciadaPor.Size = new System.Drawing.Size(180, 21);
+            //
+            // lblMesesRestantes
+            //
+            this.lblMesesRestantes.Location = new System.Drawing.Point(6, 52);
+            this.lblMesesRestantes.Name = "lblMesesRestantes";
+            this.lblMesesRestantes.Size = new System.Drawing.Size(110, 20);
+            this.lblMesesRestantes.Text = "Canon restante:";
+            this.lblMesesRestantes.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblMesesRestantesValor
+            //
+            this.lblMesesRestantesValor.AutoEllipsis = true;
+            this.lblMesesRestantesValor.Location = new System.Drawing.Point(122, 52);
+            this.lblMesesRestantesValor.Name = "lblMesesRestantesValor";
+            this.lblMesesRestantesValor.Size = new System.Drawing.Size(186, 20);
+            this.lblMesesRestantesValor.Text = "-";
+            this.lblMesesRestantesValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblPenalidad
+            //
+            this.lblPenalidad.Location = new System.Drawing.Point(6, 76);
+            this.lblPenalidad.Name = "lblPenalidad";
+            this.lblPenalidad.Size = new System.Drawing.Size(110, 20);
+            this.lblPenalidad.Text = "Penalidad:";
+            this.lblPenalidad.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblPenalidadValor
+            //
+            this.lblPenalidadValor.AutoEllipsis = true;
+            this.lblPenalidadValor.Location = new System.Drawing.Point(122, 76);
+            this.lblPenalidadValor.Name = "lblPenalidadValor";
+            this.lblPenalidadValor.Size = new System.Drawing.Size(186, 20);
+            this.lblPenalidadValor.Text = "-";
+            this.lblPenalidadValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // btnRescindir
+            //
+            this.btnRescindir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnRescindir.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnRescindir.ForeColor = System.Drawing.Color.White;
+            this.btnRescindir.Location = new System.Drawing.Point(122, 104);
+            this.btnRescindir.Name = "btnRescindir";
+            this.btnRescindir.Size = new System.Drawing.Size(180, 32);
+            this.btnRescindir.Text = "Rescindir Contrato";
+            this.btnRescindir.UseVisualStyleBackColor = false;
+            this.btnRescindir.Click += new System.EventHandler(this.btnRescindir_Click);
             //
             // FormGestionarContratos
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
-            this.ClientSize = new System.Drawing.Size(1000, 640);
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.ClientSize = new System.Drawing.Size(1000, 720);
             this.Controls.Add(this.lblFiltroEstado);
             this.Controls.Add(this.cmbFiltroEstado);
             this.Controls.Add(this.btnActualizar);
             this.Controls.Add(this.lblActualizacion);
             this.Controls.Add(this.dgvContratos);
             this.Controls.Add(this.grpInquilino);
+            this.Controls.Add(this.grpCondiciones);
+            this.Controls.Add(this.grpRescision);
             this.Controls.Add(this.grpRenovacion);
             this.Controls.Add(this.grpPagos);
-            this.MinimumSize = new System.Drawing.Size(1016, 679);
+            this.MinimumSize = new System.Drawing.Size(1016, 759);
             this.Name = "FormGestionarContratos";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Gestionar Contratos";
             this.Load += new System.EventHandler(this.FormGestionarContratos_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvContratos)).EndInit();
             this.grpInquilino.ResumeLayout(false);
+            this.grpCondiciones.ResumeLayout(false);
+            this.grpRescision.ResumeLayout(false);
             this.grpRenovacion.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.nudMesesExtension)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudNuevoMonto)).EndInit();
@@ -462,6 +677,25 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblTelefonoValor;
         private System.Windows.Forms.Label lblEmail;
         private System.Windows.Forms.Label lblEmailValor;
+        private System.Windows.Forms.GroupBox grpCondiciones;
+        private System.Windows.Forms.Label lblDeposito;
+        private System.Windows.Forms.Label lblDepositoValor;
+        private System.Windows.Forms.Label lblComision;
+        private System.Windows.Forms.Label lblComisionValor;
+        private System.Windows.Forms.Label lblMetodoPago;
+        private System.Windows.Forms.Label lblMetodoPagoValor;
+        private System.Windows.Forms.Label lblIndice;
+        private System.Windows.Forms.Label lblIndiceValor;
+        private System.Windows.Forms.Label lblGarante;
+        private System.Windows.Forms.Label lblGaranteValor;
+        private System.Windows.Forms.GroupBox grpRescision;
+        private System.Windows.Forms.Label lblIniciadaPor;
+        private System.Windows.Forms.ComboBox cmbIniciadaPor;
+        private System.Windows.Forms.Label lblMesesRestantes;
+        private System.Windows.Forms.Label lblMesesRestantesValor;
+        private System.Windows.Forms.Label lblPenalidad;
+        private System.Windows.Forms.Label lblPenalidadValor;
+        private System.Windows.Forms.Button btnRescindir;
         private System.Windows.Forms.GroupBox grpRenovacion;
         private System.Windows.Forms.Label lblMesesExtension;
         private System.Windows.Forms.NumericUpDown nudMesesExtension;

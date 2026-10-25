@@ -7,23 +7,12 @@ using SERVICIOS;
 
 namespace BLL
 {
+    // Registros de alquiler (PN2). No hay alta directa: cada registro nace del inmueble del PN1 al firmar su primer
+    // contrato (ContratoBLL.Registrar).
     public class InmuebleAlquilerBLL
     {
         private InmuebleAlquilerDAL inmuebleDAL = new InmuebleAlquilerDAL();
         private ContratoDAL contratoDAL = new ContratoDAL();
-
-        public int Registrar(InmuebleAlquiler inmueble)
-        {
-            Validar(inmueble);
-
-            int result = inmuebleDAL.Crear(inmueble);
-            if (result == -1)
-                throw new Exception("No se pudo registrar el inmueble.");
-
-            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Inmueble Alquiler",
-                $"Inmueble {result} registrado: {inmueble.TipoInmueble} - {inmueble.Direccion}.");
-            return result;
-        }
 
         public void Actualizar(InmuebleAlquiler inmueble)
         {

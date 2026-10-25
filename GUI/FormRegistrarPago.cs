@@ -39,6 +39,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblDireccion, BE.NombreControl.FormRegistrarPago_lblDireccion));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblMontoMensual, BE.NombreControl.FormRegistrarPago_lblMontoMensual));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblEstadoContrato, BE.NombreControl.FormRegistrarPago_lblEstadoContrato));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblMora, BE.NombreControl.FormRegistrarPago_lblMora));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpPeriodo, BE.NombreControl.FormRegistrarPago_grpPeriodo));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblPeriodo, BE.NombreControl.FormRegistrarPago_lblPeriodo));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblEstadoMes, BE.NombreControl.FormRegistrarPago_lblEstadoMes));
@@ -100,6 +101,7 @@ namespace TpIngSoft
                 lblEstadoContratoValor.Text = EstadosPN2.Texto(contrato.EstadoContrato);
 
                 CargarPeriodos();
+                MostrarMora();
             }
             catch (Exception ex)
             {
@@ -111,11 +113,28 @@ namespace TpIngSoft
         {
             _contrato = null;
             lblInquilinoValor.Text = lblDireccionValor.Text = lblMontoMensualValor.Text = lblEstadoContratoValor.Text = "-";
+            lblMoraValor.Text = "-";
+            lblMoraValor.ForeColor = Color.White;
             cmbPeriodo.DataSource = null;
             grpPeriodo.Enabled = false;
             btnRegistrar.Enabled = false;
             LimpiarImporte();
             lblResumenValor.Text = "Busque un contrato para registrar un pago.";
+        }
+
+        // Meses vencidos sin pagar y lo que se debe a hoy, con el recargo por mora de cada mes
+        private void MostrarMora()
+        {
+            var (enMora, enLitigio, deuda) = pagoBLL.ResumenMora(_contrato, DateTime.Now);
+            if (enMora + enLitigio == 0)
+            {
+                lblMoraValor.Text = "Sin mora: no hay meses vencidos impagos.";
+                lblMoraValor.ForeColor = Color.White;
+                return;
+            }
+            string detalle = enLitigio > 0 ? $"{enMora} En Mora, {enLitigio} En Litigio" : $"{enMora} En Mora";
+            lblMoraValor.Text = $"{enMora + enLitigio} mes(es) impagos ({detalle}): debe ${deuda:N2} con recargos";
+            lblMoraValor.ForeColor = TEXTO_CON_DEUDA;
         }
 
         // ---------- 2. Período ----------
@@ -166,7 +185,11 @@ namespace TpIngSoft
 
             var (montoBase, recargo, total) = PagoAlquilerBLL.CalcularImporte(_contrato, periodo.Mes, periodo.Anio, dtpFechaPago.Value);
             lblMontoBaseValor.Text = $"${montoBase:N2}";
-            lblRecargoValor.Text = recargo > 0 ? $"${recargo:N2} (fuera de término)" : "$0,00 (dentro de término)";
+            int diasMora = PagoAlquilerBLL.DiasEnMora(periodo.Mes, periodo.Anio, dtpFechaPago.Value);
+            lblRecargoValor.Text = recargo > 0
+                ? $"${recargo:N2} ({PagoAlquilerBLL.PORCENTAJE_RECARGO:P0}, {diasMora} día(s) de mora)"
+                : "$0,00 (dentro de término)";
+            lblRecargoValor.ForeColor = recargo > 0 ? TEXTO_CON_DEUDA : Color.White;
             lblTotalValor.Text = $"${total:N2}";
 
             lblResumenValor.Text =
@@ -180,7 +203,7 @@ namespace TpIngSoft
         private void LimpiarImporte()
         {
             lblEstadoMesValor.Text = lblMontoBaseValor.Text = lblRecargoValor.Text = lblTotalValor.Text = "-";
-            lblEstadoMesValor.ForeColor = Color.White;
+            lblEstadoMesValor.ForeColor = lblRecargoValor.ForeColor = Color.White;
         }
 
         // ---------- 3. Registro ----------
@@ -205,6 +228,7 @@ namespace TpIngSoft
                     "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 dtpFechaPago.Value = DateTime.Today;
                 CargarPeriodos(); // el mes pagado sale de la lista
+                MostrarMora();
             }
             catch (ArgumentException ex)
             {
