@@ -4,7 +4,8 @@
 -- final e inserta los datos iniciales: idiomas, roles y permisos (Composite), usuarios con DVH, DVV y los
 -- controles y traducciones (español e inglés) de todos los formularios.
 -- ATENCIÓN: se pierden todos los datos existentes.
--- Después ejecutar stored-procedures.sql.
+-- Después ejecutar actualizacion-schema.sql (lleva las tablas a la versión actual: campos y tablas agregados
+-- después de esta versión base) y stored-procedures.sql.
 -- ====================================================
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TpIngSoft')
 BEGIN
@@ -26,6 +27,8 @@ GO
 
 -- Se borran en orden inverso a sus dependencias: primero PN2, después PN1 y por último el sistema base
 -- Tablas del PN2: referencian a Usuario, se borran primero
+-- (Garante la crea actualizacion-schema.sql; referencia a Contrato y se borra antes)
+IF OBJECT_ID('[dbo].[Garante]', 'U') IS NOT NULL DROP TABLE [dbo].[Garante];
 IF OBJECT_ID('[dbo].[ContactoCobranza]', 'U') IS NOT NULL DROP TABLE [dbo].[ContactoCobranza];
 IF OBJECT_ID('[dbo].[AccionLegal]', 'U') IS NOT NULL DROP TABLE [dbo].[AccionLegal];
 IF OBJECT_ID('[dbo].[PagoAlquiler]', 'U') IS NOT NULL DROP TABLE [dbo].[PagoAlquiler];

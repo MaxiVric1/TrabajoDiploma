@@ -10,7 +10,8 @@
 ;      LocalDB (o la opción de instalarlo, incluido en el instalador) y "otro servidor" escrito a mano.
 ;      Al continuar inicia el servicio si está detenido y prueba la conexión con permisos de administrador de SQL.
 ;   3. Antes de copiar archivos (PrepareToInstall) hace todo el trabajo de la base con DbInstaller.exe (sin sqlcmd):
-;      vuelve a verificar el servicio, hace una copia previa si la base existe, ejecuta los scripts, otorga los permisos
+;      vuelve a verificar el servicio, hace una copia previa si la base existe, ejecuta los scripts (schema-init.sql
+;      solo si la base es nueva o se elige recrearla; actualizacion-schema.sql y stored-procedures.sql siempre), otorga los permisos
 ;      y hace la verificación final conectándose como el usuario que va a usar la aplicación.
 ;      Si algo falla revierte la base (la borra si era nueva o restaura la copia previa) y no copia ningún archivo:
 ;      la PC queda como estaba y el log queda en Documentos (LandSmart_instalacion_fallida.log).
@@ -78,6 +79,7 @@ Source: "BackupCLI\bin\x64\Release\BackupCLI.exe.config"; DestDir: "{app}"; Flag
 Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; Scripts y cliente SQL: se usan durante la instalación (extraídos a una carpeta temporal) y al desinstalar
 Source: "schema-init.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
+Source: "actualizacion-schema.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 Source: "stored-procedures.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 Source: "permisos.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 Source: "DbInstaller\bin\Release\DbInstaller.exe"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
@@ -194,10 +196,12 @@ begin
   DeleteFile(ArchivoLog);
   ExtractTemporaryFile('DbInstaller.exe');
   ExtractTemporaryFile('schema-init.sql');
+  ExtractTemporaryFile('actualizacion-schema.sql');
   ExtractTemporaryFile('stored-procedures.sql');
   ExtractTemporaryFile('permisos.sql');
   CopyFile(ExpandConstant('{tmp}\DbInstaller.exe'), CarpetaTrabajo + '\DbInstaller.exe', False);
   CopyFile(ExpandConstant('{tmp}\schema-init.sql'), CarpetaTrabajo + '\schema-init.sql', False);
+  CopyFile(ExpandConstant('{tmp}\actualizacion-schema.sql'), CarpetaTrabajo + '\actualizacion-schema.sql', False);
   CopyFile(ExpandConstant('{tmp}\stored-procedures.sql'), CarpetaTrabajo + '\stored-procedures.sql', False);
   CopyFile(ExpandConstant('{tmp}\permisos.sql'), CarpetaTrabajo + '\permisos.sql', False);
   RegistrarLog('==== {#AppNombre} {#AppVersion} ====');
@@ -696,6 +700,13 @@ begin
   begin
     RevertirBase(BaseExiste);
     Result := Fallo('Falló la creación de las tablas (schema-init.sql).');
+    Exit;
+  end;
+  // Siempre (base nueva o existente): lleva las tablas a la versión actual sin perder datos
+  if not EjecutarScript('actualizacion-schema', '') then
+  begin
+    RevertirBase(BaseExiste);
+    Result := Fallo('Falló la actualización de las tablas (actualizacion-schema.sql).');
     Exit;
   end;
   if not EjecutarScript('stored-procedures', '') then
