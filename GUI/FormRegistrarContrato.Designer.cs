@@ -30,12 +30,6 @@ namespace TpIngSoft
             this.grpInmueble = new System.Windows.Forms.GroupBox();
             this.lblInmueble = new System.Windows.Forms.Label();
             this.cmbInmueble = new System.Windows.Forms.ComboBox();
-            this.btnNuevoInmueble = new System.Windows.Forms.Button();
-            this.lblNuevaDireccion = new System.Windows.Forms.Label();
-            this.txtNuevaDireccion = new System.Windows.Forms.TextBox();
-            this.cmbNuevoTipo = new System.Windows.Forms.ComboBox();
-            this.btnAgregarInmueble = new System.Windows.Forms.Button();
-            this.btnCancelarInmueble = new System.Windows.Forms.Button();
             this.grpContrato = new System.Windows.Forms.GroupBox();
             this.lblFechaInicio = new System.Windows.Forms.Label();
             this.dtpFechaInicio = new System.Windows.Forms.DateTimePicker();
@@ -195,16 +189,10 @@ namespace TpIngSoft
             this.grpInmueble.BackColor = System.Drawing.Color.Transparent;
             this.grpInmueble.Controls.Add(this.lblInmueble);
             this.grpInmueble.Controls.Add(this.cmbInmueble);
-            this.grpInmueble.Controls.Add(this.btnNuevoInmueble);
-            this.grpInmueble.Controls.Add(this.lblNuevaDireccion);
-            this.grpInmueble.Controls.Add(this.txtNuevaDireccion);
-            this.grpInmueble.Controls.Add(this.cmbNuevoTipo);
-            this.grpInmueble.Controls.Add(this.btnAgregarInmueble);
-            this.grpInmueble.Controls.Add(this.btnCancelarInmueble);
             this.grpInmueble.ForeColor = System.Drawing.Color.White;
             this.grpInmueble.Location = new System.Drawing.Point(12, 152);
             this.grpInmueble.Name = "grpInmueble";
-            this.grpInmueble.Size = new System.Drawing.Size(616, 95);
+            this.grpInmueble.Size = new System.Drawing.Size(616, 60);
             this.grpInmueble.TabIndex = 1;
             this.grpInmueble.TabStop = false;
             this.grpInmueble.Text = "Inmueble";
@@ -227,84 +215,8 @@ namespace TpIngSoft
             this.cmbInmueble.FormattingEnabled = true;
             this.cmbInmueble.Location = new System.Drawing.Point(112, 25);
             this.cmbInmueble.Name = "cmbInmueble";
-            this.cmbInmueble.Size = new System.Drawing.Size(366, 21);
+            this.cmbInmueble.Size = new System.Drawing.Size(490, 21);
             this.cmbInmueble.TabIndex = 1;
-            //
-            // btnNuevoInmueble
-            //
-            this.btnNuevoInmueble.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
-            this.btnNuevoInmueble.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnNuevoInmueble.ForeColor = System.Drawing.Color.White;
-            this.btnNuevoInmueble.Location = new System.Drawing.Point(486, 21);
-            this.btnNuevoInmueble.Name = "btnNuevoInmueble";
-            this.btnNuevoInmueble.Size = new System.Drawing.Size(116, 27);
-            this.btnNuevoInmueble.TabIndex = 2;
-            this.btnNuevoInmueble.Text = "Nuevo Inmueble";
-            this.btnNuevoInmueble.UseVisualStyleBackColor = false;
-            this.btnNuevoInmueble.Click += new System.EventHandler(this.btnNuevoInmueble_Click);
-            //
-            // lblNuevaDireccion
-            //
-            this.lblNuevaDireccion.Location = new System.Drawing.Point(6, 60);
-            this.lblNuevaDireccion.Name = "lblNuevaDireccion";
-            this.lblNuevaDireccion.Size = new System.Drawing.Size(100, 21);
-            this.lblNuevaDireccion.TabIndex = 3;
-            this.lblNuevaDireccion.Text = "Dirección / tipo:";
-            this.lblNuevaDireccion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.lblNuevaDireccion.Visible = false;
-            //
-            // txtNuevaDireccion
-            //
-            this.txtNuevaDireccion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
-            this.txtNuevaDireccion.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtNuevaDireccion.ForeColor = System.Drawing.Color.White;
-            this.txtNuevaDireccion.Location = new System.Drawing.Point(112, 60);
-            this.txtNuevaDireccion.MaxLength = 200;
-            this.txtNuevaDireccion.Name = "txtNuevaDireccion";
-            this.txtNuevaDireccion.Size = new System.Drawing.Size(222, 20);
-            this.txtNuevaDireccion.TabIndex = 4;
-            this.txtNuevaDireccion.Visible = false;
-            //
-            // cmbNuevoTipo
-            //
-            this.cmbNuevoTipo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
-            this.cmbNuevoTipo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbNuevoTipo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.cmbNuevoTipo.ForeColor = System.Drawing.Color.White;
-            this.cmbNuevoTipo.FormattingEnabled = true;
-            this.cmbNuevoTipo.Location = new System.Drawing.Point(340, 59);
-            this.cmbNuevoTipo.Name = "cmbNuevoTipo";
-            this.cmbNuevoTipo.Size = new System.Drawing.Size(110, 21);
-            this.cmbNuevoTipo.TabIndex = 5;
-            this.cmbNuevoTipo.Visible = false;
-            //
-            // btnAgregarInmueble
-            //
-            this.btnAgregarInmueble.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
-            this.btnAgregarInmueble.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAgregarInmueble.ForeColor = System.Drawing.Color.White;
-            this.btnAgregarInmueble.Location = new System.Drawing.Point(456, 56);
-            this.btnAgregarInmueble.Name = "btnAgregarInmueble";
-            this.btnAgregarInmueble.Size = new System.Drawing.Size(70, 27);
-            this.btnAgregarInmueble.TabIndex = 6;
-            this.btnAgregarInmueble.Text = "Agregar";
-            this.btnAgregarInmueble.UseVisualStyleBackColor = false;
-            this.btnAgregarInmueble.Visible = false;
-            this.btnAgregarInmueble.Click += new System.EventHandler(this.btnAgregarInmueble_Click);
-            //
-            // btnCancelarInmueble
-            //
-            this.btnCancelarInmueble.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
-            this.btnCancelarInmueble.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnCancelarInmueble.ForeColor = System.Drawing.Color.White;
-            this.btnCancelarInmueble.Location = new System.Drawing.Point(532, 56);
-            this.btnCancelarInmueble.Name = "btnCancelarInmueble";
-            this.btnCancelarInmueble.Size = new System.Drawing.Size(70, 27);
-            this.btnCancelarInmueble.TabIndex = 7;
-            this.btnCancelarInmueble.Text = "Cancelar";
-            this.btnCancelarInmueble.UseVisualStyleBackColor = false;
-            this.btnCancelarInmueble.Visible = false;
-            this.btnCancelarInmueble.Click += new System.EventHandler(this.btnCancelarInmueble_Click);
             //
             // grpContrato
             //
@@ -318,7 +230,7 @@ namespace TpIngSoft
             this.grpContrato.Controls.Add(this.lblFechaFin);
             this.grpContrato.Controls.Add(this.lblFechaFinValor);
             this.grpContrato.ForeColor = System.Drawing.Color.White;
-            this.grpContrato.Location = new System.Drawing.Point(12, 257);
+            this.grpContrato.Location = new System.Drawing.Point(12, 222);
             this.grpContrato.Name = "grpContrato";
             this.grpContrato.Size = new System.Drawing.Size(616, 130);
             this.grpContrato.TabIndex = 2;
@@ -416,7 +328,7 @@ namespace TpIngSoft
             this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(412, 399);
+            this.btnGuardar.Location = new System.Drawing.Point(412, 364);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(105, 32);
             this.btnGuardar.TabIndex = 3;
@@ -429,7 +341,7 @@ namespace TpIngSoft
             this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancelar.ForeColor = System.Drawing.Color.White;
-            this.btnCancelar.Location = new System.Drawing.Point(523, 399);
+            this.btnCancelar.Location = new System.Drawing.Point(523, 364);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(105, 32);
             this.btnCancelar.TabIndex = 4;
@@ -442,7 +354,7 @@ namespace TpIngSoft
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
-            this.ClientSize = new System.Drawing.Size(640, 443);
+            this.ClientSize = new System.Drawing.Size(640, 408);
             this.Controls.Add(this.grpInquilino);
             this.Controls.Add(this.grpInmueble);
             this.Controls.Add(this.grpContrato);
@@ -480,12 +392,6 @@ namespace TpIngSoft
         private System.Windows.Forms.GroupBox grpInmueble;
         private System.Windows.Forms.Label lblInmueble;
         private System.Windows.Forms.ComboBox cmbInmueble;
-        private System.Windows.Forms.Button btnNuevoInmueble;
-        private System.Windows.Forms.Label lblNuevaDireccion;
-        private System.Windows.Forms.TextBox txtNuevaDireccion;
-        private System.Windows.Forms.ComboBox cmbNuevoTipo;
-        private System.Windows.Forms.Button btnAgregarInmueble;
-        private System.Windows.Forms.Button btnCancelarInmueble;
         private System.Windows.Forms.GroupBox grpContrato;
         private System.Windows.Forms.Label lblFechaInicio;
         private System.Windows.Forms.DateTimePicker dtpFechaInicio;

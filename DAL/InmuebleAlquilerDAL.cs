@@ -31,6 +31,7 @@ namespace DAL
             {
                 acceso.CrearParametro("@Direccion", inmueble.Direccion),
                 acceso.CrearParametro("@TipoInmueble", inmueble.TipoInmueble.ToString()),
+                acceso.CrearParametro("@IdInmueble", inmueble.IdInmueble),
                 outParam
             };
 
@@ -93,6 +94,38 @@ namespace DAL
             finally { acceso.Cerrar(); }
         }
 
+        // Registro de alquiler de un inmueble del PN1 (null si todavía no tuvo contratos)
+        public InmuebleAlquiler BuscarPorInmueble(int idInmueble)
+        {
+            acceso.Abrir();
+            try
+            {
+                List<SqlParameter> parameters = new List<SqlParameter> { acceso.CrearParametro("@IdInmueble", idInmueble) };
+                DataTable dt = acceso.Leer("BuscarInmuebleAlquilerPorInmueble", parameters);
+                return dt.Rows.Count > 0 ? Mapear(dt.Rows[0]) : null;
+            }
+            finally { acceso.Cerrar(); }
+        }
+
+        // Usa una conexión ya abierta (y su transacción, si la hay). Devuelve el registro de alquiler del inmueble
+        // del PN1 (lo crea con su dirección y tipo si todavía no existe), o -1 si falló.
+        internal int ObtenerDeInmueble(int idInmueble, Acceso acceso)
+        {
+            SqlParameter outParam = acceso.CrearParametroOut("@IdInmuebleAlquiler");
+            List<SqlParameter> parameters = new List<SqlParameter>
+            {
+                acceso.CrearParametro("@IdInmueble", idInmueble),
+                outParam
+            };
+
+            // Si el registro ya existía el SP no modifica filas: se mira solo el parámetro de salida
+            // (queda vacío si el SP falló o el inmueble no existe)
+            acceso.Escribir("ObtenerInmuebleAlquilerDeInmueble", parameters);
+            if (outParam.Value != null && outParam.Value != DBNull.Value)
+                return Convert.ToInt32(outParam.Value);
+            return -1;
+        }
+
         private List<InmuebleAlquiler> LeerLista(string storedProcedure)
         {
             acceso.Abrir();
@@ -115,7 +148,10 @@ namespace DAL
             {
                 IdInmuebleAlquiler = Convert.ToInt32(row["id_inmueble_alquiler"]),
                 Direccion = row["direccion"].ToString(),
-                TipoInmueble = (TipoInmueble)Enum.Parse(typeof(TipoInmueble), row["tipo_inmueble"].ToString())
+                TipoInmueble = (TipoInmueble)Enum.Parse(typeof(TipoInmueble), row["tipo_inmueble"].ToString()),
+                IdInmueble = row.Table.Columns.Contains("id_inmueble") && row["id_inmueble"] != DBNull.Value
+                    ? Convert.ToInt32(row["id_inmueble"])
+                    : (int?)null
             };
         }
     }

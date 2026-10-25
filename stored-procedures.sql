@@ -1,7 +1,7 @@
 -- ====================================================
 -- TpIngSoft - Stored procedures (sistema base, PN1 y PN2), en su versión final
 -- Cada uno se borra (DROP PROCEDURE IF EXISTS) y se vuelve a crear: se puede ejecutar más de una vez.
--- Ejecutar después de schema-init.sql.
+-- Ejecutar después de schema-init.sql y actualizacion-schema.sql (usan las columnas y tablas que agrega).
 -- ====================================================
 USE [TpIngSoft];
 GO
@@ -1377,7 +1377,7 @@ END
 GO
 
 -- ====================================================
--- CrearInmuebleAlquiler
+-- CrearInmuebleAlquiler (@IdInmueble: inmueble del PN1 que representa; NULL en los registros anteriores al vínculo)
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[CrearInmuebleAlquiler];
 GO
@@ -1385,11 +1385,34 @@ GO
 CREATE PROCEDURE [dbo].[CrearInmuebleAlquiler]
     @Direccion NVARCHAR(200),
     @TipoInmueble VARCHAR(50),
+    @IdInmueble INT = NULL,
     @NuevoId INT OUTPUT
 AS BEGIN
-    INSERT INTO InmuebleAlquiler (direccion, tipo_inmueble)
-    VALUES (@Direccion, @TipoInmueble);
+    INSERT INTO InmuebleAlquiler (direccion, tipo_inmueble, id_inmueble)
+    VALUES (@Direccion, @TipoInmueble, @IdInmueble);
     SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- ====================================================
+-- ObtenerInmuebleAlquilerDeInmueble
+-- Registro de alquiler (PN2) de un inmueble del PN1: devuelve el existente o lo crea con la dirección y el
+-- tipo del inmueble. @IdInmuebleAlquiler queda NULL si el inmueble no existe.
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ObtenerInmuebleAlquilerDeInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[ObtenerInmuebleAlquilerDeInmueble]
+    @IdInmueble INT,
+    @IdInmuebleAlquiler INT OUTPUT
+AS BEGIN
+    SET @IdInmuebleAlquiler = (SELECT id_inmueble_alquiler FROM InmuebleAlquiler WHERE id_inmueble = @IdInmueble);
+    IF @IdInmuebleAlquiler IS NULL AND EXISTS (SELECT 1 FROM Inmueble WHERE id_inmueble = @IdInmueble)
+    BEGIN
+        INSERT INTO InmuebleAlquiler (direccion, tipo_inmueble, id_inmueble)
+        SELECT direccion, tipo_inmueble, id_inmueble FROM Inmueble WHERE id_inmueble = @IdInmueble;
+        SET @IdInmuebleAlquiler = SCOPE_IDENTITY();
+    END
 END
 GO
 
@@ -1431,7 +1454,7 @@ GO
 
 CREATE PROCEDURE [dbo].[LeerInmueblesAlquiler]
 AS BEGIN
-    SELECT id_inmueble_alquiler, direccion, tipo_inmueble
+    SELECT id_inmueble_alquiler, direccion, tipo_inmueble, id_inmueble
     FROM InmuebleAlquiler;
 END
 GO
@@ -1445,21 +1468,58 @@ GO
 CREATE PROCEDURE [dbo].[BuscarInmuebleAlquilerPorId]
     @Id INT
 AS BEGIN
-    SELECT id_inmueble_alquiler, direccion, tipo_inmueble
+    SELECT id_inmueble_alquiler, direccion, tipo_inmueble, id_inmueble
     FROM InmuebleAlquiler
     WHERE id_inmueble_alquiler = @Id;
 END
 GO
 
 -- ====================================================
--- LeerInmueblesAlquilerDisponibles (sin contrato vigente; para Registrar Contrato)
+-- BuscarInmuebleAlquilerPorInmueble (registro de alquiler de un inmueble del PN1)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInmuebleAlquilerPorInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInmuebleAlquilerPorInmueble]
+    @IdInmueble INT
+AS BEGIN
+    SELECT id_inmueble_alquiler, direccion, tipo_inmueble, id_inmueble
+    FROM InmuebleAlquiler
+    WHERE id_inmueble = @IdInmueble;
+END
+GO
+
+-- ====================================================
+-- LeerInmueblesDisponiblesParaAlquiler
+-- Inmuebles del PN1 de alquiler que están Publicados y sin contrato vigente: los que se pueden alquilar
+-- (Registrar Contrato)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerInmueblesDisponiblesParaAlquiler];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInmueblesDisponiblesParaAlquiler]
+AS BEGIN
+    SELECT n.id_inmueble, n.tipo_inmueble, n.direccion, n.metros_cuadrados, n.cantidad_ambientes, n.estado_actual,
+           n.tipo_publicacion, n.texto_comercial, n.fecha_publicacion, n.fecha_despublicacion, n.id_cliente
+    FROM Inmueble n
+    WHERE n.tipo_publicacion = 'Alquiler' AND n.estado_actual = 'Publicado'
+      AND NOT EXISTS (
+          SELECT 1 FROM InmuebleAlquiler i
+          INNER JOIN Contrato c ON c.id_inmueble_alquiler = i.id_inmueble_alquiler
+          WHERE i.id_inmueble = n.id_inmueble AND c.estado_contrato <> 'Finalizado')
+    ORDER BY n.direccion;
+END
+GO
+
+-- ====================================================
+-- LeerInmueblesAlquilerDisponibles (registros de alquiler sin contrato vigente)
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[LeerInmueblesAlquilerDisponibles];
 GO
 
 CREATE PROCEDURE [dbo].[LeerInmueblesAlquilerDisponibles]
 AS BEGIN
-    SELECT i.id_inmueble_alquiler, i.direccion, i.tipo_inmueble
+    SELECT i.id_inmueble_alquiler, i.direccion, i.tipo_inmueble, i.id_inmueble
     FROM InmuebleAlquiler i
     WHERE NOT EXISTS (
         SELECT 1 FROM Contrato c
@@ -1470,6 +1530,8 @@ GO
 
 -- ====================================================
 -- CrearContrato
+-- Siempre crea en estado Activo y sin alerta. Si el inmueble viene del PN1 (InmuebleAlquiler.id_inmueble),
+-- ese inmueble pasa de Publicado a Alquilado.
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[CrearContrato];
 GO
@@ -1481,13 +1543,28 @@ CREATE PROCEDURE [dbo].[CrearContrato]
     @IdInquilino INT,
     @IdInmuebleAlquiler INT,
     @IdUsuarioAgente INT,
+    @DepositoGarantia DECIMAL(18,2) = 0,
+    @ComisionInmobiliaria DECIMAL(18,2) = 0,
+    @MetodoPago VARCHAR(20) = 'Transferencia',
+    @IndiceActualizacion VARCHAR(10) = 'IPC',
+    @PeriodicidadActualizacionMeses INT = 3,
     @NuevoId INT OUTPUT
 AS BEGIN
     INSERT INTO Contrato (fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
-                          id_inquilino, id_inmueble_alquiler, id_usuario_agente)
+                          id_inquilino, id_inmueble_alquiler, id_usuario_agente,
+                          deposito_garantia, comision_inmobiliaria, metodo_pago,
+                          indice_actualizacion, periodicidad_actualizacion_meses)
     VALUES (@FechaInicio, @DuracionMeses, @MontoMensual, 'Activo', 0,
-            @IdInquilino, @IdInmuebleAlquiler, @IdUsuarioAgente);
+            @IdInquilino, @IdInmuebleAlquiler, @IdUsuarioAgente,
+            @DepositoGarantia, @ComisionInmobiliaria, @MetodoPago,
+            @IndiceActualizacion, @PeriodicidadActualizacionMeses);
     SET @NuevoId = SCOPE_IDENTITY();
+
+    UPDATE n SET estado_actual = 'Alquilado'
+    FROM Inmueble n
+    INNER JOIN InmuebleAlquiler i ON i.id_inmueble = n.id_inmueble
+    WHERE i.id_inmueble_alquiler = @IdInmuebleAlquiler
+      AND n.estado_actual = 'Publicado' AND n.tipo_publicacion = 'Alquiler';
 END
 GO
 
@@ -1495,6 +1572,8 @@ GO
 -- ActualizarContrato
 -- @AvisoDesocupacion NULL conserva el aviso actual; 0 lo quita (renovación); 1 lo registra
 -- (con @FechaAvisoDesocupacion, o la fecha actual si no se indica).
+-- Las condiciones agregadas en el PN2 (depósito, comisión, método de pago, actualización) en NULL conservan
+-- el valor actual.
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[ActualizarContrato];
 GO
@@ -1510,12 +1589,22 @@ CREATE PROCEDURE [dbo].[ActualizarContrato]
     @IdInmuebleAlquiler INT,
     @IdUsuarioAgente INT,
     @AvisoDesocupacion BIT = NULL,
-    @FechaAvisoDesocupacion DATETIME = NULL
+    @FechaAvisoDesocupacion DATETIME = NULL,
+    @DepositoGarantia DECIMAL(18,2) = NULL,
+    @ComisionInmobiliaria DECIMAL(18,2) = NULL,
+    @MetodoPago VARCHAR(20) = NULL,
+    @IndiceActualizacion VARCHAR(10) = NULL,
+    @PeriodicidadActualizacionMeses INT = NULL
 AS BEGIN
     UPDATE Contrato
     SET fecha_inicio = @FechaInicio, duracion_meses = @DuracionMeses, monto_mensual = @MontoMensual,
         estado_contrato = @EstadoContrato, alerta_vencimiento = @AlertaVencimiento,
         id_inquilino = @IdInquilino, id_inmueble_alquiler = @IdInmuebleAlquiler, id_usuario_agente = @IdUsuarioAgente,
+        deposito_garantia = ISNULL(@DepositoGarantia, deposito_garantia),
+        comision_inmobiliaria = ISNULL(@ComisionInmobiliaria, comision_inmobiliaria),
+        metodo_pago = ISNULL(@MetodoPago, metodo_pago),
+        indice_actualizacion = ISNULL(@IndiceActualizacion, indice_actualizacion),
+        periodicidad_actualizacion_meses = ISNULL(@PeriodicidadActualizacionMeses, periodicidad_actualizacion_meses),
         aviso_desocupacion = ISNULL(@AvisoDesocupacion, aviso_desocupacion),
         fecha_aviso_desocupacion = CASE
             WHEN @AvisoDesocupacion IS NULL THEN fecha_aviso_desocupacion
@@ -1545,6 +1634,9 @@ GO
 
 -- ====================================================
 -- ActualizarEstadoContrato
+-- Al pasar a Finalizado, el inmueble del PN1 vinculado vuelve de Alquilado a Publicado.
+-- @RescisionIniciadaPor / @PenalidadRescision: solo en una rescisión anticipada (NULL conserva lo guardado).
+-- Las filas afectadas que se informan son solo las del contrato.
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[ActualizarEstadoContrato];
 GO
@@ -1552,16 +1644,55 @@ GO
 CREATE PROCEDURE [dbo].[ActualizarEstadoContrato]
     @Id INT,
     @EstadoContrato VARCHAR(20),
-    @AlertaVencimiento BIT
+    @AlertaVencimiento BIT,
+    @RescisionIniciadaPor VARCHAR(20) = NULL,
+    @PenalidadRescision DECIMAL(18,2) = NULL
 AS BEGIN
     UPDATE Contrato
-    SET estado_contrato = @EstadoContrato, alerta_vencimiento = @AlertaVencimiento
+    SET estado_contrato = @EstadoContrato, alerta_vencimiento = @AlertaVencimiento,
+        rescision_iniciada_por = ISNULL(@RescisionIniciadaPor, rescision_iniciada_por),
+        penalidad_rescision = ISNULL(@PenalidadRescision, penalidad_rescision)
     WHERE id_contrato = @Id;
+
+    IF @EstadoContrato = 'Finalizado'
+    BEGIN
+        SET NOCOUNT ON;
+        UPDATE n SET estado_actual = 'Publicado'
+        FROM Inmueble n
+        INNER JOIN InmuebleAlquiler i ON i.id_inmueble = n.id_inmueble
+        INNER JOIN Contrato c ON c.id_inmueble_alquiler = i.id_inmueble_alquiler
+        WHERE c.id_contrato = @Id AND n.estado_actual = 'Alquilado';
+        SET NOCOUNT OFF;
+    END
+END
+GO
+
+-- ====================================================
+-- RegistrarEntregaContrato
+-- Entrega del inmueble al finalizar: estado en que se recibió y destino del depósito (descuento + devolución
+-- = depósito, lo controla CK_Contrato_DevolucionDeposito). Solo contratos finalizados: 0 filas si no corresponde.
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[RegistrarEntregaContrato];
+GO
+
+CREATE PROCEDURE [dbo].[RegistrarEntregaContrato]
+    @Id INT,
+    @EstadoEntrega NVARCHAR(1000),
+    @MontoDescuentoDeposito DECIMAL(18,2),
+    @MontoDevolucionDeposito DECIMAL(18,2)
+AS BEGIN
+    UPDATE Contrato
+    SET estado_entrega = @EstadoEntrega,
+        monto_descuento_deposito = @MontoDescuentoDeposito,
+        monto_devolucion_deposito = @MontoDevolucionDeposito
+    WHERE id_contrato = @Id AND estado_contrato = 'Finalizado';
 END
 GO
 
 -- ====================================================
 -- EliminarContrato
+-- Los garantes se borran antes (EliminarGarantesPorContrato, en la misma transacción). Si el contrato estaba
+-- vigente, el inmueble del PN1 vuelve de Alquilado a Publicado.
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[EliminarContrato];
 GO
@@ -1569,6 +1700,14 @@ GO
 CREATE PROCEDURE [dbo].[EliminarContrato]
     @Id INT
 AS BEGIN
+    SET NOCOUNT ON;
+    UPDATE n SET estado_actual = 'Publicado'
+    FROM Inmueble n
+    INNER JOIN InmuebleAlquiler i ON i.id_inmueble = n.id_inmueble
+    INNER JOIN Contrato c ON c.id_inmueble_alquiler = i.id_inmueble_alquiler
+    WHERE c.id_contrato = @Id AND c.estado_contrato <> 'Finalizado' AND n.estado_actual = 'Alquilado';
+    SET NOCOUNT OFF;
+
     DELETE FROM Contrato WHERE id_contrato = @Id;
 END
 GO
@@ -1583,8 +1722,9 @@ CREATE PROCEDURE [dbo].[LeerContratos]
 AS BEGIN
     SELECT id_contrato, fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
            aviso_desocupacion, fecha_aviso_desocupacion,
-           id_inquilino, id_inmueble_alquiler, id_usuario_agente,
-           DATEADD(MONTH, duracion_meses, fecha_inicio) AS fecha_fin
+           id_inquilino, id_inmueble_alquiler, id_usuario_agente, fecha_fin,
+           deposito_garantia, comision_inmobiliaria, metodo_pago, indice_actualizacion, periodicidad_actualizacion_meses,
+           rescision_iniciada_por, penalidad_rescision, estado_entrega, monto_descuento_deposito, monto_devolucion_deposito
     FROM Contrato
     ORDER BY fecha_inicio DESC;
 END
@@ -1601,8 +1741,9 @@ CREATE PROCEDURE [dbo].[BuscarContratoPorId]
 AS BEGIN
     SELECT id_contrato, fecha_inicio, duracion_meses, monto_mensual, estado_contrato, alerta_vencimiento,
            aviso_desocupacion, fecha_aviso_desocupacion,
-           id_inquilino, id_inmueble_alquiler, id_usuario_agente,
-           DATEADD(MONTH, duracion_meses, fecha_inicio) AS fecha_fin
+           id_inquilino, id_inmueble_alquiler, id_usuario_agente, fecha_fin,
+           deposito_garantia, comision_inmobiliaria, metodo_pago, indice_actualizacion, periodicidad_actualizacion_meses,
+           rescision_iniciada_por, penalidad_rescision, estado_entrega, monto_descuento_deposito, monto_devolucion_deposito
     FROM Contrato
     WHERE id_contrato = @Id;
 END
@@ -1610,6 +1751,7 @@ GO
 
 -- ====================================================
 -- LeerContratosDetalle (para grillas: contrato + inquilino + inmueble; @Estado NULL = todos)
+-- La dirección es la del inmueble del PN1 cuando está vinculado (la que se mantiene actualizada).
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[LeerContratosDetalle];
 GO
@@ -1618,13 +1760,16 @@ CREATE PROCEDURE [dbo].[LeerContratosDetalle]
     @Estado VARCHAR(20) = NULL
 AS BEGIN
     SELECT c.id_contrato, c.fecha_inicio, c.duracion_meses, c.monto_mensual, c.estado_contrato, c.alerta_vencimiento,
-           c.aviso_desocupacion, c.fecha_aviso_desocupacion,
-           DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) AS fecha_fin,
+           c.aviso_desocupacion, c.fecha_aviso_desocupacion, c.fecha_fin,
+           c.deposito_garantia, c.comision_inmobiliaria, c.metodo_pago, c.indice_actualizacion, c.periodicidad_actualizacion_meses,
+           c.rescision_iniciada_por, c.penalidad_rescision, c.estado_entrega, c.monto_descuento_deposito, c.monto_devolucion_deposito,
            c.id_inquilino, q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino,
-           c.id_inmueble_alquiler, i.direccion, i.tipo_inmueble, c.id_usuario_agente
+           c.id_inmueble_alquiler, ISNULL(n.direccion, i.direccion) AS direccion, i.tipo_inmueble, i.id_inmueble,
+           c.id_usuario_agente
     FROM Contrato c
     INNER JOIN Inquilino q ON q.id_inquilino = c.id_inquilino
     INNER JOIN InmuebleAlquiler i ON i.id_inmueble_alquiler = c.id_inmueble_alquiler
+    LEFT JOIN Inmueble n ON n.id_inmueble = i.id_inmueble
     WHERE @Estado IS NULL OR c.estado_contrato = @Estado
     ORDER BY c.fecha_inicio DESC;
 END
@@ -1640,24 +1785,28 @@ CREATE PROCEDURE [dbo].[LeerContratosPorVencer]
     @DiasAnticipacion INT = 60
 AS BEGIN
     SELECT c.id_contrato, c.fecha_inicio, c.duracion_meses, c.monto_mensual, c.estado_contrato, c.alerta_vencimiento,
-           c.aviso_desocupacion, c.fecha_aviso_desocupacion,
-           DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) AS fecha_fin,
-           DATEDIFF(DAY, CAST(GETDATE() AS DATE), DATEADD(MONTH, c.duracion_meses, c.fecha_inicio)) AS dias_restantes,
+           c.aviso_desocupacion, c.fecha_aviso_desocupacion, c.fecha_fin,
+           DATEDIFF(DAY, CAST(GETDATE() AS DATE), c.fecha_fin) AS dias_restantes,
+           c.deposito_garantia, c.comision_inmobiliaria, c.metodo_pago, c.indice_actualizacion, c.periodicidad_actualizacion_meses,
+           c.rescision_iniciada_por, c.penalidad_rescision, c.estado_entrega, c.monto_descuento_deposito, c.monto_devolucion_deposito,
            c.id_inquilino, q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino, q.telefono, q.email,
-           c.id_inmueble_alquiler, i.direccion, i.tipo_inmueble, c.id_usuario_agente
+           c.id_inmueble_alquiler, ISNULL(n.direccion, i.direccion) AS direccion, i.tipo_inmueble, i.id_inmueble,
+           c.id_usuario_agente
     FROM Contrato c
     INNER JOIN Inquilino q ON q.id_inquilino = c.id_inquilino
     INNER JOIN InmuebleAlquiler i ON i.id_inmueble_alquiler = c.id_inmueble_alquiler
+    LEFT JOIN Inmueble n ON n.id_inmueble = i.id_inmueble
     WHERE c.estado_contrato <> 'Finalizado'
-      AND DATEADD(MONTH, c.duracion_meses, c.fecha_inicio) <= DATEADD(DAY, @DiasAnticipacion, CAST(GETDATE() AS DATE))
-    ORDER BY fecha_fin;
+      AND c.fecha_fin <= DATEADD(DAY, @DiasAnticipacion, CAST(GETDATE() AS DATE))
+    ORDER BY c.fecha_fin;
 END
 GO
 
 -- ====================================================
 -- ActualizarVencimientoContratos
 -- Activo -> Por Vencer (con alerta) si termina dentro de @DiasAnticipacion días;
--- vigentes con fecha de fin pasada -> Finalizado (sin alerta).
+-- vigentes con fecha de fin pasada -> Finalizado (sin alerta), y su inmueble del PN1 vuelve a Publicado.
+-- Las filas afectadas que se informan son solo las de los contratos.
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[ActualizarVencimientoContratos];
 GO
@@ -1666,16 +1815,108 @@ CREATE PROCEDURE [dbo].[ActualizarVencimientoContratos]
     @DiasAnticipacion INT = 60
 AS BEGIN
     DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
+    DECLARE @Finalizados TABLE (id_inmueble_alquiler INT);
 
     UPDATE Contrato
     SET estado_contrato = 'Finalizado', alerta_vencimiento = 0
+    OUTPUT inserted.id_inmueble_alquiler INTO @Finalizados
     WHERE estado_contrato <> 'Finalizado'
-      AND DATEADD(MONTH, duracion_meses, fecha_inicio) < @Hoy;
+      AND fecha_fin < @Hoy;
 
     UPDATE Contrato
     SET estado_contrato = 'Por Vencer', alerta_vencimiento = 1
     WHERE estado_contrato = 'Activo'
-      AND DATEADD(MONTH, duracion_meses, fecha_inicio) <= DATEADD(DAY, @DiasAnticipacion, @Hoy);
+      AND fecha_fin <= DATEADD(DAY, @DiasAnticipacion, @Hoy);
+
+    SET NOCOUNT ON;
+    UPDATE n SET estado_actual = 'Publicado'
+    FROM Inmueble n
+    INNER JOIN InmuebleAlquiler i ON i.id_inmueble = n.id_inmueble
+    WHERE i.id_inmueble_alquiler IN (SELECT id_inmueble_alquiler FROM @Finalizados) AND n.estado_actual = 'Alquilado';
+    SET NOCOUNT OFF;
+END
+GO
+
+-- ====================================================
+-- Garante (garantes de cada contrato)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearGarante];
+GO
+
+CREATE PROCEDURE [dbo].[CrearGarante]
+    @IdContrato INT,
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Dni VARCHAR(20),
+    @Domicilio NVARCHAR(200),
+    @PropiedadGarantia NVARCHAR(200),
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Garante (id_contrato, nombre, apellido, dni, domicilio, propiedad_garantia)
+    VALUES (@IdContrato, @Nombre, @Apellido, @Dni, @Domicilio, @PropiedadGarantia);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarGarante];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarGarante]
+    @Id INT,
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Dni VARCHAR(20),
+    @Domicilio NVARCHAR(200),
+    @PropiedadGarantia NVARCHAR(200)
+AS BEGIN
+    UPDATE Garante
+    SET nombre = @Nombre, apellido = @Apellido, dni = @Dni, domicilio = @Domicilio, propiedad_garantia = @PropiedadGarantia
+    WHERE id_garante = @Id;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[EliminarGarante];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarGarante]
+    @Id INT
+AS BEGIN
+    DELETE FROM Garante WHERE id_garante = @Id;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[EliminarGarantesPorContrato];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarGarantesPorContrato]
+    @IdContrato INT
+AS BEGIN
+    DELETE FROM Garante WHERE id_contrato = @IdContrato;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[LeerGarantesPorContrato];
+GO
+
+CREATE PROCEDURE [dbo].[LeerGarantesPorContrato]
+    @IdContrato INT
+AS BEGIN
+    SELECT id_garante, id_contrato, nombre, apellido, dni, domicilio, propiedad_garantia
+    FROM Garante
+    WHERE id_contrato = @IdContrato
+    ORDER BY apellido, nombre;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[BuscarGarantePorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarGarantePorId]
+    @Id INT
+AS BEGIN
+    SELECT id_garante, id_contrato, nombre, apellido, dni, domicilio, propiedad_garantia
+    FROM Garante
+    WHERE id_garante = @Id;
 END
 GO
 

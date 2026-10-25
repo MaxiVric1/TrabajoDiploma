@@ -195,6 +195,23 @@ namespace DAL
             finally { acceso.Cerrar(); }
         }
 
+        // De alquiler, Publicados y sin contrato vigente: los que se pueden alquilar (PN2)
+        public List<Inmueble> LeerDisponiblesParaAlquiler()
+        {
+            acceso.Abrir();
+            try
+            {
+                DataTable dt = acceso.Leer("LeerInmueblesDisponiblesParaAlquiler");
+                List<Inmueble> lista = new List<Inmueble>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    lista.Add(Mapear(row));
+                }
+                return lista;
+            }
+            finally { acceso.Cerrar(); }
+        }
+
         public Inmueble BuscarPorId(int idInmueble)
         {
             acceso.Abrir();

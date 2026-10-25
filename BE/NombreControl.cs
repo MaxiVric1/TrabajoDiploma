@@ -179,10 +179,6 @@ namespace BE
         public const string FormRegistrarContrato_lblEmail = "FormRegistrarContrato.lblEmail";
         public const string FormRegistrarContrato_grpInmueble = "FormRegistrarContrato.grpInmueble";
         public const string FormRegistrarContrato_lblInmueble = "FormRegistrarContrato.lblInmueble";
-        public const string FormRegistrarContrato_btnNuevoInmueble = "FormRegistrarContrato.btnNuevoInmueble";
-        public const string FormRegistrarContrato_lblNuevaDireccion = "FormRegistrarContrato.lblNuevaDireccion";
-        public const string FormRegistrarContrato_btnAgregarInmueble = "FormRegistrarContrato.btnAgregarInmueble";
-        public const string FormRegistrarContrato_btnCancelarInmueble = "FormRegistrarContrato.btnCancelarInmueble";
         public const string FormRegistrarContrato_grpContrato = "FormRegistrarContrato.grpContrato";
         public const string FormRegistrarContrato_lblFechaInicio = "FormRegistrarContrato.lblFechaInicio";
         public const string FormRegistrarContrato_lblDuracion = "FormRegistrarContrato.lblDuracion";

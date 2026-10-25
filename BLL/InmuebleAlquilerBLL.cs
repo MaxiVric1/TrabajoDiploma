@@ -50,10 +50,16 @@ namespace BLL
 
         public List<InmuebleAlquiler> LeerTodos() => inmuebleDAL.LeerTodos();
 
-        // Sin contrato vigente: los que se pueden ofrecer en Registrar Contrato
+        // Registros de alquiler sin contrato vigente
         public List<InmuebleAlquiler> LeerDisponibles() => inmuebleDAL.LeerDisponibles();
 
+        // Inmuebles del PN1 de alquiler, Publicados y sin contrato vigente: los que se ofrecen en Registrar Contrato
+        public List<Inmueble> LeerInmueblesParaAlquilar() => new InmuebleDAL().LeerDisponiblesParaAlquiler();
+
         public InmuebleAlquiler BuscarPorId(int idInmuebleAlquiler) => inmuebleDAL.BuscarPorId(idInmuebleAlquiler);
+
+        // Registro de alquiler de un inmueble del PN1 (null si todavía no tuvo contratos)
+        public InmuebleAlquiler BuscarPorInmueble(int idInmueble) => inmuebleDAL.BuscarPorInmueble(idInmueble);
 
         private void Validar(InmuebleAlquiler inmueble)
         {

@@ -37,10 +37,6 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblEmail, BE.NombreControl.FormRegistrarContrato_lblEmail));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpInmueble, BE.NombreControl.FormRegistrarContrato_grpInmueble));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblInmueble, BE.NombreControl.FormRegistrarContrato_lblInmueble));
-            _controlesTraducibles.Add(new EtiquetaTraducible(btnNuevoInmueble, BE.NombreControl.FormRegistrarContrato_btnNuevoInmueble));
-            _controlesTraducibles.Add(new EtiquetaTraducible(lblNuevaDireccion, BE.NombreControl.FormRegistrarContrato_lblNuevaDireccion));
-            _controlesTraducibles.Add(new EtiquetaTraducible(btnAgregarInmueble, BE.NombreControl.FormRegistrarContrato_btnAgregarInmueble));
-            _controlesTraducibles.Add(new EtiquetaTraducible(btnCancelarInmueble, BE.NombreControl.FormRegistrarContrato_btnCancelarInmueble));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpContrato, BE.NombreControl.FormRegistrarContrato_grpContrato));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblFechaInicio, BE.NombreControl.FormRegistrarContrato_lblFechaInicio));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblDuracion, BE.NombreControl.FormRegistrarContrato_lblDuracion));
@@ -66,13 +62,6 @@ namespace TpIngSoft
 
         private void FormRegistrarContrato_Load(object sender, EventArgs e)
         {
-            cmbNuevoTipo.Items.Clear();
-            foreach (TipoInmueble tipo in Enum.GetValues(typeof(TipoInmueble)))
-            {
-                cmbNuevoTipo.Items.Add(tipo);
-            }
-            cmbNuevoTipo.SelectedIndex = 0;
-
             CargarInmuebles();
             Limpiar();
         }
@@ -145,73 +134,19 @@ namespace TpIngSoft
 
         // ---------- Inmueble ----------
 
-        // Solo inmuebles sin contrato vigente
-        private void CargarInmuebles(int? idASeleccionar = null)
+        // Inmuebles del PN1 de alquiler, Publicados y sin contrato vigente (los inmuebles se cargan en el PN1)
+        private void CargarInmuebles()
         {
             try
             {
-                List<InmuebleAlquiler> disponibles = inmuebleBLL.LeerDisponibles();
+                List<Inmueble> disponibles = inmuebleBLL.LeerInmueblesParaAlquilar();
                 cmbInmueble.DataSource = null;
-                cmbInmueble.DataSource = disponibles; // se muestra "Tipo - Dirección" (InmuebleAlquiler.ToString)
-                cmbInmueble.SelectedIndex = -1;
-                if (idASeleccionar.HasValue)
-                    cmbInmueble.SelectedItem = disponibles.FirstOrDefault(i => i.IdInmuebleAlquiler == idASeleccionar.Value);
-                else if (disponibles.Count > 0)
-                    cmbInmueble.SelectedIndex = 0;
+                cmbInmueble.DataSource = disponibles; // se muestra "Tipo - Dirección" (Inmueble.ToString)
+                cmbInmueble.SelectedIndex = disponibles.Count > 0 ? 0 : -1;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error al cargar los inmuebles disponibles: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnNuevoInmueble_Click(object sender, EventArgs e)
-        {
-            MostrarNuevoInmueble(true);
-            txtNuevaDireccion.Focus();
-        }
-
-        private void btnCancelarInmueble_Click(object sender, EventArgs e)
-        {
-            MostrarNuevoInmueble(false);
-        }
-
-        private void MostrarNuevoInmueble(bool visible)
-        {
-            lblNuevaDireccion.Visible = txtNuevaDireccion.Visible = cmbNuevoTipo.Visible = visible;
-            btnAgregarInmueble.Visible = btnCancelarInmueble.Visible = visible;
-            btnNuevoInmueble.Enabled = !visible;
-            if (!visible)
-            {
-                txtNuevaDireccion.Clear();
-                if (cmbNuevoTipo.Items.Count > 0) cmbNuevoTipo.SelectedIndex = 0;
-            }
-        }
-
-        // El inmueble se registra en el momento: queda disponible aunque después no se guarde el contrato
-        private void btnAgregarInmueble_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                InmuebleAlquiler nuevo = new InmuebleAlquiler
-                {
-                    Direccion = txtNuevaDireccion.Text,
-                    TipoInmueble = (TipoInmueble)cmbNuevoTipo.SelectedItem
-                };
-                int id = inmuebleBLL.Registrar(nuevo);
-
-                MostrarNuevoInmueble(false);
-                CargarInmuebles(id);
-                dtpFechaInicio.Focus();
-            }
-            catch (ArgumentException ex)
-            {
-                MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtNuevaDireccion.Focus();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al registrar el inmueble: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -246,10 +181,10 @@ namespace TpIngSoft
                 txtDni.Focus();
                 return;
             }
-            if (!(cmbInmueble.SelectedItem is InmuebleAlquiler inmueble))
+            if (!(cmbInmueble.SelectedItem is Inmueble inmueble))
             {
                 MessageBox.Show(cmbInmueble.Items.Count == 0
-                        ? "No hay inmuebles disponibles: cargue uno con \"Nuevo Inmueble\"."
+                        ? "No hay inmuebles de alquiler publicados y disponibles. Los inmuebles se captan, tasan y publican en el circuito de captación."
                         : "Seleccione el inmueble del contrato.",
                     "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -276,8 +211,7 @@ namespace TpIngSoft
                 {
                     FechaInicio = dtpFechaInicio.Value.Date,
                     DuracionMeses = (int)nudDuracion.Value,
-                    MontoMensual = nudMonto.Value,
-                    IdInmuebleAlquiler = inmueble.IdInmuebleAlquiler
+                    MontoMensual = nudMonto.Value
                 };
 
                 // Inquilino nuevo: se da de alta junto con el contrato en una sola transacción
@@ -298,10 +232,10 @@ namespace TpIngSoft
                     };
                 }
 
-                int nro = contratoBLL.Registrar(contrato, inquilinoNuevo);
+                int nro = contratoBLL.Registrar(contrato, inmueble.IdInmueble, inquilinoNuevo);
 
                 string estado = contrato.EstadoContrato == EstadoContrato.PorVencer ? " Queda Por Vencer (alerta de vencimiento activa)." : "";
-                MessageBox.Show($"Contrato N° {nro} registrado con éxito.\nVence el {contrato.FechaFin:dd/MM/yyyy}.{estado}",
+                MessageBox.Show($"Contrato N° {nro} registrado con éxito.\nVence el {contrato.FechaFin:dd/MM/yyyy}.{estado}\nEl inmueble pasa a Alquilado.",
                     "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Limpiar();
                 CargarInmuebles(); // el inmueble alquilado deja de estar disponible
@@ -325,7 +259,6 @@ namespace TpIngSoft
         {
             txtDni.Clear();
             LiberarDatosInquilino(limpiar: true);
-            MostrarNuevoInmueble(false);
             dtpFechaInicio.Value = DateTime.Today;
             nudDuracion.Value = 24;
             nudMonto.Value = 0;

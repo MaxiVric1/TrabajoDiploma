@@ -12,7 +12,7 @@
 --   3. Contrato: fecha_fin (calculada y guardada), depósito de garantía, comisión, método de pago, actualización
 --      por índice (IPC cada 3 meses), rescisión y entrega del inmueble con devolución del depósito.
 --   4. Garante: garantes de cada contrato.
---   5. Traducciones (español e inglés) de los controles agregados a los formularios.
+--   5. Traducciones (español e inglés) de los controles agregados a los formularios; baja de las de los quitados.
 -- ====================================================
 USE [TpIngSoft];
 GO
@@ -228,6 +228,23 @@ FROM @Nuevos n
 JOIN [dbo].[Control] c ON c.[nombre] = n.[nombre] AND c.[formulario] = n.[formulario]
 WHERE EXISTS (SELECT 1 FROM [dbo].[Idioma] WHERE [id] = 2)
   AND NOT EXISTS (SELECT 1 FROM [dbo].[Traducciones] t WHERE t.[idcontrol] = c.[id] AND t.[ididioma] = 2);
+GO
+
+-- Controles que se quitaron de los formularios: sus textos ya no se usan
+DECLARE @Quitados TABLE ([nombre] NVARCHAR(100), [formulario] NVARCHAR(100));
+INSERT INTO @Quitados VALUES
+    -- PN2: los inmuebles de alquiler vienen del PN1, ya no se cargan desde Registrar Contrato
+    ('btnNuevoInmueble', 'FormRegistrarContrato'),
+    ('lblNuevaDireccion', 'FormRegistrarContrato'),
+    ('btnAgregarInmueble', 'FormRegistrarContrato'),
+    ('btnCancelarInmueble', 'FormRegistrarContrato');
+
+DELETE t FROM [dbo].[Traducciones] t
+JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
+JOIN @Quitados q ON q.[nombre] = c.[nombre] AND q.[formulario] = c.[formulario];
+
+DELETE c FROM [dbo].[Control] c
+JOIN @Quitados q ON q.[nombre] = c.[nombre] AND q.[formulario] = c.[formulario];
 GO
 
 PRINT N'Actualización del schema terminada.';

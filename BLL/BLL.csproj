@@ -78,6 +78,7 @@
     <Compile Include="InquilinoBLL.cs" />
     <Compile Include="InmuebleAlquilerBLL.cs" />
     <Compile Include="ContratoBLL.cs" />
+    <Compile Include="GaranteBLL.cs" />
     <Compile Include="PagoAlquilerBLL.cs" />
     <Compile Include="AccionLegalBLL.cs" />
     <Compile Include="ContactoCobranzaBLL.cs" />

@@ -16,6 +16,9 @@ namespace BE
         public string Direccion { get; set; }
         public TipoInmueble TipoInmueble { get; set; }
 
+        // Inmueble del PN1 que representa; null en los registros anteriores al vínculo
+        public int? IdInmueble { get; set; }
+
         public override string ToString()
         {
             return $"{TipoInmueble} - {Direccion}";
