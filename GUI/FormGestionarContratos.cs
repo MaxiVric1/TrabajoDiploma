@@ -313,7 +313,8 @@ namespace TpIngSoft
         {
             lblDepositoValor.Text = $"${contrato.DepositoGarantia:N2}" +
                 (contrato.MontoDevolucionDeposito.HasValue ? $" (devuelto ${contrato.MontoDevolucionDeposito:N2})" : "");
-            lblComisionValor.Text = $"${contrato.ComisionInmobiliaria:N2}";
+            lblComisionValor.Text = $"{contrato.ComisionInmobiliaria:0.##}% de cada pago " +
+                                    $"(${ContratoBLL.CalcularComision(contrato.MontoMensual, contrato.ComisionInmobiliaria):N2}/mes)";
             lblMetodoPagoValor.Text = contrato.MetodoPago.ToString();
             lblIndiceValor.Text = $"{contrato.IndiceActualizacion} cada {contrato.PeriodicidadActualizacionMeses} meses";
 

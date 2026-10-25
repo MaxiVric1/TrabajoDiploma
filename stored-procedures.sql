@@ -1544,7 +1544,7 @@ CREATE PROCEDURE [dbo].[CrearContrato]
     @IdInmuebleAlquiler INT,
     @IdUsuarioAgente INT,
     @DepositoGarantia DECIMAL(18,2) = 0,
-    @ComisionInmobiliaria DECIMAL(18,2) = 0,
+    @ComisionInmobiliaria DECIMAL(18,2) = 4, -- porcentaje retenido de cada pago
     @MetodoPago VARCHAR(20) = 'Transferencia',
     @IndiceActualizacion VARCHAR(10) = 'IPC',
     @PeriodicidadActualizacionMeses INT = 3,
@@ -1935,12 +1935,13 @@ CREATE PROCEDURE [dbo].[CrearPagoAlquiler]
     @RecargoAplicado DECIMAL(18,2) = 0,
     @IdContrato INT,
     @IdUsuarioAnalista INT,
+    @ComisionInmobiliaria DECIMAL(18,2) = 0, -- monto retenido de este pago
     @NuevoId INT OUTPUT
 AS BEGIN
     INSERT INTO PagoAlquiler (mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
-                              recargo_aplicado, id_contrato, id_usuario_analista)
+                              recargo_aplicado, id_contrato, id_usuario_analista, comision_inmobiliaria)
     VALUES (@MesCorrespondiente, @AnioCorrespondiente, @FechaPago, @MontoPagado, @EstadoPago,
-            @RecargoAplicado, @IdContrato, @IdUsuarioAnalista);
+            @RecargoAplicado, @IdContrato, @IdUsuarioAnalista, @ComisionInmobiliaria);
     SET @NuevoId = SCOPE_IDENTITY();
 END
 GO
@@ -1959,12 +1960,14 @@ CREATE PROCEDURE [dbo].[ActualizarPagoAlquiler]
     @MontoPagado DECIMAL(18,2),
     @EstadoPago NVARCHAR(20),
     @RecargoAplicado DECIMAL(18,2),
-    @IdUsuarioAnalista INT
+    @IdUsuarioAnalista INT,
+    @ComisionInmobiliaria DECIMAL(18,2) = NULL -- NULL conserva la guardada
 AS BEGIN
     UPDATE PagoAlquiler
     SET mes_correspondiente = @MesCorrespondiente, anio_correspondiente = @AnioCorrespondiente,
         fecha_pago = @FechaPago, monto_pagado = @MontoPagado, estado_pago = @EstadoPago,
-        recargo_aplicado = @RecargoAplicado, id_usuario_analista = @IdUsuarioAnalista
+        recargo_aplicado = @RecargoAplicado, id_usuario_analista = @IdUsuarioAnalista,
+        comision_inmobiliaria = ISNULL(@ComisionInmobiliaria, comision_inmobiliaria)
     WHERE id_pago = @Id;
 END
 GO
@@ -2008,7 +2011,7 @@ GO
 CREATE PROCEDURE [dbo].[LeerPagosAlquiler]
 AS BEGIN
     SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
-           recargo_aplicado, id_contrato, id_usuario_analista
+           recargo_aplicado, id_contrato, id_usuario_analista, comision_inmobiliaria
     FROM PagoAlquiler
     ORDER BY anio_correspondiente DESC, mes_correspondiente DESC;
 END
@@ -2024,7 +2027,7 @@ CREATE PROCEDURE [dbo].[BuscarPagoAlquilerPorId]
     @Id INT
 AS BEGIN
     SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
-           recargo_aplicado, id_contrato, id_usuario_analista
+           recargo_aplicado, id_contrato, id_usuario_analista, comision_inmobiliaria
     FROM PagoAlquiler
     WHERE id_pago = @Id;
 END
@@ -2040,7 +2043,7 @@ CREATE PROCEDURE [dbo].[LeerPagosPorContrato]
     @IdContrato INT
 AS BEGIN
     SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
-           recargo_aplicado, id_contrato, id_usuario_analista
+           recargo_aplicado, id_contrato, id_usuario_analista, comision_inmobiliaria
     FROM PagoAlquiler
     WHERE id_contrato = @IdContrato
     ORDER BY anio_correspondiente DESC, mes_correspondiente DESC;
@@ -2059,7 +2062,7 @@ CREATE PROCEDURE [dbo].[BuscarPagoPorPeriodo]
     @AnioCorrespondiente INT
 AS BEGIN
     SELECT id_pago, mes_correspondiente, anio_correspondiente, fecha_pago, monto_pagado, estado_pago,
-           recargo_aplicado, id_contrato, id_usuario_analista
+           recargo_aplicado, id_contrato, id_usuario_analista, comision_inmobiliaria
     FROM PagoAlquiler
     WHERE id_contrato = @IdContrato
       AND mes_correspondiente = @MesCorrespondiente
@@ -2077,7 +2080,7 @@ CREATE PROCEDURE [dbo].[LeerPagosDetalle]
     @EstadoPago NVARCHAR(20) = NULL
 AS BEGIN
     SELECT p.id_pago, p.mes_correspondiente, p.anio_correspondiente, p.fecha_pago, p.monto_pagado, p.estado_pago,
-           p.recargo_aplicado, p.id_contrato, p.id_usuario_analista,
+           p.recargo_aplicado, p.id_contrato, p.id_usuario_analista, p.comision_inmobiliaria,
            c.monto_mensual, c.estado_contrato,
            q.nombre + ' ' + q.apellido AS inquilino, q.dni AS dni_inquilino, q.telefono, q.email,
            i.direccion, i.tipo_inmueble

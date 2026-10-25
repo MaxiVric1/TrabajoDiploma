@@ -121,6 +121,7 @@ namespace BLL
             pago.EstadoPago = EstadoPago.AlDia;
             pago.RecargoAplicado = recargo;
             pago.IdUsuarioAnalista = SessionManager.Instance.UsuarioActual.Id;
+            pago.ComisionInmobiliaria = ContratoBLL.CalcularComision(montoPagado, contrato.ComisionInmobiliaria);
 
             bool ok = existente != null ? pagoDAL.Actualizar(pago) : pagoDAL.Crear(pago) != -1;
             if (!ok)
@@ -128,6 +129,7 @@ namespace BLL
 
             string detalle = $"Contrato N° {idContrato}, período {mes:00}/{anio}: ${montoPagado:N2}";
             if (recargo > 0) detalle += $" (incluye recargo ${recargo:N2})";
+            detalle += $"; comisión {contrato.ComisionInmobiliaria:0.##}% ${pago.ComisionInmobiliaria:N2}, neto al propietario ${pago.NetoPropietario:N2}";
             if (estadoAnterior.HasValue && estadoAnterior != EstadoPago.AlDia) detalle += $"; regulariza un período {estadoAnterior}";
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Registro Pago", detalle + ".");
             return pago.IdPago;

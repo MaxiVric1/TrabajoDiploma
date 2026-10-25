@@ -44,7 +44,7 @@ namespace BE
 
         // Condiciones económicas
         public decimal DepositoGarantia { get; set; }
-        public decimal ComisionInmobiliaria { get; set; }
+        public decimal ComisionInmobiliaria { get; set; } // PORCENTAJE (ej. 4 = 4%) que la inmobiliaria retiene de cada pago
         public MetodoPago MetodoPago { get; set; } = MetodoPago.Transferencia;
 
         // Actualización del monto mensual por índice (hoy siempre IPC cada 3 meses)

@@ -59,6 +59,7 @@ namespace DAL
                 acceso.CrearParametro("@RecargoAplicado", pago.RecargoAplicado),
                 acceso.CrearParametro("@IdContrato", pago.IdContrato),
                 acceso.CrearParametro("@IdUsuarioAnalista", pago.IdUsuarioAnalista),
+                acceso.CrearParametro("@ComisionInmobiliaria", pago.ComisionInmobiliaria),
                 outParam
             };
 
@@ -93,7 +94,8 @@ namespace DAL
                 acceso.CrearParametro("@MontoPagado", pago.MontoPagado),
                 acceso.CrearParametro("@EstadoPago", EstadoATexto(pago.EstadoPago)),
                 acceso.CrearParametro("@RecargoAplicado", pago.RecargoAplicado),
-                acceso.CrearParametro("@IdUsuarioAnalista", pago.IdUsuarioAnalista)
+                acceso.CrearParametro("@IdUsuarioAnalista", pago.IdUsuarioAnalista),
+                acceso.CrearParametro("@ComisionInmobiliaria", pago.ComisionInmobiliaria)
             };
             return acceso.Escribir("ActualizarPagoAlquiler", parameters) != -1;
         }
@@ -236,7 +238,8 @@ namespace DAL
                 EstadoPago = TextoAEstado(row["estado_pago"].ToString()),
                 RecargoAplicado = Convert.ToDecimal(row["recargo_aplicado"]),
                 IdContrato = Convert.ToInt32(row["id_contrato"]),
-                IdUsuarioAnalista = Convert.ToInt32(row["id_usuario_analista"])
+                IdUsuarioAnalista = Convert.ToInt32(row["id_usuario_analista"]),
+                ComisionInmobiliaria = cols.Contains("comision_inmobiliaria") ? Convert.ToDecimal(row["comision_inmobiliaria"]) : 0
             };
 
             // LeerPagosDetalle: datos del contrato, el inquilino (nombre ya concatenado) y el inmueble

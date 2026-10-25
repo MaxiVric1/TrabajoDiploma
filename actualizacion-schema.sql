@@ -172,6 +172,46 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE [name] = 'CK_Contrato_D
             AND [monto_descuento_deposito] + [monto_devolucion_deposito] = [deposito_garantia]));
 GO
 
+-- Comisión inmobiliaria: es un PORCENTAJE que la inmobiliaria retiene de cada pago mensual (no un monto único).
+-- Una sola vez (mientras el valor por defecto siga siendo 0): por defecto pasa a 4%, los contratos sin comisión
+-- cargada toman el 4% y los que tuvieran un monto guardado (versiones de prueba anteriores) se convierten al
+-- porcentaje equivalente sobre el total del contrato.
+IF EXISTS (SELECT 1 FROM sys.default_constraints
+           WHERE [name] = 'DF_Contrato_ComisionInmobiliaria' AND [definition] IN ('((0))', '((0.00))'))
+BEGIN
+    ALTER TABLE [dbo].[Contrato] DROP CONSTRAINT [DF_Contrato_ComisionInmobiliaria];
+    ALTER TABLE [dbo].[Contrato] ADD CONSTRAINT [DF_Contrato_ComisionInmobiliaria] DEFAULT 4 FOR [comision_inmobiliaria];
+    UPDATE [dbo].[Contrato]
+    SET [comision_inmobiliaria] = CASE
+            WHEN [comision_inmobiliaria] = 0 THEN 4
+            ELSE ROUND([comision_inmobiliaria] * 100 / ([monto_mensual] * [duracion_meses]), 2) END
+    WHERE [comision_inmobiliaria] = 0 OR [comision_inmobiliaria] > 100;
+    PRINT N'Contrato: comisión inmobiliaria convertida a porcentaje mensual (4% por defecto).';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE [name] = 'CK_Contrato_ComisionPorcentaje')
+    ALTER TABLE [dbo].[Contrato] ADD CONSTRAINT [CK_Contrato_ComisionPorcentaje]
+        CHECK ([comision_inmobiliaria] BETWEEN 0 AND 100);
+GO
+
+-- PagoAlquiler: comisión retenida en cada pago (monto en pesos); el neto al propietario es monto_pagado - comisión
+IF COL_LENGTH('dbo.PagoAlquiler', 'comision_inmobiliaria') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[PagoAlquiler] ADD [comision_inmobiliaria] DECIMAL(18,2) NOT NULL
+        CONSTRAINT [DF_PagoAlquiler_ComisionInmobiliaria] DEFAULT 0
+        CONSTRAINT [CK_PagoAlquiler_ComisionInmobiliaria] CHECK ([comision_inmobiliaria] >= 0);
+    PRINT N'PagoAlquiler: columna comision_inmobiliaria agregada.';
+END
+GO
+
+-- Pagos ya registrados sin comisión calculada: se completa con el porcentaje de su contrato (los de 0% quedan en 0)
+UPDATE p SET [comision_inmobiliaria] = ROUND(p.[monto_pagado] * c.[comision_inmobiliaria] / 100, 2)
+FROM [dbo].[PagoAlquiler] p
+JOIN [dbo].[Contrato] c ON c.[id_contrato] = p.[id_contrato]
+WHERE p.[fecha_pago] IS NOT NULL AND p.[monto_pagado] > 0 AND p.[comision_inmobiliaria] = 0 AND c.[comision_inmobiliaria] > 0;
+GO
+
 -- ====================================================
 -- 4. Garante (PN2)
 -- ====================================================
@@ -255,7 +295,10 @@ INSERT INTO @Nuevos VALUES
     ('lblPenalidad', 'FormGestionarContratos', 'Penalidad:', 'Penalty:'),
     ('btnRescindir', 'FormGestionarContratos', 'Rescindir Contrato', 'Terminate Contract'),
     -- PN2 (paso 4): FormRegistrarPago
-    ('lblMora', 'FormRegistrarPago', 'Mora:', 'Arrears:');
+    ('lblMora', 'FormRegistrarPago', 'Mora:', 'Arrears:'),
+    -- Comisión inmobiliaria mensual: desglose de cada pago
+    ('lblComision', 'FormRegistrarPago', N'Comisión:', 'Agency fee:'),
+    ('lblNeto', 'FormRegistrarPago', 'Neto propietario:', 'Net to owner:');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

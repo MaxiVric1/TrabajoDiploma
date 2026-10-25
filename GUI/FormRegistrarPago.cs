@@ -47,6 +47,8 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblMontoBase, BE.NombreControl.FormRegistrarPago_lblMontoBase));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblRecargo, BE.NombreControl.FormRegistrarPago_lblRecargo));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblTotal, BE.NombreControl.FormRegistrarPago_lblTotal));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblComision, BE.NombreControl.FormRegistrarPago_lblComision));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblNeto, BE.NombreControl.FormRegistrarPago_lblNeto));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpResumen, BE.NombreControl.FormRegistrarPago_grpResumen));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnRegistrar, BE.NombreControl.FormRegistrarPago_btnRegistrar));
         }
@@ -192,10 +194,16 @@ namespace TpIngSoft
             lblRecargoValor.ForeColor = recargo > 0 ? TEXTO_CON_DEUDA : Color.White;
             lblTotalValor.Text = $"${total:N2}";
 
+            // La inmobiliaria retiene su comisión de lo que paga el inquilino; el resto es del propietario
+            decimal comision = ContratoBLL.CalcularComision(total, _contrato.ComisionInmobiliaria);
+            lblComisionValor.Text = $"${comision:N2} ({_contrato.ComisionInmobiliaria:0.##}%)";
+            lblNetoValor.Text = $"${total - comision:N2}";
+
             lblResumenValor.Text =
                 $"Contrato N° {_contrato.IdContrato} — {_nombreInquilino}\n" +
                 $"Período {periodo} ({TextoEstado(periodo)}), pagado el {dtpFechaPago.Value:dd/MM/yyyy}\n" +
-                $"Alquiler ${montoBase:N2} + recargo ${recargo:N2} = total ${total:N2}" +
+                $"Alquiler ${montoBase:N2} + recargo ${recargo:N2} = total ${total:N2}\n" +
+                $"Comisión inmobiliaria ${comision:N2} - neto al propietario ${total - comision:N2}" +
                 (periodo.Estado.HasValue || periodo.Regularizado ? "\nEl pago regulariza el mes: queda Al día." : "");
             btnRegistrar.Enabled = true;
         }
@@ -203,6 +211,7 @@ namespace TpIngSoft
         private void LimpiarImporte()
         {
             lblEstadoMesValor.Text = lblMontoBaseValor.Text = lblRecargoValor.Text = lblTotalValor.Text = "-";
+            lblComisionValor.Text = lblNetoValor.Text = "-";
             lblEstadoMesValor.ForeColor = lblRecargoValor.ForeColor = Color.White;
         }
 

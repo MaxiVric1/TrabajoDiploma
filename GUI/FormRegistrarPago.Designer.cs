@@ -48,6 +48,10 @@ namespace TpIngSoft
             this.lblMora = new System.Windows.Forms.Label();
             this.lblMoraValor = new System.Windows.Forms.Label();
             this.grpContrato.SuspendLayout();
+            this.lblComision = new System.Windows.Forms.Label();
+            this.lblComisionValor = new System.Windows.Forms.Label();
+            this.lblNeto = new System.Windows.Forms.Label();
+            this.lblNetoValor = new System.Windows.Forms.Label();
             this.grpPeriodo.SuspendLayout();
             this.grpResumen.SuspendLayout();
             this.SuspendLayout();
@@ -228,11 +232,15 @@ namespace TpIngSoft
             this.grpPeriodo.Controls.Add(this.lblRecargoValor);
             this.grpPeriodo.Controls.Add(this.lblTotal);
             this.grpPeriodo.Controls.Add(this.lblTotalValor);
+            this.grpPeriodo.Controls.Add(this.lblComision);
+            this.grpPeriodo.Controls.Add(this.lblComisionValor);
+            this.grpPeriodo.Controls.Add(this.lblNeto);
+            this.grpPeriodo.Controls.Add(this.lblNetoValor);
             this.grpPeriodo.Enabled = false;
             this.grpPeriodo.ForeColor = System.Drawing.Color.White;
             this.grpPeriodo.Location = new System.Drawing.Point(12, 194);
             this.grpPeriodo.Name = "grpPeriodo";
-            this.grpPeriodo.Size = new System.Drawing.Size(616, 150);
+            this.grpPeriodo.Size = new System.Drawing.Size(616, 176);
             this.grpPeriodo.TabIndex = 2;
             this.grpPeriodo.TabStop = false;
             this.grpPeriodo.Text = "Período a pagar";
@@ -355,12 +363,46 @@ namespace TpIngSoft
             this.lblTotalValor.Text = "-";
             this.lblTotalValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
+            // lblComision
+            //
+            this.lblComision.Location = new System.Drawing.Point(296, 118);
+            this.lblComision.Name = "lblComision";
+            this.lblComision.Size = new System.Drawing.Size(100, 20);
+            this.lblComision.Text = "Comisión:";
+            this.lblComision.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblComisionValor
+            //
+            this.lblComisionValor.AutoEllipsis = true;
+            this.lblComisionValor.Location = new System.Drawing.Point(402, 118);
+            this.lblComisionValor.Name = "lblComisionValor";
+            this.lblComisionValor.Size = new System.Drawing.Size(200, 20);
+            this.lblComisionValor.Text = "-";
+            this.lblComisionValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblNeto
+            //
+            this.lblNeto.Location = new System.Drawing.Point(6, 146);
+            this.lblNeto.Name = "lblNeto";
+            this.lblNeto.Size = new System.Drawing.Size(100, 20);
+            this.lblNeto.Text = "Neto propietario:";
+            this.lblNeto.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblNetoValor
+            //
+            this.lblNetoValor.AutoEllipsis = true;
+            this.lblNetoValor.Location = new System.Drawing.Point(112, 146);
+            this.lblNetoValor.Name = "lblNetoValor";
+            this.lblNetoValor.Size = new System.Drawing.Size(180, 20);
+            this.lblNetoValor.Text = "-";
+            this.lblNetoValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
             // grpResumen
             //
             this.grpResumen.BackColor = System.Drawing.Color.Transparent;
             this.grpResumen.Controls.Add(this.lblResumenValor);
             this.grpResumen.ForeColor = System.Drawing.Color.White;
-            this.grpResumen.Location = new System.Drawing.Point(12, 352);
+            this.grpResumen.Location = new System.Drawing.Point(12, 378);
             this.grpResumen.Name = "grpResumen";
             this.grpResumen.Size = new System.Drawing.Size(616, 100);
             this.grpResumen.TabIndex = 3;
@@ -381,7 +423,7 @@ namespace TpIngSoft
             this.btnRegistrar.Enabled = false;
             this.btnRegistrar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnRegistrar.ForeColor = System.Drawing.Color.White;
-            this.btnRegistrar.Location = new System.Drawing.Point(468, 462);
+            this.btnRegistrar.Location = new System.Drawing.Point(468, 488);
             this.btnRegistrar.Name = "btnRegistrar";
             this.btnRegistrar.Size = new System.Drawing.Size(160, 36);
             this.btnRegistrar.TabIndex = 4;
@@ -394,7 +436,7 @@ namespace TpIngSoft
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
-            this.ClientSize = new System.Drawing.Size(640, 510);
+            this.ClientSize = new System.Drawing.Size(640, 536);
             this.Controls.Add(this.lblActualizacion);
             this.Controls.Add(this.grpContrato);
             this.Controls.Add(this.grpPeriodo);
@@ -442,6 +484,10 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblRecargoValor;
         private System.Windows.Forms.Label lblTotal;
         private System.Windows.Forms.Label lblTotalValor;
+        private System.Windows.Forms.Label lblComision;
+        private System.Windows.Forms.Label lblComisionValor;
+        private System.Windows.Forms.Label lblNeto;
+        private System.Windows.Forms.Label lblNetoValor;
         private System.Windows.Forms.GroupBox grpResumen;
         private System.Windows.Forms.Label lblResumenValor;
         private System.Windows.Forms.Button btnRegistrar;

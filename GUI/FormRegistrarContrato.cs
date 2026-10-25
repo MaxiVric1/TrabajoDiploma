@@ -332,7 +332,7 @@ namespace TpIngSoft
                 DuracionMeses = (int)nudDuracion.Value,
                 MontoMensual = nudMonto.Value,
                 DepositoGarantia = ContratoBLL.CalcularDeposito(nudMonto.Value),
-                ComisionInmobiliaria = ContratoBLL.CalcularComision(nudMonto.Value, (int)nudDuracion.Value),
+                ComisionInmobiliaria = ContratoBLL.PORCENTAJE_COMISION,
                 MetodoPago = cmbMetodoPago.SelectedItem is MetodoPago metodo ? metodo : MetodoPago.Transferencia,
                 PeriodicidadActualizacionMeses = ContratoBLL.PERIODICIDAD_IPC_MESES
             };
@@ -358,8 +358,9 @@ namespace TpIngSoft
             }
             lblFechaFinValor.Text = texto;
             lblDepositoValor.Text = $"${borrador.DepositoGarantia:N2} ({ContratoBLL.MESES_DEPOSITO} mes de alquiler)";
-            lblComisionValor.Text = $"${borrador.ComisionInmobiliaria:N2} ({ContratoBLL.PORCENTAJE_COMISION:P0} del total del contrato: " +
-                                    $"${borrador.MontoMensual * borrador.DuracionMeses:N2})";
+            lblComisionValor.Text = $"{borrador.ComisionInmobiliaria:0.##}% de cada pago: " +
+                                    $"${ContratoBLL.CalcularComision(borrador.MontoMensual, borrador.ComisionInmobiliaria):N2} por mes " +
+                                    $"(neto al propietario ${ContratoBLL.NetoPropietario(borrador.MontoMensual, borrador.ComisionInmobiliaria):N2})";
         }
 
         // ---------- 5. Resumen, registro y PDF ----------
@@ -390,7 +391,9 @@ namespace TpIngSoft
             sb.AppendLine($"  Plazo: {c.DuracionMeses} meses, del {c.FechaInicio:dd/MM/yyyy} al {c.FechaFin:dd/MM/yyyy}");
             sb.AppendLine($"  Alquiler mensual: ${c.MontoMensual:N2} ({c.MetodoPago})");
             sb.AppendLine($"  Depósito de garantía: ${c.DepositoGarantia:N2}");
-            sb.AppendLine($"  Comisión inmobiliaria: ${c.ComisionInmobiliaria:N2}");
+            sb.AppendLine($"  Comisión inmobiliaria: {c.ComisionInmobiliaria:0.##}% de cada pago " +
+                          $"(${ContratoBLL.CalcularComision(c.MontoMensual, c.ComisionInmobiliaria):N2} por mes; neto al propietario " +
+                          $"${ContratoBLL.NetoPropietario(c.MontoMensual, c.ComisionInmobiliaria):N2})");
             sb.AppendLine($"  Actualización: IPC cada {c.PeriodicidadActualizacionMeses} meses");
             txtResumen.Text = sb.ToString();
         }

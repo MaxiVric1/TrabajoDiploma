@@ -21,6 +21,7 @@ namespace BE
         public decimal MontoPagado { get; set; }
         public EstadoPago EstadoPago { get; set; } = EstadoPago.AlDia;
         public decimal RecargoAplicado { get; set; } // monto en pesos
+        public decimal ComisionInmobiliaria { get; set; } // monto en pesos que retiene la inmobiliaria de este pago
         public int IdContrato { get; set; }
         public int IdUsuarioAnalista { get; set; }
 
@@ -28,6 +29,9 @@ namespace BE
         public Contrato Contrato { get; set; }
 
         public bool Pagado => FechaPago.HasValue;
+
+        // Lo que le corresponde al propietario de este pago
+        public decimal NetoPropietario => MontoPagado - ComisionInmobiliaria;
 
         public override string ToString()
         {

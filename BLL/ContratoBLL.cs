@@ -38,15 +38,17 @@ namespace BLL
         // ---------- Condiciones económicas ----------
 
         public const int MESES_DEPOSITO = 1;                        // depósito de garantía = 1 mes de alquiler
-        public const decimal PORCENTAJE_COMISION = 0.04m;           // comisión = 4% del valor total del contrato
+        public const decimal PORCENTAJE_COMISION = 4m;              // comisión: 4% que se retiene de cada pago mensual
         public const int PERIODICIDAD_IPC_MESES = 3;                // actualización por IPC cada 3 meses
         public const decimal PORCENTAJE_PENALIDAD_RESCISION = 0.10m; // rescisión = 10% del canon restante
 
         public static decimal CalcularDeposito(decimal montoMensual) => Math.Round(montoMensual * MESES_DEPOSITO, 2);
 
         // Sobre el valor total del contrato (monto mensual x duración)
-        public static decimal CalcularComision(decimal montoMensual, int duracionMeses) =>
-            Math.Round(montoMensual * duracionMeses * PORCENTAJE_COMISION, 2);
+        // Comisión de un pago (porcentaje del contrato sobre lo que paga el inquilino) y neto al propietario
+        public static decimal CalcularComision(decimal montoPagado, decimal porcentaje) => Math.Round(montoPagado * porcentaje / 100, 2);
+
+        public static decimal NetoPropietario(decimal montoPagado, decimal porcentaje) => montoPagado - CalcularComision(montoPagado, porcentaje);
 
         // Meses del contrato posteriores al mes en curso: los que quedan sin devengar si se rescinde hoy
         public static int MesesRestantes(Contrato contrato, DateTime hoy)
@@ -98,7 +100,7 @@ namespace BLL
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Contrato",
                 $"Contrato N° {result}: inmueble {idInmueble} ({inmueble.Direccion}, pasa a Alquilado), {inquilino}, " +
                 $"{contrato.Garantes.Count} garante(s), {contrato.DuracionMeses} meses desde {contrato.FechaInicio:dd/MM/yyyy}, " +
-                $"${contrato.MontoMensual:N2} mensuales, depósito ${contrato.DepositoGarantia:N2}, comisión ${contrato.ComisionInmobiliaria:N2}, " +
+                $"${contrato.MontoMensual:N2} mensuales, depósito ${contrato.DepositoGarantia:N2}, comisión {contrato.ComisionInmobiliaria:0.##}% mensual, " +
                 $"pago por {contrato.MetodoPago}.");
             return result;
         }
@@ -313,7 +315,9 @@ namespace BLL
             pdf.Campo("Alquiler mensual", $"${contrato.MontoMensual:N2}, pagadero del 1 al {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes");
             pdf.Campo("Método de pago", contrato.MetodoPago.ToString());
             pdf.Campo("Depósito de garantía", $"${contrato.DepositoGarantia:N2}");
-            pdf.Campo("Comisión inmobiliaria", $"${contrato.ComisionInmobiliaria:N2}");
+            pdf.Campo("Comisión inmobiliaria", $"{contrato.ComisionInmobiliaria:0.##}% de cada pago, retenido por la inmobiliaria " +
+                $"(${CalcularComision(contrato.MontoMensual, contrato.ComisionInmobiliaria):N2} de cada alquiler de ${contrato.MontoMensual:N2}; " +
+                $"neto al propietario ${NetoPropietario(contrato.MontoMensual, contrato.ComisionInmobiliaria):N2})");
             pdf.Campo("Actualización", $"Por índice {contrato.IndiceActualizacion}, cada {contrato.PeriodicidadActualizacionMeses} meses");
 
             pdf.Subtitulo("5. Cláusulas");
@@ -410,8 +414,8 @@ namespace BLL
                 throw new ArgumentException("El monto mensual debe ser mayor a cero.");
             if (contrato.DepositoGarantia < 0)
                 throw new ArgumentException("El depósito de garantía no puede ser negativo.");
-            if (contrato.ComisionInmobiliaria < 0)
-                throw new ArgumentException("La comisión inmobiliaria no puede ser negativa.");
+            if (contrato.ComisionInmobiliaria < 0 || contrato.ComisionInmobiliaria > 100)
+                throw new ArgumentException("La comisión inmobiliaria es un porcentaje entre 0 y 100.");
             if (!Enum.IsDefined(typeof(MetodoPago), contrato.MetodoPago))
                 throw new ArgumentException("El método de pago no es válido.");
             if (contrato.IndiceActualizacion != "IPC")
