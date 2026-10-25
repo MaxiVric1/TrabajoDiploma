@@ -1692,7 +1692,7 @@ GO
 -- ====================================================
 -- EliminarContrato
 -- Los garantes se borran antes (EliminarGarantesPorContrato, en la misma transacción). Si el contrato estaba
--- vigente, el inmueble del PN1 vuelve de Alquilado a Publicado.
+-- vigente, el inmueble del PN1 vuelve de Alquilado a Publicado. Su historial de actualizaciones se borra con él.
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[EliminarContrato];
 GO
@@ -1706,6 +1706,7 @@ AS BEGIN
     INNER JOIN InmuebleAlquiler i ON i.id_inmueble = n.id_inmueble
     INNER JOIN Contrato c ON c.id_inmueble_alquiler = i.id_inmueble_alquiler
     WHERE c.id_contrato = @Id AND c.estado_contrato <> 'Finalizado' AND n.estado_actual = 'Alquilado';
+    DELETE FROM ActualizacionContrato WHERE id_contrato = @Id;
     SET NOCOUNT OFF;
 
     DELETE FROM Contrato WHERE id_contrato = @Id;
@@ -1917,6 +1918,99 @@ AS BEGIN
     SELECT id_garante, id_contrato, nombre, apellido, dni, domicilio, propiedad_garantia
     FROM Garante
     WHERE id_garante = @Id;
+END
+GO
+
+-- ====================================================
+-- AplicarActualizacionContrato
+-- Nuevo monto mensual por índice + su registro en el historial, juntos o ninguno. Solo si el contrato sigue
+-- vigente con el monto esperado (@MontoAnterior) y esa actualización no estaba aplicada: @Aplicado = 0 si no.
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[AplicarActualizacionContrato];
+GO
+
+CREATE PROCEDURE [dbo].[AplicarActualizacionContrato]
+    @IdContrato INT,
+    @FechaActualizacion DATE,
+    @Indice VARCHAR(10),
+    @Porcentaje DECIMAL(9,4),
+    @Detalle NVARCHAR(200),
+    @MontoAnterior DECIMAL(18,2),
+    @MontoNuevo DECIMAL(18,2),
+    @IdUsuario INT = NULL,
+    @Aplicado BIT OUTPUT
+AS BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    SET @Aplicado = 0;
+    IF EXISTS (SELECT 1 FROM ActualizacionContrato WHERE id_contrato = @IdContrato AND fecha_actualizacion = @FechaActualizacion)
+        RETURN;
+
+    BEGIN TRANSACTION;
+    UPDATE Contrato SET monto_mensual = @MontoNuevo
+    WHERE id_contrato = @IdContrato AND monto_mensual = @MontoAnterior AND estado_contrato <> 'Finalizado';
+    IF @@ROWCOUNT = 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+    INSERT INTO ActualizacionContrato (id_contrato, fecha_actualizacion, indice, porcentaje, detalle, monto_anterior, monto_nuevo, id_usuario)
+    VALUES (@IdContrato, @FechaActualizacion, @Indice, @Porcentaje, @Detalle, @MontoAnterior, @MontoNuevo, @IdUsuario);
+    COMMIT TRANSACTION;
+    SET @Aplicado = 1;
+END
+GO
+
+-- ====================================================
+-- LeerActualizacionesPorContrato (historial, de la más antigua a la más reciente)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerActualizacionesPorContrato];
+GO
+
+CREATE PROCEDURE [dbo].[LeerActualizacionesPorContrato]
+    @IdContrato INT
+AS BEGIN
+    SELECT id_actualizacion, id_contrato, fecha_actualizacion, fecha_registro, indice, porcentaje, detalle,
+           monto_anterior, monto_nuevo, id_usuario
+    FROM ActualizacionContrato
+    WHERE id_contrato = @IdContrato
+    ORDER BY fecha_actualizacion;
+END
+GO
+
+-- ====================================================
+-- GuardarIndiceBCRA (alta o reemplazo de un valor de una serie del BCRA)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[GuardarIndiceBCRA];
+GO
+
+CREATE PROCEDURE [dbo].[GuardarIndiceBCRA]
+    @IdVariable INT,
+    @Fecha DATE,
+    @Valor DECIMAL(19,6)
+AS BEGIN
+    UPDATE IndiceBCRA SET valor = @Valor, fecha_consulta = GETDATE()
+    WHERE id_variable = @IdVariable AND fecha = @Fecha;
+    IF @@ROWCOUNT = 0
+        INSERT INTO IndiceBCRA (id_variable, fecha, valor) VALUES (@IdVariable, @Fecha, @Valor);
+END
+GO
+
+-- ====================================================
+-- LeerIndiceBCRA (valores guardados de una serie entre dos fechas)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[LeerIndiceBCRA];
+GO
+
+CREATE PROCEDURE [dbo].[LeerIndiceBCRA]
+    @IdVariable INT,
+    @Desde DATE,
+    @Hasta DATE
+AS BEGIN
+    SELECT id_variable, fecha, valor
+    FROM IndiceBCRA
+    WHERE id_variable = @IdVariable AND fecha BETWEEN @Desde AND @Hasta
+    ORDER BY fecha;
 END
 GO
 

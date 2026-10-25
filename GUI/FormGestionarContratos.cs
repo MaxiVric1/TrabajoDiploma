@@ -42,6 +42,7 @@ namespace TpIngSoft
         private PagoAlquilerBLL pagoBLL = new PagoAlquilerBLL();
         private InquilinoBLL inquilinoBLL = new InquilinoBLL();
         private GaranteBLL garanteBLL = new GaranteBLL();
+        private ActualizacionIpcBLL ipcBLL = new ActualizacionIpcBLL();
         private ToolTip toolTip = new ToolTip(); // detalle de todos los garantes sobre lblGaranteValor
         private List<IControlTraducible> _controlesTraducibles = new List<IControlTraducible>();
         private List<DataGridTraducible> _grillasTraducibles = new List<DataGridTraducible>();
@@ -252,6 +253,7 @@ namespace TpIngSoft
             lblDepositoValor.Text = lblComisionValor.Text = lblMetodoPagoValor.Text = lblIndiceValor.Text = lblGaranteValor.Text = "-";
             lblMesesRestantesValor.Text = lblPenalidadValor.Text = "-";
             toolTip.SetToolTip(lblGaranteValor, null);
+            toolTip.SetToolTip(lblIndiceValor, null);
             dgvPagos.DataSource = null;
 
             // Renovar y rescindir solo para contratos Activo o Por Vencer
@@ -317,6 +319,25 @@ namespace TpIngSoft
                                     $"(${ContratoBLL.CalcularComision(contrato.MontoMensual, contrato.ComisionInmobiliaria):N2}/mes)";
             lblMetodoPagoValor.Text = contrato.MetodoPago.ToString();
             lblIndiceValor.Text = $"{contrato.IndiceActualizacion} cada {contrato.PeriodicidadActualizacionMeses} meses";
+            try
+            {
+                // Próxima actualización y, en el tooltip, el historial de las ya aplicadas
+                List<ActualizacionContrato> historial = ipcBLL.LeerHistorial(contrato.IdContrato);
+                DateTime? proxima = contrato.Vigente ? ipcBLL.ProximaActualizacion(contrato, historial) : null;
+                if (proxima.HasValue) lblIndiceValor.Text += $" (próx. {proxima:dd/MM/yyyy})";
+                string detalle = historial.Count == 0
+                    ? "Sin actualizaciones aplicadas todavía."
+                    : "Actualizaciones aplicadas:" + Environment.NewLine + string.Join(Environment.NewLine,
+                        historial.Select(a => $"{a.FechaActualizacion:dd/MM/yyyy}: {a.Porcentaje:+0.##;-0.##}% ({a.Detalle}) ${a.MontoAnterior:N2} -> ${a.MontoNuevo:N2}"));
+                if (proxima.HasValue)
+                    detalle += Environment.NewLine + $"Próxima: rige desde {proxima:dd/MM/yyyy} con el IPC de " +
+                               string.Join(", ", ActualizacionIpcBLL.MesesIpc(proxima.Value).Select(m => m.ToString("MM/yyyy"))) + ".";
+                toolTip.SetToolTip(lblIndiceValor, detalle);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar las actualizaciones por IPC: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
             if (contrato.Vigente)
             {

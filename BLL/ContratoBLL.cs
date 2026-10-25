@@ -321,8 +321,9 @@ namespace BLL
             pdf.Campo("Actualización", $"Por índice {contrato.IndiceActualizacion}, cada {contrato.PeriodicidadActualizacionMeses} meses");
 
             pdf.Subtitulo("5. Cláusulas");
-            pdf.Parrafo($"Mora: el pago posterior al día {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes devenga un recargo del " +
-                        $"{PagoAlquilerBLL.PORCENTAJE_RECARGO:P0} sobre el alquiler mensual.");
+            pdf.Parrafo($"Mora: el pago posterior al día {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes devenga intereses moratorios " +
+                        "sobre el alquiler del mes, a la Tasa de Intereses Moratorios (TIM) que publica el BCRA (art. 768 inc. c del " +
+                        "Código Civil y Comercial), desde el vencimiento hasta el día del pago.");
             pdf.Espacio(3);
             pdf.Parrafo($"Actualización: el alquiler mensual se ajusta cada {contrato.PeriodicidadActualizacionMeses} meses según la " +
                         $"variación acumulada del {contrato.IndiceActualizacion} publicada por el BCRA.");

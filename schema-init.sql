@@ -29,6 +29,8 @@ GO
 -- Tablas del PN2: referencian a Usuario, se borran primero
 -- (Garante la crea actualizacion-schema.sql; referencia a Contrato y se borra antes)
 IF OBJECT_ID('[dbo].[Garante]', 'U') IS NOT NULL DROP TABLE [dbo].[Garante];
+IF OBJECT_ID('[dbo].[ActualizacionContrato]', 'U') IS NOT NULL DROP TABLE [dbo].[ActualizacionContrato];
+IF OBJECT_ID('[dbo].[IndiceBCRA]', 'U') IS NOT NULL DROP TABLE [dbo].[IndiceBCRA];
 IF OBJECT_ID('[dbo].[ContactoCobranza]', 'U') IS NOT NULL DROP TABLE [dbo].[ContactoCobranza];
 IF OBJECT_ID('[dbo].[AccionLegal]', 'U') IS NOT NULL DROP TABLE [dbo].[AccionLegal];
 IF OBJECT_ID('[dbo].[PagoAlquiler]', 'U') IS NOT NULL DROP TABLE [dbo].[PagoAlquiler];
@@ -1041,7 +1043,7 @@ INSERT INTO @Nuevos VALUES
     ('lblEstadoMes', 'FormRegistrarPago', 'Estado del mes:', 'Month status:'),
     ('lblFechaPago', 'FormRegistrarPago', 'Fecha de pago:', 'Payment date:'),
     ('lblMontoBase', 'FormRegistrarPago', 'Alquiler:', 'Rent:'),
-    ('lblRecargo', 'FormRegistrarPago', 'Recargo (10%):', 'Surcharge (10%):'),
+    ('lblRecargo', 'FormRegistrarPago', 'Recargo por mora:', 'Late fee:'),
     ('lblTotal', 'FormRegistrarPago', 'Total a pagar:', 'Total due:'),
     ('grpResumen', 'FormRegistrarPago', 'Resumen del pago', 'Payment summary'),
     ('btnRegistrar', 'FormRegistrarPago', 'Registrar Pago', 'Register Payment'),

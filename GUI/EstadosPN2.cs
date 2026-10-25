@@ -28,26 +28,46 @@ namespace TpIngSoft
             }
         }
 
-        // Procesos automáticos que ejecutan los formularios del PN2 al abrirse: primero la mora (un contrato recién
-        // vencido todavía genera sus últimos meses impagos), después los vencimientos de contratos.
+        // Procesos automáticos que ejecutan los formularios del PN2 al abrirse: primero las actualizaciones por IPC
+        // (definen el monto de los meses que entran en mora), después la mora (un contrato recién vencido todavía
+        // genera sus últimos meses impagos) y por último los vencimientos de contratos.
         // Devuelve el resumen para mostrar; si falla, avisa con un MessageBox y devuelve el aviso.
         public static string EjecutarProcesosAutomaticos()
         {
+            string ipc = ActualizarPorIpc();
             try
             {
                 var (enMora, enLitigio) = new BLL.PagoAlquilerBLL().ActualizarEstadosAutomaticos();
                 int contratos = new BLL.ContratoBLL().ActualizarVencimientos();
 
-                return enMora + enLitigio + contratos == 0
+                return (enMora + enLitigio + contratos == 0
                     ? $"Estados actualizados al {System.DateTime.Now:dd/MM/yyyy HH:mm}: sin cambios."
                     : $"Estados actualizados al {System.DateTime.Now:dd/MM/yyyy HH:mm}: {enMora} mes(es) pasaron a En Mora, " +
-                      $"{enLitigio} a En Litigio y {contratos} contrato(s) cambiaron por vencimiento.";
+                      $"{enLitigio} a En Litigio y {contratos} contrato(s) cambiaron por vencimiento.") + ipc;
             }
             catch (System.Exception ex)
             {
                 MessageBox.Show("No se pudieron actualizar los estados de pagos y contratos: " + ex.Message,
                     "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return "No se pudieron actualizar los estados automáticamente.";
+            }
+        }
+
+        // Actualizaciones por IPC vencidas (datos del BCRA). Sin conexión o sin IPC publicado quedan pendientes para la
+        // próxima vez: no frenan el resto de los procesos. Devuelve el texto que se agrega al resumen.
+        private static string ActualizarPorIpc()
+        {
+            try
+            {
+                BLL.ResultadoActualizacionIpc resultado = new BLL.ActualizacionIpcBLL().AplicarPendientes();
+                string texto = resultado.Aplicadas.Count > 0 ? $" {resultado.Aplicadas.Count} monto(s) actualizado(s) por IPC." : "";
+                if (resultado.Pendientes.Count > 0)
+                    texto += $" {resultado.Pendientes.Count} actualización(es) por IPC pendiente(s): {resultado.Pendientes[0]}";
+                return texto;
+            }
+            catch (System.Exception ex)
+            {
+                return " No se pudieron aplicar las actualizaciones por IPC: " + ex.Message;
             }
         }
 

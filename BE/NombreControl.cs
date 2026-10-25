@@ -280,6 +280,7 @@ namespace BE
         public const string FormRegistrarPago_lblMora = "FormRegistrarPago.lblMora";
         public const string FormRegistrarPago_lblComision = "FormRegistrarPago.lblComision";
         public const string FormRegistrarPago_lblNeto = "FormRegistrarPago.lblNeto";
+        public const string FormRegistrarPago_lblTasa = "FormRegistrarPago.lblTasa";
 
         // FormGestionarMora
         public const string FormGestionarMora_grpInquilino = "FormGestionarMora.grpInquilino";

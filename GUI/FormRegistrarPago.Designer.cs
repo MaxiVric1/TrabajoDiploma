@@ -52,6 +52,8 @@ namespace TpIngSoft
             this.lblComisionValor = new System.Windows.Forms.Label();
             this.lblNeto = new System.Windows.Forms.Label();
             this.lblNetoValor = new System.Windows.Forms.Label();
+            this.lblTasa = new System.Windows.Forms.Label();
+            this.lblTasaValor = new System.Windows.Forms.Label();
             this.grpPeriodo.SuspendLayout();
             this.grpResumen.SuspendLayout();
             this.SuspendLayout();
@@ -236,6 +238,8 @@ namespace TpIngSoft
             this.grpPeriodo.Controls.Add(this.lblComisionValor);
             this.grpPeriodo.Controls.Add(this.lblNeto);
             this.grpPeriodo.Controls.Add(this.lblNetoValor);
+            this.grpPeriodo.Controls.Add(this.lblTasa);
+            this.grpPeriodo.Controls.Add(this.lblTasaValor);
             this.grpPeriodo.Enabled = false;
             this.grpPeriodo.ForeColor = System.Drawing.Color.White;
             this.grpPeriodo.Location = new System.Drawing.Point(12, 194);
@@ -332,7 +336,7 @@ namespace TpIngSoft
             this.lblRecargo.Name = "lblRecargo";
             this.lblRecargo.Size = new System.Drawing.Size(100, 20);
             this.lblRecargo.TabIndex = 8;
-            this.lblRecargo.Text = "Recargo (10%):";
+            this.lblRecargo.Text = "Recargo por mora:";
             this.lblRecargo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
             // lblRecargoValor
@@ -396,6 +400,23 @@ namespace TpIngSoft
             this.lblNetoValor.Size = new System.Drawing.Size(180, 20);
             this.lblNetoValor.Text = "-";
             this.lblNetoValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // lblTasa
+            //
+            this.lblTasa.Location = new System.Drawing.Point(296, 58);
+            this.lblTasa.Name = "lblTasa";
+            this.lblTasa.Size = new System.Drawing.Size(100, 20);
+            this.lblTasa.Text = "Tasa de mora:";
+            this.lblTasa.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // lblTasaValor
+            //
+            this.lblTasaValor.AutoEllipsis = true;
+            this.lblTasaValor.Location = new System.Drawing.Point(402, 58);
+            this.lblTasaValor.Name = "lblTasaValor";
+            this.lblTasaValor.Size = new System.Drawing.Size(200, 20);
+            this.lblTasaValor.Text = "-";
+            this.lblTasaValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // grpResumen
             //
@@ -488,6 +509,8 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblComisionValor;
         private System.Windows.Forms.Label lblNeto;
         private System.Windows.Forms.Label lblNetoValor;
+        private System.Windows.Forms.Label lblTasa;
+        private System.Windows.Forms.Label lblTasaValor;
         private System.Windows.Forms.GroupBox grpResumen;
         private System.Windows.Forms.Label lblResumenValor;
         private System.Windows.Forms.Button btnRegistrar;

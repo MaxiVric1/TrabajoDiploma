@@ -11,6 +11,8 @@ namespace TpIngSoft
     public partial class FormRegistrarPago : Form, IObservador
     {
         private static readonly Color TEXTO_CON_DEUDA = Color.FromArgb(255, 130, 130);
+        private static readonly Color TEXTO_AVISO = Color.FromArgb(255, 200, 120);
+        private ToolTip toolTip = new ToolTip(); // detalle de la tasa de mora aplicada
 
         private ContratoBLL contratoBLL = new ContratoBLL();
         private PagoAlquilerBLL pagoBLL = new PagoAlquilerBLL();
@@ -49,6 +51,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblTotal, BE.NombreControl.FormRegistrarPago_lblTotal));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblComision, BE.NombreControl.FormRegistrarPago_lblComision));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblNeto, BE.NombreControl.FormRegistrarPago_lblNeto));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblTasa, BE.NombreControl.FormRegistrarPago_lblTasa));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpResumen, BE.NombreControl.FormRegistrarPago_grpResumen));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnRegistrar, BE.NombreControl.FormRegistrarPago_btnRegistrar));
         }
@@ -185,13 +188,14 @@ namespace TpIngSoft
             lblEstadoMesValor.Text = TextoEstado(periodo);
             lblEstadoMesValor.ForeColor = periodo.Estado.HasValue ? TEXTO_CON_DEUDA : Color.White;
 
-            var (montoBase, recargo, total) = PagoAlquilerBLL.CalcularImporte(_contrato, periodo.Mes, periodo.Anio, dtpFechaPago.Value);
+            // Monto del período (con las actualizaciones por IPC que rigen para ese mes) e intereses por mora con la
+            // TIM del BCRA entre el vencimiento y la fecha de pago
+            ImportePeriodo importe = pagoBLL.CalcularImporte(_contrato, periodo.Mes, periodo.Anio, dtpFechaPago.Value);
+            decimal montoBase = importe.Base, recargo = importe.Recargo, total = importe.Total;
             lblMontoBaseValor.Text = $"${montoBase:N2}";
-            int diasMora = PagoAlquilerBLL.DiasEnMora(periodo.Mes, periodo.Anio, dtpFechaPago.Value);
-            lblRecargoValor.Text = recargo > 0
-                ? $"${recargo:N2} ({PagoAlquilerBLL.PORCENTAJE_RECARGO:P0}, {diasMora} día(s) de mora)"
-                : "$0,00 (dentro de término)";
+            lblRecargoValor.Text = recargo > 0 ? $"${recargo:N2} ({importe.DiasMora} día(s) de mora)" : "$0,00 (dentro de término)";
             lblRecargoValor.ForeColor = recargo > 0 ? TEXTO_CON_DEUDA : Color.White;
+            MostrarTasa(importe);
             lblTotalValor.Text = $"${total:N2}";
 
             // La inmobiliaria retiene su comisión de lo que paga el inquilino; el resto es del propietario
@@ -202,17 +206,39 @@ namespace TpIngSoft
             lblResumenValor.Text =
                 $"Contrato N° {_contrato.IdContrato} — {_nombreInquilino}\n" +
                 $"Período {periodo} ({TextoEstado(periodo)}), pagado el {dtpFechaPago.Value:dd/MM/yyyy}\n" +
-                $"Alquiler ${montoBase:N2} + recargo ${recargo:N2} = total ${total:N2}\n" +
+                $"Alquiler ${montoBase:N2} + recargo ${recargo:N2}" +
+                (recargo > 0 ? (importe.TasaFija ? $" ({importe.FuenteTasa})" : $" (TIM {importe.TasaPeriodo:0.####}% en {importe.DiasMora} días)") : "") +
+                $" = total ${total:N2}\n" +
                 $"Comisión inmobiliaria ${comision:N2} - neto al propietario ${total - comision:N2}" +
                 (periodo.Estado.HasValue || periodo.Regularizado ? "\nEl pago regulariza el mes: queda Al día." : "");
             btnRegistrar.Enabled = true;
         }
 
+        // Tasa de mora aplicada: la TIM del período (y su equivalente anual) o, sin datos del BCRA, el porcentaje fijo
+        private void MostrarTasa(ImportePeriodo importe)
+        {
+            if (importe.DiasMora == 0)
+            {
+                lblTasaValor.Text = "-";
+                lblTasaValor.ForeColor = Color.White;
+                toolTip.SetToolTip(lblTasaValor, null);
+                return;
+            }
+            lblTasaValor.Text = importe.TasaFija
+                ? importe.FuenteTasa
+                : $"TIM {importe.TasaPeriodo:0.####}% (≈ {importe.TasaAnual:0.##}% anual)";
+            lblTasaValor.ForeColor = importe.TasaFija ? TEXTO_AVISO : Color.White;
+            toolTip.SetToolTip(lblTasaValor, importe.TasaFija
+                ? $"No se pudo obtener la TIM del BCRA ({pagoBLL.ErrorBCRA ?? "sin datos para esas fechas"}): se aplica el {importe.FuenteTasa}."
+                : $"{importe.FuenteTasa}: variación del índice entre el vencimiento ({PagoAlquilerBLL.FechaVencimiento(PeriodoSeleccionado().Mes, PeriodoSeleccionado().Anio):dd/MM/yyyy}) " +
+                  $"y la fecha de pago, {importe.DiasMora} día(s).");
+        }
+
         private void LimpiarImporte()
         {
             lblEstadoMesValor.Text = lblMontoBaseValor.Text = lblRecargoValor.Text = lblTotalValor.Text = "-";
-            lblComisionValor.Text = lblNetoValor.Text = "-";
-            lblEstadoMesValor.ForeColor = lblRecargoValor.ForeColor = Color.White;
+            lblComisionValor.Text = lblNetoValor.Text = lblTasaValor.Text = "-";
+            lblEstadoMesValor.ForeColor = lblRecargoValor.ForeColor = lblTasaValor.ForeColor = Color.White;
         }
 
         // ---------- 3. Registro ----------
@@ -229,7 +255,7 @@ namespace TpIngSoft
             try
             {
                 DateTime fechaPago = dtpFechaPago.Value.Date == DateTime.Today ? DateTime.Now : dtpFechaPago.Value.Date;
-                decimal total = PagoAlquilerBLL.CalcularImporte(_contrato, periodo.Mes, periodo.Anio, fechaPago).Total;
+                decimal total = pagoBLL.CalcularImporte(_contrato, periodo.Mes, periodo.Anio, fechaPago).Total;
 
                 pagoBLL.RegistrarPago(_contrato.IdContrato, periodo.Mes, periodo.Anio, total, fechaPago);
 

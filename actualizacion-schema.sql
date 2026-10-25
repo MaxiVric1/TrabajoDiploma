@@ -12,6 +12,7 @@
 --   3. Contrato: fecha_fin (calculada y guardada), depósito de garantía, comisión, método de pago, actualización
 --      por índice (IPC cada 3 meses), rescisión y entrega del inmueble con devolución del depósito.
 --   4. Garante: garantes de cada contrato.
+--   4b. APIs del BCRA: historial de actualizaciones de monto por IPC y valores consultados a la API (IPC y TIM).
 --   5. Traducciones (español e inglés) de los controles agregados a los formularios; baja de las de los quitados.
 -- ====================================================
 USE [TpIngSoft];
@@ -234,6 +235,46 @@ END
 GO
 
 -- ====================================================
+-- 4b. APIs del BCRA (PN2)
+-- ====================================================
+
+-- Historial de actualizaciones del monto mensual por índice. La actualización rige desde el período que
+-- empieza en fecha_actualizacion (los meses anteriores conservan el monto anterior).
+IF OBJECT_ID('[dbo].[ActualizacionContrato]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[ActualizacionContrato] (
+        [id_actualizacion] INT IDENTITY(1,1) PRIMARY KEY,
+        [id_contrato] INT NOT NULL CONSTRAINT [FK_ActualizacionContrato_Contrato] FOREIGN KEY REFERENCES [dbo].[Contrato]([id_contrato]),
+        [fecha_actualizacion] DATE NOT NULL,              -- primer día del período desde el que rige
+        [fecha_registro] DATETIME NOT NULL CONSTRAINT [DF_ActualizacionContrato_FechaRegistro] DEFAULT GETDATE(),
+        [indice] VARCHAR(10) NOT NULL CONSTRAINT [DF_ActualizacionContrato_Indice] DEFAULT 'IPC',
+        [porcentaje] DECIMAL(9,4) NOT NULL,               -- variación acumulada aplicada, en %
+        [detalle] NVARCHAR(200) NULL,                     -- valores mensuales usados
+        [monto_anterior] DECIMAL(18,2) NOT NULL CONSTRAINT [CK_ActualizacionContrato_MontoAnterior] CHECK ([monto_anterior] > 0),
+        [monto_nuevo] DECIMAL(18,2) NOT NULL CONSTRAINT [CK_ActualizacionContrato_MontoNuevo] CHECK ([monto_nuevo] > 0),
+        [id_usuario] INT NULL CONSTRAINT [FK_ActualizacionContrato_Usuario] FOREIGN KEY REFERENCES [dbo].[Usuario]([id]),
+        CONSTRAINT [UQ_ActualizacionContrato_Fecha] UNIQUE ([id_contrato], [fecha_actualizacion])
+    );
+    PRINT N'Tabla ActualizacionContrato creada.';
+END
+GO
+
+-- Valores de las series del BCRA ya consultados (27 = inflación mensual, 1197 = TIM art. 768 CCC): evitan
+-- consultar la API de nuevo y permiten trabajar sin conexión con lo ya descargado
+IF OBJECT_ID('[dbo].[IndiceBCRA]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[IndiceBCRA] (
+        [id_variable] INT NOT NULL,
+        [fecha] DATE NOT NULL,
+        [valor] DECIMAL(19,6) NOT NULL,
+        [fecha_consulta] DATETIME NOT NULL CONSTRAINT [DF_IndiceBCRA_FechaConsulta] DEFAULT GETDATE(),
+        CONSTRAINT [PK_IndiceBCRA] PRIMARY KEY ([id_variable], [fecha])
+    );
+    PRINT N'Tabla IndiceBCRA creada.';
+END
+GO
+
+-- ====================================================
 -- 5. Traducciones de los controles nuevos (español e inglés)
 --    Van acá y no en schema-init.sql para que también las reciban las bases existentes.
 --    Solo se agregan las que faltan: no pisa textos editados desde Gestión de Idiomas.
@@ -298,7 +339,9 @@ INSERT INTO @Nuevos VALUES
     ('lblMora', 'FormRegistrarPago', 'Mora:', 'Arrears:'),
     -- Comisión inmobiliaria mensual: desglose de cada pago
     ('lblComision', 'FormRegistrarPago', N'Comisión:', 'Agency fee:'),
-    ('lblNeto', 'FormRegistrarPago', 'Neto propietario:', 'Net to owner:');
+    ('lblNeto', 'FormRegistrarPago', 'Neto propietario:', 'Net to owner:'),
+    -- Mora con la TIM del BCRA (paso 5)
+    ('lblTasa', 'FormRegistrarPago', 'Tasa de mora:', 'Late interest rate:');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
@@ -338,6 +381,14 @@ JOIN @Quitados q ON q.[nombre] = c.[nombre] AND q.[formulario] = c.[formulario];
 
 DELETE c FROM [dbo].[Control] c
 JOIN @Quitados q ON q.[nombre] = c.[nombre] AND q.[formulario] = c.[formulario];
+GO
+
+-- Textos que cambiaron: solo si siguen con el texto original (no se pisan los editados en Gestión de Idiomas)
+UPDATE t SET [texto] = CASE t.[ididioma] WHEN 1 THEN N'Recargo por mora:' ELSE N'Late fee:' END
+FROM [dbo].[Traducciones] t
+JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
+WHERE c.[nombre] = 'lblRecargo' AND c.[formulario] = 'FormRegistrarPago'
+  AND t.[texto] IN (N'Recargo (10%):', N'Surcharge (10%):');
 GO
 
 PRINT N'Actualización del schema terminada.';

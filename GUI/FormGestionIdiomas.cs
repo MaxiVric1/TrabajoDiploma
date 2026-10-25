@@ -384,6 +384,7 @@ namespace TpIngSoft
                 ("FormRegistrarPago", "lblMora"),
                 ("FormRegistrarPago", "lblComision"),
                 ("FormRegistrarPago", "lblNeto"),
+                ("FormRegistrarPago", "lblTasa"),
                 ("FormGestionarMora", "grpInquilino"),
                 ("FormGestionarMora", "lblNombre"),
                 ("FormGestionarMora", "lblApellido"),
