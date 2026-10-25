@@ -40,7 +40,16 @@ namespace DAL
                 //ConnectionString = CadenaConexion
                 ConnectionString = ServidorSql.Detectar()
             };
-            conexion.Open();
+            try
+            {
+                conexion.Open();
+            }
+            catch (SqlException ex)
+            {
+                LogConexion.Escribir($"Error al abrir la conexión ({LogConexion.SinDatosSensibles(conexion.ConnectionString)}) " +
+                                     $"con el usuario {LogConexion.UsuarioWindows}: {LogConexion.Detalle(ex)}");
+                throw;
+            }
         }
 
         public void Cerrar()

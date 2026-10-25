@@ -1,10 +1,10 @@
 # TpIngSoft - Utilidad de Backup y Restauración (CLI)
 
-Este utilitario externo de línea de comandos permite administrar los resguardos y restauraciones de la base de datos `tpingsoft` de manera independiente del sistema principal, cumpliendo con los requerimientos de seguridad e integridad del sistema (DVH/DVV).
+Este utilitario externo de línea de comandos permite administrar los resguardos y restauraciones de la base de datos `TpIngSoft` de manera independiente del sistema principal, cumpliendo con los requerimientos de seguridad e integridad del sistema (DVH/DVV).
 
 ## Requisitos Previos
 
-1. **Instancia de SQL Server**: El utilitario intenta conectarse a `localhost` (instancia por defecto de SQL Server en tu máquina) utilizando seguridad integrada de Windows (`Integrated Security=True`). Asegúrate de que el motor de base de datos esté en ejecución y que el usuario actual tenga permisos de administración (`sysadmin` o `dbcreator` / `dbowner`).
+1. **Instancia de SQL Server**: El utilitario detecta automáticamente la instancia local de SQL Server (la que tiene la base `TpIngSoft` o, si ninguna la tiene, la primera que responde; ver `DAL/ServidorSql.cs`) y se conecta con seguridad integrada de Windows (`Integrated Security=True`). La base y la seguridad salen de `BackupCLI.exe.config`; el diagnóstico de la conexión queda en `%LOCALAPPDATA%andsmartogsnexion.log`. Asegúrate de que el motor de base de datos esté en ejecución y que el usuario actual tenga permisos de administración (`sysadmin` o `dbcreator` / `dbowner`).
 2. **Sistema Cerrado (Recomendado)**: Se recomienda que la aplicación principal (`GUI`) esté cerrada al realizar operaciones de restauración para evitar bloqueos por tablas en uso, aunque el CLI cerrará de forma forzada las conexiones activas si fuera necesario.
 
 ---
@@ -35,7 +35,7 @@ Permite seleccionar uno de los backups listados para aplicarlo sobre la base de 
 * **Manejo de Conexiones**: El script de restauración pone temporalmente la base de datos en modo `SINGLE_USER WITH ROLLBACK IMMEDIATE` para forzar la desconexión de cualquier sesión activa (por ejemplo, si el sistema principal quedó abierto accidentalmente), restaura la base de datos reemplazándola con el backup y, finalmente, restablece la base de datos a modo `MULTI_USER`.
 
 ### 5. Restaurar Day Zero
-Opción de recuperación extrema que destruye la base de datos `tpingsoft` y la vuelve a construir ejecutando en orden:
+Opción de recuperación extrema que destruye la base de datos `TpIngSoft` y la vuelve a construir ejecutando en orden:
 1. `docs/schema-init.sql` (creación de tablas, idiomas iniciales, roles, permisos y usuario administrador).
 2. `docs/stored-procedures.sql` (re-creación de todos los procedimientos almacenados).
 * Esta opción restablece el sistema a su estado original de "semilla", incluyendo los hashes y dígitos verificadores iniciales del administrador por defecto.

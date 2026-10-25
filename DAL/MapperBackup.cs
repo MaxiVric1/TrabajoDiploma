@@ -11,11 +11,13 @@ namespace DAL
         private readonly string masterConnectionString;
         private readonly string dbName;
 
-        // Misma cadena que la aplicación (App.config), pero conectada a master: un backup o restore
-        // no puede hacerse estando conectado a la propia base
+        // Misma instancia y base que la aplicación, pero conectada a master: un backup o restore
+        // no puede hacerse estando conectado a la propia base. A diferencia de la aplicación, acepta una
+        // instancia donde la base todavía no existe (restaurar un backup en una PC nueva).
         public MapperBackup()
         {
-            var cadena = new SqlConnectionStringBuilder(Acceso.CadenaConexion);
+            //var cadena = new SqlConnectionStringBuilder(Acceso.CadenaConexion);
+            var cadena = new SqlConnectionStringBuilder(ServidorSql.DetectarParaAdministracion());
             dbName = cadena.InitialCatalog;
             if (string.IsNullOrWhiteSpace(dbName))
                 throw new InvalidOperationException(

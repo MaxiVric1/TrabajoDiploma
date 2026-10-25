@@ -80,6 +80,10 @@ session.dat
 
 # Claves y credenciales locales: nunca se suben al repositorio
 Claves.txt
+Credenciales_Iniciales.txt
+
+# Instalador de SQL Server Express LocalDB (Microsoft, ~60 MB): lo descarga compilar-instalador.ps1 si falta
+Redist/
 
 # Archivos copiados por los formularios del PN1 (normalmente dentro de bin/, por si se ejecuta desde otra carpeta)
 Autorizaciones/
