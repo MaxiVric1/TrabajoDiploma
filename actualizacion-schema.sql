@@ -13,6 +13,7 @@
 --      por índice (IPC cada 3 meses), rescisión y entrega del inmueble con devolución del depósito.
 --   4. Garante: garantes de cada contrato.
 --   4b. APIs del BCRA: historial de actualizaciones de monto por IPC y valores consultados a la API (IPC y TIM).
+--   4c. PN3: proyectos de inversión, inversores, suscripciones al fideicomiso, historial del ICC y sus roles.
 --   5. Traducciones (español e inglés) de los controles agregados a los formularios; baja de las de los quitados.
 -- ====================================================
 USE [TpIngSoft];
@@ -68,6 +69,34 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE [name] = 'CK_Inmueble_AlquiladoEsAlquiler')
     ALTER TABLE [dbo].[Inmueble] ADD CONSTRAINT [CK_Inmueble_AlquiladoEsAlquiler]
         CHECK ([estado_actual] <> 'Alquilado' OR [tipo_publicacion] = 'Alquiler');
+GO
+
+-- Ubicación y lote (PN3): localidad para geocodificar (obligatoria en captaciones nuevas, la exige la BLL),
+-- superficie del lote (obligatoria en casas, la exige la BLL: los inmuebles existentes no la tienen) y
+-- coordenadas obtenidas de Nominatim
+IF COL_LENGTH('dbo.Inmueble', 'localidad') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[Inmueble] ADD [localidad] NVARCHAR(100) NULL;
+    PRINT N'Inmueble: columna localidad agregada.';
+END
+GO
+
+IF COL_LENGTH('dbo.Inmueble', 'superficie_lote') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[Inmueble] ADD [superficie_lote] DECIMAL(10,2) NULL
+        CONSTRAINT [CK_Inmueble_SuperficieLote] CHECK ([superficie_lote] > 0);
+    PRINT N'Inmueble: columna superficie_lote agregada.';
+END
+GO
+
+IF COL_LENGTH('dbo.Inmueble', 'latitud') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[Inmueble] ADD [latitud] DECIMAL(9,6) NULL
+        CONSTRAINT [CK_Inmueble_Latitud] CHECK ([latitud] BETWEEN -90 AND 90);
+    ALTER TABLE [dbo].[Inmueble] ADD [longitud] DECIMAL(9,6) NULL
+        CONSTRAINT [CK_Inmueble_Longitud] CHECK ([longitud] BETWEEN -180 AND 180);
+    PRINT N'Inmueble: columnas latitud y longitud agregadas.';
+END
 GO
 
 -- ====================================================
@@ -283,6 +312,190 @@ END
 GO
 
 -- ====================================================
+-- 4c. PN3 - Evaluación de desarrollo de inversión
+-- ====================================================
+
+-- Proyecto de desarrollo en fideicomiso sobre un inmueble del inventario. Arquitectura carga los datos técnicos;
+-- los totales los calcula SQL Server. Montos por m² en dólares (USD).
+--   metros_construibles = superficie_lote x FOT
+--   costo_total_obra    = metros_construibles x costo_obra_m2
+--   valor_total_unidades = metros_construibles x valor_venta_m2_unidades
+IF OBJECT_ID('[dbo].[ProyectoInversion]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[ProyectoInversion] (
+        [id_proyecto] INT IDENTITY(1,1) PRIMARY KEY,
+        [id_inmueble] INT NOT NULL CONSTRAINT [FK_ProyectoInversion_Inmueble] FOREIGN KEY REFERENCES [dbo].[Inmueble]([id_inmueble]),
+        [superficie_lote] DECIMAL(10,2) NULL CONSTRAINT [CK_ProyectoInversion_SuperficieLote] CHECK ([superficie_lote] > 0),
+        [fos] DECIMAL(5,2) NULL CONSTRAINT [CK_ProyectoInversion_Fos] CHECK ([fos] > 0 AND [fos] <= 1),
+        [fot] DECIMAL(5,2) NULL CONSTRAINT [CK_ProyectoInversion_Fot] CHECK ([fot] > 0 AND [fot] <= 20),
+        [metros_construibles] AS CAST([superficie_lote] * [fot] AS DECIMAL(12,2)) PERSISTED,
+        [costo_obra_m2] DECIMAL(18,2) NULL CONSTRAINT [CK_ProyectoInversion_CostoObraM2] CHECK ([costo_obra_m2] > 0),
+        [costo_total_obra] AS CAST([superficie_lote] * [fot] * [costo_obra_m2] AS DECIMAL(18,2)) PERSISTED,
+        [valor_venta_m2_unidades] DECIMAL(18,2) NULL CONSTRAINT [CK_ProyectoInversion_ValorVentaM2] CHECK ([valor_venta_m2_unidades] > 0),
+        [valor_total_unidades] AS CAST([superficie_lote] * [fot] * [valor_venta_m2_unidades] AS DECIMAL(18,2)) PERSISTED,
+        [estado] VARCHAR(20) NOT NULL CONSTRAINT [DF_ProyectoInversion_Estado] DEFAULT 'EnAnalisis'
+            CONSTRAINT [CK_ProyectoInversion_Estado] CHECK ([estado] IN ('EnAnalisis', 'Aprobado', 'Rechazado')),
+        [id_usuario_arquitectura] INT NULL CONSTRAINT [FK_ProyectoInversion_Arquitectura] FOREIGN KEY REFERENCES [dbo].[Usuario]([id]),
+        [id_usuario_directorio] INT NULL CONSTRAINT [FK_ProyectoInversion_Directorio] FOREIGN KEY REFERENCES [dbo].[Usuario]([id]),
+        [fecha_creacion] DATETIME NOT NULL CONSTRAINT [DF_ProyectoInversion_FechaCreacion] DEFAULT GETDATE(),
+        [fecha_decision] DATETIME NULL,
+        [observaciones] NVARCHAR(1000) NULL,
+        -- La decisión del Directorio queda registrada con quién y cuándo, y solo sobre un proyecto con datos técnicos
+        CONSTRAINT [CK_ProyectoInversion_Decision] CHECK (
+            ([estado] = 'EnAnalisis' AND [fecha_decision] IS NULL AND [id_usuario_directorio] IS NULL)
+            OR ([estado] <> 'EnAnalisis' AND [fecha_decision] IS NOT NULL AND [id_usuario_directorio] IS NOT NULL
+                AND [superficie_lote] IS NOT NULL AND [fos] IS NOT NULL AND [fot] IS NOT NULL AND [costo_obra_m2] IS NOT NULL
+                AND [valor_venta_m2_unidades] IS NOT NULL))
+    );
+    PRINT N'Tabla ProyectoInversion creada.';
+END
+GO
+
+-- Un inmueble tiene como mucho un proyecto en análisis o aprobado (uno rechazado no impide evaluarlo de nuevo)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE [name] = 'UX_ProyectoInversion_InmuebleVigente')
+    CREATE UNIQUE INDEX [UX_ProyectoInversion_InmuebleVigente] ON [dbo].[ProyectoInversion]([id_inmueble])
+        WHERE [estado] <> 'Rechazado';
+GO
+
+IF OBJECT_ID('[dbo].[Inversor]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[Inversor] (
+        [id_inversor] INT IDENTITY(1,1) PRIMARY KEY,
+        [nombre] NVARCHAR(100) NOT NULL,
+        [apellido] NVARCHAR(100) NOT NULL,
+        [cuit] VARCHAR(13) NOT NULL CONSTRAINT [UQ_Inversor_Cuit] UNIQUE, -- con o sin guiones: 20-12345678-3
+        [email] VARCHAR(100) NULL,
+        [telefono] VARCHAR(30) NULL
+    );
+    PRINT N'Tabla Inversor creada.';
+END
+GO
+
+-- Aportes de los inversores a un fideicomiso aprobado. El porcentaje de participación no se guarda: se calcula
+-- al leer (monto aportado / capital necesario = costo total de obra del proyecto), así no queda desactualizado.
+IF OBJECT_ID('[dbo].[SuscripcionFideicomiso]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[SuscripcionFideicomiso] (
+        [id_suscripcion] INT IDENTITY(1,1) PRIMARY KEY,
+        [id_proyecto] INT NOT NULL CONSTRAINT [FK_Suscripcion_Proyecto] FOREIGN KEY REFERENCES [dbo].[ProyectoInversion]([id_proyecto]),
+        [id_inversor] INT NOT NULL CONSTRAINT [FK_Suscripcion_Inversor] FOREIGN KEY REFERENCES [dbo].[Inversor]([id_inversor]),
+        [monto_aportado] DECIMAL(18,2) NOT NULL CONSTRAINT [CK_Suscripcion_Monto] CHECK ([monto_aportado] > 0), -- USD
+        [unidades_asignadas] INT NOT NULL CONSTRAINT [DF_Suscripcion_Unidades] DEFAULT 0
+            CONSTRAINT [CK_Suscripcion_Unidades] CHECK ([unidades_asignadas] >= 0),
+        [fecha_suscripcion] DATETIME NOT NULL CONSTRAINT [DF_Suscripcion_Fecha] DEFAULT GETDATE()
+    );
+    PRINT N'Tabla SuscripcionFideicomiso creada.';
+END
+GO
+
+-- Índice del Costo de la Construcción (INDEC, CSV mensual): caché local de lo descargado
+IF OBJECT_ID('[dbo].[HistorialICC]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[HistorialICC] (
+        [id_icc] INT IDENTITY(1,1) PRIMARY KEY,
+        [periodo] DATE NOT NULL CONSTRAINT [UQ_HistorialICC_Periodo] UNIQUE, -- primer día del mes
+        [valor_indice] DECIMAL(10,4) NOT NULL CONSTRAINT [CK_HistorialICC_Valor] CHECK ([valor_indice] > 0),
+        [variacion_mensual] DECIMAL(8,4) NULL,                                -- en %, respecto del mes anterior
+        [fecha_consulta] DATETIME NOT NULL CONSTRAINT [DF_HistorialICC_FechaConsulta] DEFAULT GETDATE()
+    );
+    PRINT N'Tabla HistorialICC creada.';
+END
+GO
+
+-- Roles, permisos y usuarios del PN3 en bases existentes (en una base nueva ya los creó schema-init.sql).
+-- Mismo esquema que PN1/PN2: cada rol con su permiso, hijo de Admin, y un usuario <Rol> con contraseña <Rol>123.
+DECLARE @RolesPN3 TABLE ([orden] INT, [rol] VARCHAR(50), [permiso] VARCHAR(50), [usuario] VARCHAR(50), [pass] VARCHAR(100),
+                         [nombre_persona] NVARCHAR(100), [apellido] NVARCHAR(100));
+INSERT INTO @RolesPN3 VALUES
+    (7, 'Analista de Inversiones', 'AccesoPN3Analisis', 'AnalistaInversiones', 'f53d7900cae1b6cf4355764d2845998c65b89740ec961e53640cf121cd6c5c5f', N'Analista', N'Inversiones'),
+    (8, 'Arquitectura', 'AccesoPN3Arquitectura', 'Arquitectura', '643ea49d4863cd97325107e90a0571512fb7fd612e0228bbd96114115b897bc9', N'Arquitectura', N'Sistema'),
+    (9, 'Directorio', 'AccesoPN3Directorio', 'Directorio', '0d4ad2d25c6082f589c0f75709a7980b64a93e2c6bcf22ee347f21826e2ca369', N'Directorio', N'Sistema'),
+    (10, 'Inversiones', 'AccesoPN3Inversiones', 'Inversiones', 'bc80595a2638cd35ba465c739cd1861b82b5ac162241fb41e5b1f4cc99af9cb1', N'Inversiones', N'Sistema');
+
+INSERT INTO [dbo].[Permiso] ([nombre])
+SELECT r.[permiso] FROM @RolesPN3 r WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Permiso] p WHERE p.[nombre] = r.[permiso]) ORDER BY r.[orden];
+INSERT INTO [dbo].[Rol] ([nombre])
+SELECT r.[rol] FROM @RolesPN3 r WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Rol] ro WHERE ro.[nombre] = r.[rol]) ORDER BY r.[orden];
+
+INSERT INTO [dbo].[RolPermiso] ([id_padre], [id_hijo], [tipo_hijo])
+SELECT ro.[id], pe.[id], 'Permiso'
+FROM @RolesPN3 r
+JOIN [dbo].[Rol] ro ON ro.[nombre] = r.[rol]
+JOIN [dbo].[Permiso] pe ON pe.[nombre] = r.[permiso]
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[RolPermiso] rp WHERE rp.[id_padre] = ro.[id] AND rp.[id_hijo] = pe.[id] AND rp.[tipo_hijo] = 'Permiso');
+
+INSERT INTO [dbo].[RolPermiso] ([id_padre], [id_hijo], [tipo_hijo])
+SELECT ad.[id], ro.[id], 'Rol'
+FROM @RolesPN3 r
+JOIN [dbo].[Rol] ro ON ro.[nombre] = r.[rol]
+CROSS JOIN (SELECT [id] FROM [dbo].[Rol] WHERE [nombre] = 'Admin') ad
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[RolPermiso] rp WHERE rp.[id_padre] = ad.[id] AND rp.[id_hijo] = ro.[id] AND rp.[tipo_hijo] = 'Rol');
+
+DECLARE @UsuariosNuevos TABLE ([id] INT);
+INSERT INTO [dbo].[Usuario] ([nombre], [nombre_persona], [apellido], [pass], [activo], [id_idioma])
+OUTPUT inserted.[id] INTO @UsuariosNuevos
+SELECT r.[usuario], r.[nombre_persona], r.[apellido], r.[pass], 1, 1
+FROM @RolesPN3 r
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Usuario] u WHERE u.[nombre] = r.[usuario])
+ORDER BY r.[orden];
+
+INSERT INTO [dbo].[UsuarioRol] ([id_usuario], [id_rol])
+SELECT us.[id], ro.[id]
+FROM @RolesPN3 r
+JOIN [dbo].[Usuario] us ON us.[nombre] = r.[usuario]
+JOIN [dbo].[Rol] ro ON ro.[nombre] = r.[rol]
+WHERE us.[id] IN (SELECT [id] FROM @UsuariosNuevos);
+
+INSERT INTO [dbo].[Usuario_Historial] ([id_usuario], [nombre], [nombre_persona], [apellido], [pass], [activo], [dvh], [id_usuario_autor], [tipo_operacion])
+SELECT us.[id], us.[nombre], us.[nombre_persona], us.[apellido], us.[pass], us.[activo], 0,
+       (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'admin'), 'INSERT'
+FROM [dbo].[Usuario] us
+WHERE us.[id] IN (SELECT [id] FROM @UsuariosNuevos);
+
+-- Dígitos verificadores de los usuarios nuevos (mismo cálculo que SERVICIOS.GestorDV y schema-init.sql) y DVV
+IF EXISTS (SELECT 1 FROM @UsuariosNuevos)
+BEGIN
+    DECLARE @Dvh TABLE ([id] INT, [dvh] BIGINT);
+    DECLARE @Id INT, @Texto NVARCHAR(MAX), @Pos INT, @Total BIGINT, @i INT;
+    DECLARE cur CURSOR LOCAL FAST_FORWARD FOR SELECT [id] FROM @UsuariosNuevos;
+    OPEN cur;
+    FETCH NEXT FROM cur INTO @Id;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @Total = 0;
+        SET @Pos = 1;
+        WHILE @Pos <= 6
+        BEGIN
+            SELECT @Texto = CASE @Pos
+                WHEN 1 THEN CAST(u.[id] AS NVARCHAR(50))
+                WHEN 2 THEN u.[nombre]
+                WHEN 3 THEN u.[pass]
+                WHEN 4 THEN CASE WHEN u.[activo] = 1 THEN N'1' ELSE N'0' END
+                WHEN 5 THEN ISNULL(u.[nombre_persona], N'')
+                ELSE ISNULL(u.[apellido], N'') END
+            FROM [dbo].[Usuario] u WHERE u.[id] = @Id;
+            SET @i = 1;
+            WHILE @i <= LEN(@Texto)
+            BEGIN
+                SET @Total = @Total + UNICODE(SUBSTRING(@Texto, @i, 1)) * @i * @Pos;
+                SET @i = @i + 1;
+            END
+            SET @Pos = @Pos + 1;
+        END
+        INSERT INTO @Dvh VALUES (@Id, @Total);
+        FETCH NEXT FROM cur INTO @Id;
+    END
+    CLOSE cur;
+    DEALLOCATE cur;
+
+    UPDATE u SET [dvh] = d.[dvh] FROM [dbo].[Usuario] u JOIN @Dvh d ON d.[id] = u.[id];
+    UPDATE h SET [dvh] = d.[dvh] FROM [dbo].[Usuario_Historial] h JOIN @Dvh d ON d.[id] = h.[id_usuario];
+    UPDATE [dbo].[DigitoVerificadorVertical] SET [dvv] = (SELECT ISNULL(SUM([dvh]), 0) FROM [dbo].[Usuario]) WHERE [tabla] = 'Usuario';
+    PRINT N'PN3: roles, permisos y usuarios creados.';
+END
+GO
+
+-- ====================================================
 -- 5. Traducciones de los controles nuevos (español e inglés)
 --    Van acá y no en schema-init.sql para que también las reciban las bases existentes.
 --    Solo se agregan las que faltan: no pisa textos editados desde Gestión de Idiomas.
@@ -353,7 +566,10 @@ INSERT INTO @Nuevos VALUES
     -- Domicilio del inquilino (paso 6: va en el PDF del contrato)
     ('lblDomicilio', 'FormRegistrarContrato', 'Domicilio:', 'Address:'),
     ('lblDomicilio', 'FormGestionarContratos', 'Domicilio:', 'Address:'),
-    ('btnCompletarDomicilio', 'FormGestionarContratos', 'Completar domicilio', 'Add address');
+    ('btnCompletarDomicilio', 'FormGestionarContratos', 'Completar domicilio', 'Add address'),
+    -- PN3-1: ubicación y lote del inmueble en la captación
+    ('lblLocalidad', 'FormRegistrarCaptacion', 'Localidad:', 'City:'),
+    ('lblSuperficieLote', 'FormRegistrarCaptacion', N'Sup. lote (m²):', N'Lot area (m²):');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

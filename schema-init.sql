@@ -28,6 +28,10 @@ GO
 -- Se borran en orden inverso a sus dependencias: primero PN2, después PN1 y por último el sistema base
 -- Tablas del PN2: referencian a Usuario, se borran primero
 -- (Garante la crea actualizacion-schema.sql; referencia a Contrato y se borra antes)
+IF OBJECT_ID('[dbo].[SuscripcionFideicomiso]', 'U') IS NOT NULL DROP TABLE [dbo].[SuscripcionFideicomiso];
+IF OBJECT_ID('[dbo].[Inversor]', 'U') IS NOT NULL DROP TABLE [dbo].[Inversor];
+IF OBJECT_ID('[dbo].[ProyectoInversion]', 'U') IS NOT NULL DROP TABLE [dbo].[ProyectoInversion];
+IF OBJECT_ID('[dbo].[HistorialICC]', 'U') IS NOT NULL DROP TABLE [dbo].[HistorialICC];
 IF OBJECT_ID('[dbo].[Garante]', 'U') IS NOT NULL DROP TABLE [dbo].[Garante];
 IF OBJECT_ID('[dbo].[ActualizacionContrato]', 'U') IS NOT NULL DROP TABLE [dbo].[ActualizacionContrato];
 IF OBJECT_ID('[dbo].[IndiceBCRA]', 'U') IS NOT NULL DROP TABLE [dbo].[IndiceBCRA];
@@ -338,8 +342,8 @@ INSERT INTO [dbo].[UsuarioRol] ([id_usuario], [id_rol]) VALUES (@UserId, 2);
 INSERT INTO [dbo].[Usuario_Historial] ([id_usuario], [nombre], [nombre_persona], [apellido], [pass], [activo], [dvh], [id_usuario_autor], [tipo_operacion])
 VALUES (@UserId, 'user', 'Usuario', 'Normal', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 1, 0, @AdminId, 'INSERT');
 
--- Roles y permisos del PN1 y PN2: cada rol con su permiso (BE.PermisosDefinidos) y los seis como
--- hijos del rol Admin (Composite): Admin ve todos los menús PN1 y PN2
+-- Roles y permisos del PN1, PN2 y PN3: cada rol con su permiso (BE.PermisosDefinidos) y todos como
+-- hijos del rol Admin (Composite): Admin ve todos los menús de los procesos de negocio
 DECLARE @RolesPN TABLE ([orden] INT, [rol] VARCHAR(50), [permiso] VARCHAR(50));
 INSERT INTO @RolesPN VALUES
     (1, 'Agente Comercial',            'AccesoPN1AgenteComercial'),
@@ -347,7 +351,11 @@ INSERT INTO @RolesPN VALUES
     (3, 'Marketing',                   'AccesoPN1Marketing'),
     (4, 'Administrador de Alquileres', 'AccesoPN2AdministradorAlquileres'),
     (5, 'Analista de Cobranzas',       'AccesoPN2AnalistaCobranzas'),
-    (6, 'Asesor Legal',                'AccesoPN2AsesorLegal');
+    (6, 'Asesor Legal',                'AccesoPN2AsesorLegal'),
+    (7, 'Analista de Inversiones',     'AccesoPN3Analisis'),
+    (8, 'Arquitectura',                  'AccesoPN3Arquitectura'),
+    (9, 'Directorio',                    'AccesoPN3Directorio'),
+    (10, 'Inversiones',                'AccesoPN3Inversiones');
 
 INSERT INTO [dbo].[Permiso] ([nombre]) SELECT [permiso] FROM @RolesPN ORDER BY [orden];
 INSERT INTO [dbo].[Rol] ([nombre]) SELECT [rol] FROM @RolesPN ORDER BY [orden];
@@ -379,7 +387,15 @@ INSERT INTO @UsuariosPN VALUES
     -- AnalistaCobranzas123
     (5, 'AnalistaCobranzas',       '7830d1704d6a2d1f2923a53a42156f3a07d12076817b6b6bc9cd52ea966dc6a4', N'Analista', N'Cobranzas', 'Analista de Cobranzas'),
     -- AsesorLegal123
-    (6, 'AsesorLegal',             '9ef67c768b149aa820db7778763b505f04c6b35f767eaee7864b451d07a99fa1', N'Asesor', N'Legal', 'Asesor Legal');
+    (6, 'AsesorLegal',             '9ef67c768b149aa820db7778763b505f04c6b35f767eaee7864b451d07a99fa1', N'Asesor', N'Legal', 'Asesor Legal'),
+    -- AnalistaInversiones123
+    (7, 'AnalistaInversiones',     'f53d7900cae1b6cf4355764d2845998c65b89740ec961e53640cf121cd6c5c5f', N'Analista', N'Inversiones', 'Analista de Inversiones'),
+    -- Arquitectura123
+    (8, 'Arquitectura',            '643ea49d4863cd97325107e90a0571512fb7fd612e0228bbd96114115b897bc9', N'Arquitectura', N'Sistema', 'Arquitectura'),
+    -- Directorio123
+    (9, 'Directorio',              '0d4ad2d25c6082f589c0f75709a7980b64a93e2c6bcf22ee347f21826e2ca369', N'Directorio', N'Sistema', 'Directorio'),
+    -- Inversiones123
+    (10, 'Inversiones',            'bc80595a2638cd35ba465c739cd1861b82b5ac162241fb41e5b1f4cc99af9cb1', N'Inversiones', N'Sistema', 'Inversiones');
 
 INSERT INTO [dbo].[Usuario] ([nombre], [nombre_persona], [apellido], [pass], [activo], [id_idioma])
 SELECT [nombre], [nombre_persona], [apellido], [pass], 1, 1 FROM @UsuariosPN ORDER BY [orden];

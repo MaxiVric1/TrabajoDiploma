@@ -124,7 +124,9 @@ namespace BLL
         public Inmueble BuscarPorId(int idInmueble) => inmuebleDAL.BuscarPorId(idInmueble);
 
         // validarCliente = false cuando el cliente se crea en la misma transacción y todavía no existe en la base
-        internal void Validar(Inmueble inmueble, bool validarCliente = true)
+        // exigirUbicacion: en una captación nueva la localidad es obligatoria (para ubicarlo en el mapa) y en una casa
+        // también la superficie del lote (para evaluar un desarrollo); los inmuebles anteriores no las tienen
+        internal void Validar(Inmueble inmueble, bool validarCliente = true, bool exigirUbicacion = false)
         {
             if (inmueble == null) throw new ArgumentNullException(nameof(inmueble));
             if (string.IsNullOrWhiteSpace(inmueble.TipoInmueble))
@@ -138,8 +140,20 @@ namespace BLL
             if (validarCliente && clienteDAL.BuscarPorId(inmueble.IdCliente) == null)
                 throw new ArgumentException("El cliente indicado no existe.");
 
+            inmueble.Localidad = string.IsNullOrWhiteSpace(inmueble.Localidad) ? null : inmueble.Localidad.Trim();
+            if (exigirUbicacion && inmueble.Localidad == null)
+                throw new ArgumentException("La localidad es obligatoria.");
+            if (inmueble.Localidad != null && inmueble.Localidad.Length > 100)
+                throw new ArgumentException("La localidad no puede superar los 100 caracteres.");
+            if (inmueble.SuperficieLote.HasValue && inmueble.SuperficieLote <= 0)
+                throw new ArgumentException("La superficie del lote debe ser mayor a cero.");
+            if (exigirUbicacion && EsCasa(inmueble) && !inmueble.SuperficieLote.HasValue)
+                throw new ArgumentException("La superficie del lote es obligatoria para una casa.");
+
             inmueble.TipoInmueble = inmueble.TipoInmueble.Trim();
             inmueble.Direccion = inmueble.Direccion.Trim();
         }
+
+        public static bool EsCasa(Inmueble inmueble) => string.Equals(inmueble?.TipoInmueble?.Trim(), "Casa", StringComparison.OrdinalIgnoreCase);
     }
 }

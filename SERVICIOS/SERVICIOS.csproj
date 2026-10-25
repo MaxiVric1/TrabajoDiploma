@@ -68,6 +68,10 @@
     <Compile Include="GestorDV.cs" />
     <Compile Include="DocumentoPdf.cs" />
     <Compile Include="ClienteBCRA.cs" />
+    <Compile Include="ClienteHttp.cs" />
+    <Compile Include="ClienteICC.cs" />
+    <Compile Include="ClienteDolarAPI.cs" />
+    <Compile Include="ClienteNominatim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

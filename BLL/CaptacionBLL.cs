@@ -42,6 +42,9 @@ namespace BLL
         // Si ya hay un cliente con ese DNI se usa el existente (sus datos no se modifican).
         // No se registra una captación sin la Autorización de Venta (o de Alquiler) firmada (el agente la confirma; el
         // documento no se guarda). Para un alquiler, el valor pretendido es el alquiler mensual.
+        // Resultado de ubicar en el mapa el inmueble de la última captación registrada: null si se ubicó
+        public string ErrorUbicacion { get; private set; }
+
         public int RegistrarCaptacion(Cliente cliente, Inmueble inmueble, Captacion captacion, bool autorizacionRecibida)
         {
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
@@ -64,7 +67,7 @@ namespace BLL
             inmueble.IdInmueble = 0;
             inmueble.IdCliente = cliente.IdCliente;
             inmueble.EstadoActual = EstadoInmueble.Captado;
-            new InmuebleBLL().Validar(inmueble, validarCliente: existente != null);
+            new InmuebleBLL().Validar(inmueble, validarCliente: existente != null, exigirUbicacion: true);
 
             if (captacion.IdUsuarioAgente == 0 && SessionManager.Instance.EstaLogueado())
                 captacion.IdUsuarioAgente = SessionManager.Instance.UsuarioActual.Id;
@@ -76,7 +79,11 @@ namespace BLL
 
             string detalleCliente = existente != null ? $"cliente existente DNI {cliente.Dni}" : $"cliente nuevo DNI {cliente.Dni}";
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Captación",
-                $"Captación N° {result} registrada: inmueble {inmueble.IdInmueble} ({inmueble.Direccion}) para {inmueble.TipoPublicacion}, {detalleCliente}.");
+                $"Captación N° {result} registrada: inmueble {inmueble.IdInmueble} ({inmueble.Direccion}, {inmueble.Localidad}) para {inmueble.TipoPublicacion}, {detalleCliente}.");
+
+            // Ubicación en el mapa (PN3): si no hay conexión o no se encuentra, la captación queda igual registrada
+            GeocodificacionBLL geo = new GeocodificacionBLL();
+            ErrorUbicacion = geo.Geocodificar(inmueble) ? null : geo.UltimoError;
             return result;
         }
 

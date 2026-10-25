@@ -81,6 +81,9 @@
     <Compile Include="GaranteBLL.cs" />
     <Compile Include="IndicesBCRABLL.cs" />
     <Compile Include="ActualizacionIpcBLL.cs" />
+    <Compile Include="IccBLL.cs" />
+    <Compile Include="CotizacionesBLL.cs" />
+    <Compile Include="GeocodificacionBLL.cs" />
     <Compile Include="PagoAlquilerBLL.cs" />
     <Compile Include="AccionLegalBLL.cs" />
     <Compile Include="ContactoCobranzaBLL.cs" />

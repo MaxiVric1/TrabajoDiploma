@@ -35,6 +35,14 @@ namespace BE
         public DateTime? FechaDespublicacion { get; set; } // última despublicación (null si está publicado)
         public int IdCliente { get; set; }
 
+        // Ubicación y lote (PN3): la localidad es obligatoria en captaciones nuevas y la superficie del lote en casas;
+        // las coordenadas las completa la geocodificación (Nominatim). null en los inmuebles anteriores.
+        public string Localidad { get; set; }
+        public decimal? SuperficieLote { get; set; }
+        public decimal? Latitud { get; set; }
+        public decimal? Longitud { get; set; }
+        public bool Geocodificado => Latitud.HasValue && Longitud.HasValue;
+
         // Ya estuvo publicado y se retiró: vuelve a Tasado conservando la fecha de publicación
         public bool Despublicado => EstadoActual == EstadoInmueble.Tasado && FechaPublicacion.HasValue;
 

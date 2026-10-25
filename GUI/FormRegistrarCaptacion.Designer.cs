@@ -44,10 +44,15 @@ namespace TpIngSoft
             this.cmbTipoPublicacion = new System.Windows.Forms.ComboBox();
             this.btnGuardar = new System.Windows.Forms.Button();
             this.btnCancelar = new System.Windows.Forms.Button();
+            this.lblLocalidad = new System.Windows.Forms.Label();
+            this.txtLocalidad = new System.Windows.Forms.TextBox();
+            this.lblSuperficieLote = new System.Windows.Forms.Label();
+            this.nudSuperficieLote = new System.Windows.Forms.NumericUpDown();
             this.grpCliente.SuspendLayout();
             this.grpInmueble.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudMetros)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudAmbientes)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudSuperficieLote)).BeginInit();
             this.grpCaptacion.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudValorPretendido)).BeginInit();
             this.SuspendLayout();
@@ -199,10 +204,14 @@ namespace TpIngSoft
             this.grpInmueble.Controls.Add(this.nudMetros);
             this.grpInmueble.Controls.Add(this.lblAmbientes);
             this.grpInmueble.Controls.Add(this.nudAmbientes);
+            this.grpInmueble.Controls.Add(this.lblLocalidad);
+            this.grpInmueble.Controls.Add(this.txtLocalidad);
+            this.grpInmueble.Controls.Add(this.lblSuperficieLote);
+            this.grpInmueble.Controls.Add(this.nudSuperficieLote);
             this.grpInmueble.ForeColor = System.Drawing.Color.White;
             this.grpInmueble.Location = new System.Drawing.Point(12, 152);
             this.grpInmueble.Name = "grpInmueble";
-            this.grpInmueble.Size = new System.Drawing.Size(616, 95);
+            this.grpInmueble.Size = new System.Drawing.Size(616, 130);
             this.grpInmueble.TabIndex = 1;
             this.grpInmueble.TabStop = false;
             this.grpInmueble.Text = "Inmueble";
@@ -292,6 +301,44 @@ namespace TpIngSoft
             this.nudAmbientes.TabIndex = 7;
             this.nudAmbientes.Value = new decimal(new int[] { 1, 0, 0, 0 });
             //
+            // lblLocalidad
+            //
+            this.lblLocalidad.Location = new System.Drawing.Point(6, 95);
+            this.lblLocalidad.Name = "lblLocalidad";
+            this.lblLocalidad.Size = new System.Drawing.Size(100, 20);
+            this.lblLocalidad.Text = "Localidad:";
+            this.lblLocalidad.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // txtLocalidad
+            //
+            this.txtLocalidad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.txtLocalidad.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtLocalidad.ForeColor = System.Drawing.Color.White;
+            this.txtLocalidad.Location = new System.Drawing.Point(112, 95);
+            this.txtLocalidad.MaxLength = 100;
+            this.txtLocalidad.Name = "txtLocalidad";
+            this.txtLocalidad.Size = new System.Drawing.Size(180, 20);
+            //
+            // lblSuperficieLote
+            //
+            this.lblSuperficieLote.Location = new System.Drawing.Point(296, 95);
+            this.lblSuperficieLote.Name = "lblSuperficieLote";
+            this.lblSuperficieLote.Size = new System.Drawing.Size(100, 20);
+            this.lblSuperficieLote.Text = "Sup. lote (m²):";
+            this.lblSuperficieLote.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // nudSuperficieLote
+            //
+            this.nudSuperficieLote.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.nudSuperficieLote.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.nudSuperficieLote.DecimalPlaces = 2;
+            this.nudSuperficieLote.ForeColor = System.Drawing.Color.White;
+            this.nudSuperficieLote.Location = new System.Drawing.Point(402, 95);
+            this.nudSuperficieLote.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
+            this.nudSuperficieLote.Name = "nudSuperficieLote";
+            this.nudSuperficieLote.Size = new System.Drawing.Size(120, 20);
+            this.nudSuperficieLote.ThousandsSeparator = true;
+            //
             // grpCaptacion
             //
             this.grpCaptacion.BackColor = System.Drawing.Color.Transparent;
@@ -301,7 +348,7 @@ namespace TpIngSoft
             this.grpCaptacion.Controls.Add(this.lblTipoPublicacion);
             this.grpCaptacion.Controls.Add(this.cmbTipoPublicacion);
             this.grpCaptacion.ForeColor = System.Drawing.Color.White;
-            this.grpCaptacion.Location = new System.Drawing.Point(12, 257);
+            this.grpCaptacion.Location = new System.Drawing.Point(12, 292);
             this.grpCaptacion.Name = "grpCaptacion";
             this.grpCaptacion.Size = new System.Drawing.Size(616, 95);
             this.grpCaptacion.TabIndex = 2;
@@ -368,7 +415,7 @@ namespace TpIngSoft
             this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(412, 364);
+            this.btnGuardar.Location = new System.Drawing.Point(412, 399);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(105, 32);
             this.btnGuardar.TabIndex = 3;
@@ -381,7 +428,7 @@ namespace TpIngSoft
             this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancelar.ForeColor = System.Drawing.Color.White;
-            this.btnCancelar.Location = new System.Drawing.Point(523, 364);
+            this.btnCancelar.Location = new System.Drawing.Point(523, 399);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(105, 32);
             this.btnCancelar.TabIndex = 4;
@@ -396,7 +443,7 @@ namespace TpIngSoft
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
             this.CancelButton = this.btnCancelar;
-            this.ClientSize = new System.Drawing.Size(640, 408);
+            this.ClientSize = new System.Drawing.Size(640, 443);
             this.Controls.Add(this.grpCliente);
             this.Controls.Add(this.grpInmueble);
             this.Controls.Add(this.grpCaptacion);
@@ -414,6 +461,7 @@ namespace TpIngSoft
             this.grpInmueble.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudMetros)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudAmbientes)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudSuperficieLote)).EndInit();
             this.grpCaptacion.ResumeLayout(false);
             this.grpCaptacion.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudValorPretendido)).EndInit();
@@ -442,6 +490,10 @@ namespace TpIngSoft
         private System.Windows.Forms.NumericUpDown nudMetros;
         private System.Windows.Forms.Label lblAmbientes;
         private System.Windows.Forms.NumericUpDown nudAmbientes;
+        private System.Windows.Forms.Label lblLocalidad;
+        private System.Windows.Forms.TextBox txtLocalidad;
+        private System.Windows.Forms.Label lblSuperficieLote;
+        private System.Windows.Forms.NumericUpDown nudSuperficieLote;
         private System.Windows.Forms.GroupBox grpCaptacion;
         private System.Windows.Forms.Label lblValorPretendido;
         private System.Windows.Forms.NumericUpDown nudValorPretendido;

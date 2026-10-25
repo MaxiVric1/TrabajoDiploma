@@ -855,12 +855,14 @@ CREATE PROCEDURE [dbo].[CrearInmueble]
     @TextoComercial NVARCHAR(2000) = NULL,
     @IdCliente INT,
     @TipoPublicacion VARCHAR(10) = 'Venta',     -- 'Venta' / 'Alquiler'
+    @Localidad NVARCHAR(100) = NULL,
+    @SuperficieLote DECIMAL(10,2) = NULL,
     @NuevoId INT OUTPUT
 AS BEGIN
     INSERT INTO Inmueble (tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial, id_cliente,
-                          tipo_publicacion)
+                          tipo_publicacion, localidad, superficie_lote)
     VALUES (@TipoInmueble, @Direccion, @MetrosCuadrados, @CantidadAmbientes, 'Captado', @TextoComercial, @IdCliente,
-            @TipoPublicacion);
+            @TipoPublicacion, @Localidad, @SuperficieLote);
     SET @NuevoId = SCOPE_IDENTITY();
 END
 GO
@@ -880,13 +882,17 @@ CREATE PROCEDURE [dbo].[ActualizarInmueble]
     @EstadoActual VARCHAR(20),
     @TextoComercial NVARCHAR(2000),
     @IdCliente INT,
-    @TipoPublicacion VARCHAR(10) = NULL        -- NULL conserva el actual
+    @TipoPublicacion VARCHAR(10) = NULL,       -- NULL conserva el actual (igual los siguientes)
+    @Localidad NVARCHAR(100) = NULL,
+    @SuperficieLote DECIMAL(10,2) = NULL
 AS BEGIN
     UPDATE Inmueble
     SET tipo_inmueble = @TipoInmueble, direccion = @Direccion, metros_cuadrados = @MetrosCuadrados,
         cantidad_ambientes = @CantidadAmbientes, estado_actual = @EstadoActual,
         texto_comercial = @TextoComercial, id_cliente = @IdCliente,
-        tipo_publicacion = ISNULL(@TipoPublicacion, tipo_publicacion)
+        tipo_publicacion = ISNULL(@TipoPublicacion, tipo_publicacion),
+        localidad = ISNULL(@Localidad, localidad),
+        superficie_lote = ISNULL(@SuperficieLote, superficie_lote)
     WHERE id_inmueble = @Id;
 END
 GO
@@ -927,7 +933,7 @@ GO
 CREATE PROCEDURE [dbo].[LeerInmuebles]
 AS BEGIN
     SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, tipo_publicacion, texto_comercial,
-           fecha_publicacion, fecha_despublicacion, id_cliente
+           fecha_publicacion, fecha_despublicacion, id_cliente, localidad, superficie_lote, latitud, longitud
     FROM Inmueble;
 END
 GO
@@ -942,7 +948,7 @@ CREATE PROCEDURE [dbo].[BuscarInmueblePorId]
     @Id INT
 AS BEGIN
     SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, tipo_publicacion, texto_comercial,
-           fecha_publicacion, fecha_despublicacion, id_cliente
+           fecha_publicacion, fecha_despublicacion, id_cliente, localidad, superficie_lote, latitud, longitud
     FROM Inmueble
     WHERE id_inmueble = @Id;
 END
@@ -958,7 +964,7 @@ CREATE PROCEDURE [dbo].[LeerInmueblesPorCliente]
     @IdCliente INT
 AS BEGIN
     SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, tipo_publicacion, texto_comercial,
-           fecha_publicacion, fecha_despublicacion, id_cliente
+           fecha_publicacion, fecha_despublicacion, id_cliente, localidad, superficie_lote, latitud, longitud
     FROM Inmueble
     WHERE id_cliente = @IdCliente;
 END
@@ -1503,7 +1509,8 @@ GO
 CREATE PROCEDURE [dbo].[LeerInmueblesDisponiblesParaAlquiler]
 AS BEGIN
     SELECT n.id_inmueble, n.tipo_inmueble, n.direccion, n.metros_cuadrados, n.cantidad_ambientes, n.estado_actual,
-           n.tipo_publicacion, n.texto_comercial, n.fecha_publicacion, n.fecha_despublicacion, n.id_cliente
+           n.tipo_publicacion, n.texto_comercial, n.fecha_publicacion, n.fecha_despublicacion, n.id_cliente,
+           n.localidad, n.superficie_lote, n.latitud, n.longitud
     FROM Inmueble n
     WHERE n.tipo_publicacion = 'Alquiler' AND n.estado_actual = 'Publicado'
       AND NOT EXISTS (
@@ -2379,5 +2386,302 @@ AS BEGIN
     INNER JOIN Usuario u ON u.id = cc.id_usuario_analista
     WHERE cc.id_contrato = @IdContrato
     ORDER BY cc.fecha_contacto DESC;
+END
+GO
+
+-- ####################################################
+-- PN3 - Evaluación de desarrollo de inversión
+-- ####################################################
+
+-- ====================================================
+-- ActualizarCoordenadasInmueble (resultado de la geocodificación con Nominatim)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarCoordenadasInmueble];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarCoordenadasInmueble]
+    @Id INT,
+    @Latitud DECIMAL(9,6),
+    @Longitud DECIMAL(9,6)
+AS BEGIN
+    UPDATE Inmueble SET latitud = @Latitud, longitud = @Longitud WHERE id_inmueble = @Id;
+END
+GO
+
+-- ====================================================
+-- ProyectoInversion
+-- Columnas que leen todas las consultas: el proyecto, sus totales calculados, el inmueble y el capital suscripto
+-- (suma de los aportes; el capital necesario es el costo total de la obra).
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearProyectoInversion];
+GO
+
+-- Nace En Análisis. La superficie del lote se toma del inmueble si no se indica.
+CREATE PROCEDURE [dbo].[CrearProyectoInversion]
+    @IdInmueble INT,
+    @SuperficieLote DECIMAL(10,2) = NULL,
+    @Observaciones NVARCHAR(1000) = NULL,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO ProyectoInversion (id_inmueble, superficie_lote, observaciones)
+    SELECT id_inmueble, ISNULL(@SuperficieLote, superficie_lote), @Observaciones
+    FROM Inmueble WHERE id_inmueble = @IdInmueble;
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+-- Datos técnicos de Arquitectura: solo mientras el proyecto está En Análisis (0 filas si no)
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarDatosTecnicosProyecto];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarDatosTecnicosProyecto]
+    @Id INT,
+    @SuperficieLote DECIMAL(10,2),
+    @Fos DECIMAL(5,2),
+    @Fot DECIMAL(5,2),
+    @CostoObraM2 DECIMAL(18,2),
+    @ValorVentaM2Unidades DECIMAL(18,2),
+    @IdUsuarioArquitectura INT,
+    @Observaciones NVARCHAR(1000) = NULL       -- NULL conserva las actuales
+AS BEGIN
+    UPDATE ProyectoInversion
+    SET superficie_lote = @SuperficieLote, fos = @Fos, fot = @Fot, costo_obra_m2 = @CostoObraM2,
+        valor_venta_m2_unidades = @ValorVentaM2Unidades, id_usuario_arquitectura = @IdUsuarioArquitectura,
+        observaciones = ISNULL(@Observaciones, observaciones)
+    WHERE id_proyecto = @Id AND estado = 'EnAnalisis';
+END
+GO
+
+-- Decisión del Directorio (Aprobado / Rechazado): solo sobre un proyecto En Análisis (0 filas si no). La base
+-- exige que tenga todos los datos técnicos (CK_ProyectoInversion_Decision).
+DROP PROCEDURE IF EXISTS [dbo].[RegistrarDecisionProyecto];
+GO
+
+CREATE PROCEDURE [dbo].[RegistrarDecisionProyecto]
+    @Id INT,
+    @Estado VARCHAR(20),
+    @IdUsuarioDirectorio INT,
+    @Observaciones NVARCHAR(1000) = NULL       -- NULL conserva las actuales
+AS BEGIN
+    UPDATE ProyectoInversion
+    SET estado = @Estado, id_usuario_directorio = @IdUsuarioDirectorio, fecha_decision = GETDATE(),
+        observaciones = ISNULL(@Observaciones, observaciones)
+    WHERE id_proyecto = @Id AND estado = 'EnAnalisis';
+END
+GO
+
+-- Baja: solo En Análisis y sin suscripciones (0 filas si no)
+DROP PROCEDURE IF EXISTS [dbo].[EliminarProyectoInversion];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarProyectoInversion]
+    @Id INT
+AS BEGIN
+    DELETE FROM ProyectoInversion
+    WHERE id_proyecto = @Id AND estado = 'EnAnalisis'
+      AND NOT EXISTS (SELECT 1 FROM SuscripcionFideicomiso s WHERE s.id_proyecto = @Id);
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[LeerProyectosInversion];
+GO
+
+-- @Estado NULL = todos
+CREATE PROCEDURE [dbo].[LeerProyectosInversion]
+    @Estado VARCHAR(20) = NULL
+AS BEGIN
+    SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
+           p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
+           p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones,
+           n.direccion, n.localidad, n.tipo_inmueble, n.tipo_publicacion, n.latitud, n.longitud,
+           ISNULL(s.capital_suscripto, 0) AS capital_suscripto, ISNULL(s.inversores, 0) AS inversores
+    FROM ProyectoInversion p
+    INNER JOIN Inmueble n ON n.id_inmueble = p.id_inmueble
+    LEFT JOIN (SELECT id_proyecto, SUM(monto_aportado) AS capital_suscripto, COUNT(DISTINCT id_inversor) AS inversores
+               FROM SuscripcionFideicomiso GROUP BY id_proyecto) s ON s.id_proyecto = p.id_proyecto
+    WHERE @Estado IS NULL OR p.estado = @Estado
+    ORDER BY p.fecha_creacion DESC;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[BuscarProyectoInversionPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarProyectoInversionPorId]
+    @Id INT
+AS BEGIN
+    SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
+           p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
+           p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones,
+           n.direccion, n.localidad, n.tipo_inmueble, n.tipo_publicacion, n.latitud, n.longitud,
+           ISNULL((SELECT SUM(monto_aportado) FROM SuscripcionFideicomiso s WHERE s.id_proyecto = p.id_proyecto), 0) AS capital_suscripto,
+           (SELECT COUNT(DISTINCT id_inversor) FROM SuscripcionFideicomiso s WHERE s.id_proyecto = p.id_proyecto) AS inversores
+    FROM ProyectoInversion p
+    INNER JOIN Inmueble n ON n.id_inmueble = p.id_inmueble
+    WHERE p.id_proyecto = @Id;
+END
+GO
+
+-- ====================================================
+-- Inversor
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearInversor];
+GO
+
+CREATE PROCEDURE [dbo].[CrearInversor]
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Cuit VARCHAR(13),
+    @Email VARCHAR(100) = NULL,
+    @Telefono VARCHAR(30) = NULL,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    INSERT INTO Inversor (nombre, apellido, cuit, email, telefono)
+    VALUES (@Nombre, @Apellido, @Cuit, @Email, @Telefono);
+    SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarInversor];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarInversor]
+    @Id INT,
+    @Nombre NVARCHAR(100),
+    @Apellido NVARCHAR(100),
+    @Cuit VARCHAR(13),
+    @Email VARCHAR(100) = NULL,
+    @Telefono VARCHAR(30) = NULL
+AS BEGIN
+    UPDATE Inversor
+    SET nombre = @Nombre, apellido = @Apellido, cuit = @Cuit, email = @Email, telefono = @Telefono
+    WHERE id_inversor = @Id;
+END
+GO
+
+-- Solo sin suscripciones (0 filas si tiene)
+DROP PROCEDURE IF EXISTS [dbo].[EliminarInversor];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarInversor]
+    @Id INT
+AS BEGIN
+    DELETE FROM Inversor
+    WHERE id_inversor = @Id AND NOT EXISTS (SELECT 1 FROM SuscripcionFideicomiso s WHERE s.id_inversor = @Id);
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[LeerInversores];
+GO
+
+CREATE PROCEDURE [dbo].[LeerInversores]
+AS BEGIN
+    SELECT id_inversor, nombre, apellido, cuit, email, telefono
+    FROM Inversor
+    ORDER BY apellido, nombre;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInversorPorId];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInversorPorId]
+    @Id INT
+AS BEGIN
+    SELECT id_inversor, nombre, apellido, cuit, email, telefono FROM Inversor WHERE id_inversor = @Id;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[BuscarInversorPorCuit];
+GO
+
+CREATE PROCEDURE [dbo].[BuscarInversorPorCuit]
+    @Cuit VARCHAR(13)
+AS BEGIN
+    SELECT id_inversor, nombre, apellido, cuit, email, telefono FROM Inversor WHERE cuit = @Cuit;
+END
+GO
+
+-- ====================================================
+-- SuscripcionFideicomiso
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[CrearSuscripcionFideicomiso];
+GO
+
+-- Solo sobre un proyecto Aprobado: si no lo está no se inserta y @NuevoId queda NULL
+CREATE PROCEDURE [dbo].[CrearSuscripcionFideicomiso]
+    @IdProyecto INT,
+    @IdInversor INT,
+    @MontoAportado DECIMAL(18,2),
+    @UnidadesAsignadas INT = 0,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    SET @NuevoId = NULL;
+    INSERT INTO SuscripcionFideicomiso (id_proyecto, id_inversor, monto_aportado, unidades_asignadas)
+    SELECT @IdProyecto, @IdInversor, @MontoAportado, @UnidadesAsignadas
+    WHERE EXISTS (SELECT 1 FROM ProyectoInversion WHERE id_proyecto = @IdProyecto AND estado = 'Aprobado');
+    IF @@ROWCOUNT = 1 SET @NuevoId = SCOPE_IDENTITY();
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[EliminarSuscripcionFideicomiso];
+GO
+
+CREATE PROCEDURE [dbo].[EliminarSuscripcionFideicomiso]
+    @Id INT
+AS BEGIN
+    DELETE FROM SuscripcionFideicomiso WHERE id_suscripcion = @Id;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[LeerSuscripcionesPorProyecto];
+GO
+
+-- Con el inversor y su participación: monto aportado / capital necesario (costo total de la obra), en %
+CREATE PROCEDURE [dbo].[LeerSuscripcionesPorProyecto]
+    @IdProyecto INT
+AS BEGIN
+    SELECT s.id_suscripcion, s.id_proyecto, s.id_inversor, s.monto_aportado, s.unidades_asignadas, s.fecha_suscripcion,
+           CAST(CASE WHEN p.costo_total_obra > 0 THEN s.monto_aportado * 100 / p.costo_total_obra END AS DECIMAL(9,4))
+               AS porcentaje_participacion,
+           i.nombre, i.apellido, i.cuit
+    FROM SuscripcionFideicomiso s
+    INNER JOIN ProyectoInversion p ON p.id_proyecto = s.id_proyecto
+    INNER JOIN Inversor i ON i.id_inversor = s.id_inversor
+    WHERE s.id_proyecto = @IdProyecto
+    ORDER BY s.fecha_suscripcion;
+END
+GO
+
+-- ====================================================
+-- HistorialICC (caché del CSV del INDEC)
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[GuardarHistorialICC];
+GO
+
+-- Alta o reemplazo del valor de un mes
+CREATE PROCEDURE [dbo].[GuardarHistorialICC]
+    @Periodo DATE,
+    @ValorIndice DECIMAL(10,4),
+    @VariacionMensual DECIMAL(8,4) = NULL
+AS BEGIN
+    UPDATE HistorialICC SET valor_indice = @ValorIndice, variacion_mensual = @VariacionMensual, fecha_consulta = GETDATE()
+    WHERE periodo = @Periodo;
+    IF @@ROWCOUNT = 0
+        INSERT INTO HistorialICC (periodo, valor_indice, variacion_mensual) VALUES (@Periodo, @ValorIndice, @VariacionMensual);
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[LeerHistorialICC];
+GO
+
+CREATE PROCEDURE [dbo].[LeerHistorialICC]
+    @Desde DATE = NULL,
+    @Hasta DATE = NULL
+AS BEGIN
+    SELECT id_icc, periodo, valor_indice, variacion_mensual, fecha_consulta
+    FROM HistorialICC
+    WHERE (@Desde IS NULL OR periodo >= @Desde) AND (@Hasta IS NULL OR periodo <= @Hasta)
+    ORDER BY periodo;
 END
 GO

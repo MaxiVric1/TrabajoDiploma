@@ -170,6 +170,8 @@ namespace TpIngSoft
                 ("FormRegistrarCaptacion", "lblDireccion"),
                 ("FormRegistrarCaptacion", "lblMetros"),
                 ("FormRegistrarCaptacion", "lblAmbientes"),
+                ("FormRegistrarCaptacion", "lblLocalidad"),
+                ("FormRegistrarCaptacion", "lblSuperficieLote"),
                 ("FormRegistrarCaptacion", "grpCaptacion"),
                 ("FormRegistrarCaptacion", "lblValorPretendido"),
                 ("FormRegistrarCaptacion", "chkAutorizacionRecibida"),

@@ -50,6 +50,8 @@ namespace BE
         public const string FormRegistrarCaptacion_lblDireccion = "FormRegistrarCaptacion.lblDireccion";
         public const string FormRegistrarCaptacion_lblMetros = "FormRegistrarCaptacion.lblMetros";
         public const string FormRegistrarCaptacion_lblAmbientes = "FormRegistrarCaptacion.lblAmbientes";
+        public const string FormRegistrarCaptacion_lblLocalidad = "FormRegistrarCaptacion.lblLocalidad";
+        public const string FormRegistrarCaptacion_lblSuperficieLote = "FormRegistrarCaptacion.lblSuperficieLote";
         public const string FormRegistrarCaptacion_grpCaptacion = "FormRegistrarCaptacion.grpCaptacion";
         public const string FormRegistrarCaptacion_lblValorPretendido = "FormRegistrarCaptacion.lblValorPretendido";
         public const string FormRegistrarCaptacion_chkAutorizacionRecibida = "FormRegistrarCaptacion.chkAutorizacionRecibida";

@@ -35,6 +35,8 @@ namespace DAL
                 acceso.CrearParametro("@CantidadAmbientes", inmueble.CantidadAmbientes),
                 acceso.CrearParametro("@IdCliente", inmueble.IdCliente),
                 acceso.CrearParametro("@TipoPublicacion", inmueble.TipoPublicacion.ToString()),
+                acceso.CrearParametro("@Localidad", inmueble.Localidad),
+                acceso.CrearParametro("@SuperficieLote", inmueble.SuperficieLote),
                 outParam
             };
             // Opcional en el SP: al captar todavía no hay texto, y así sigue funcionando con el SP anterior a la migración
@@ -66,9 +68,28 @@ namespace DAL
                     acceso.CrearParametro("@EstadoActual", inmueble.EstadoActual.ToString()),
                     acceso.CrearParametro("@TextoComercial", inmueble.TextoComercial),
                     acceso.CrearParametro("@IdCliente", inmueble.IdCliente),
-                    acceso.CrearParametro("@TipoPublicacion", inmueble.TipoPublicacion.ToString())
+                    acceso.CrearParametro("@TipoPublicacion", inmueble.TipoPublicacion.ToString()),
+                    acceso.CrearParametro("@Localidad", inmueble.Localidad),
+                    acceso.CrearParametro("@SuperficieLote", inmueble.SuperficieLote)
                 };
                 return acceso.Escribir("ActualizarInmueble", parameters) != -1;
+            }
+            finally { acceso.Cerrar(); }
+        }
+
+        // Resultado de la geocodificación (Nominatim)
+        public bool ActualizarCoordenadas(int idInmueble, decimal latitud, decimal longitud)
+        {
+            acceso.Abrir();
+            try
+            {
+                List<SqlParameter> parameters = new List<SqlParameter>
+                {
+                    acceso.CrearParametro("@Id", idInmueble),
+                    acceso.CrearParametro("@Latitud", latitud),
+                    acceso.CrearParametro("@Longitud", longitud)
+                };
+                return acceso.Escribir("ActualizarCoordenadasInmueble", parameters) > 0;
             }
             finally { acceso.Cerrar(); }
         }
@@ -240,8 +261,17 @@ namespace DAL
                 TextoComercial = row.Table.Columns.Contains("texto_comercial") && row["texto_comercial"] != DBNull.Value ? row["texto_comercial"].ToString() : "",
                 FechaPublicacion = row.Table.Columns.Contains("fecha_publicacion") && row["fecha_publicacion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["fecha_publicacion"]) : null,
                 FechaDespublicacion = row.Table.Columns.Contains("fecha_despublicacion") && row["fecha_despublicacion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["fecha_despublicacion"]) : null,
-                IdCliente = Convert.ToInt32(row["id_cliente"])
+                IdCliente = Convert.ToInt32(row["id_cliente"]),
+                Localidad = row.Table.Columns.Contains("localidad") && row["localidad"] != DBNull.Value ? row["localidad"].ToString() : null,
+                SuperficieLote = DecimalONull(row, "superficie_lote"),
+                Latitud = DecimalONull(row, "latitud"),
+                Longitud = DecimalONull(row, "longitud")
             };
+        }
+
+        private static decimal? DecimalONull(DataRow row, string columna)
+        {
+            return row.Table.Columns.Contains(columna) && row[columna] != DBNull.Value ? Convert.ToDecimal(row[columna]) : (decimal?)null;
         }
     }
 }

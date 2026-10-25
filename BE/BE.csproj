@@ -86,6 +86,8 @@
     <Compile Include="Garante.cs" />
     <Compile Include="ActualizacionContrato.cs" />
     <Compile Include="ImportePeriodo.cs" />
+    <Compile Include="CotizacionDolar.cs" />
+    <Compile Include="ValorICC.cs" />
     <Compile Include="PagoAlquiler.cs" />
     <Compile Include="PeriodoAPagar.cs" />
     <Compile Include="AccionLegal.cs" />

@@ -38,6 +38,8 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblDireccion, BE.NombreControl.FormRegistrarCaptacion_lblDireccion));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblMetros, BE.NombreControl.FormRegistrarCaptacion_lblMetros));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblAmbientes, BE.NombreControl.FormRegistrarCaptacion_lblAmbientes));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblLocalidad, BE.NombreControl.FormRegistrarCaptacion_lblLocalidad));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblSuperficieLote, BE.NombreControl.FormRegistrarCaptacion_lblSuperficieLote));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpCaptacion, BE.NombreControl.FormRegistrarCaptacion_grpCaptacion));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblValorPretendido, BE.NombreControl.FormRegistrarCaptacion_lblValorPretendido));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblTipoPublicacion, BE.NombreControl.FormRegistrarCaptacion_lblTipoPublicacion));
@@ -88,6 +90,7 @@ namespace TpIngSoft
             cmbTipo.Items.Clear();
             cmbTipo.Items.AddRange(new object[] { "Casa", "Departamento", "Local", "Terreno", "Oficina" });
             cmbTipo.SelectedIndex = 0;
+            cmbTipo.SelectedIndexChanged += (s, ev) => MostrarSuperficieLote();
 
             cmbTipoPublicacion.Items.Clear();
             cmbTipoPublicacion.Items.AddRange(new object[] { TipoPublicacion.Venta, TipoPublicacion.Alquiler });
@@ -135,6 +138,13 @@ namespace TpIngSoft
                 LiberarDatosCliente(limpiar: true);
         }
 
+        // La superficie del lote solo se pide para una casa (es la que puede evaluarse para un desarrollo)
+        private void MostrarSuperficieLote()
+        {
+            bool casa = string.Equals(cmbTipo.SelectedItem?.ToString(), "Casa", StringComparison.OrdinalIgnoreCase);
+            lblSuperficieLote.Visible = nudSuperficieLote.Visible = casa;
+        }
+
         private void btnGuardar_Click(object sender, EventArgs e)
         {
             string dni = txtDni.Text.Trim();
@@ -142,6 +152,19 @@ namespace TpIngSoft
             {
                 MessageBox.Show("El DNI del cliente es requerido.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtDni.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtLocalidad.Text))
+            {
+                MessageBox.Show("La localidad es obligatoria.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtLocalidad.Focus();
+                return;
+            }
+            if (nudSuperficieLote.Visible && nudSuperficieLote.Value <= 0)
+            {
+                MessageBox.Show("Ingrese la superficie del lote de la casa.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                nudSuperficieLote.Focus();
                 return;
             }
 
@@ -185,7 +208,9 @@ namespace TpIngSoft
                     TipoPublicacion = TipoPublicacionSeleccionado(),
                     Direccion = txtDireccion.Text,
                     MetrosCuadrados = nudMetros.Value,
-                    CantidadAmbientes = (int)nudAmbientes.Value
+                    CantidadAmbientes = (int)nudAmbientes.Value,
+                    Localidad = txtLocalidad.Text,
+                    SuperficieLote = nudSuperficieLote.Visible ? nudSuperficieLote.Value : (decimal?)null
                 };
 
                 Captacion captacion = new Captacion
@@ -195,7 +220,10 @@ namespace TpIngSoft
 
                 int nro = captacionBLL.RegistrarCaptacion(cliente, inmueble, captacion, chkAutorizacionRecibida.Checked);
 
-                MessageBox.Show($"Captación N° {nro} registrada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string ubicacion = captacionBLL.ErrorUbicacion == null
+                    ? $"\nUbicación en el mapa: {inmueble.Latitud:0.000000}, {inmueble.Longitud:0.000000}."
+                    : $"\nNo se pudo ubicar en el mapa: {captacionBLL.ErrorUbicacion}";
+                MessageBox.Show($"Captación N° {nro} registrada con éxito.{ubicacion}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Limpiar();
             }
             catch (ArgumentException ex)
@@ -245,6 +273,9 @@ namespace TpIngSoft
             if (cmbTipo.Items.Count > 0) cmbTipo.SelectedIndex = 0;
             if (cmbTipoPublicacion.Items.Count > 0) cmbTipoPublicacion.SelectedIndex = 0;
             txtDireccion.Clear();
+            txtLocalidad.Clear();
+            nudSuperficieLote.Value = 0;
+            MostrarSuperficieLote();
             nudMetros.Value = 0;
             nudAmbientes.Value = 1;
             nudValorPretendido.Value = 0;
