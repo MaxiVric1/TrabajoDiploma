@@ -12,6 +12,7 @@
 --   3. Contrato: fecha_fin (calculada y guardada), depósito de garantía, comisión, método de pago, actualización
 --      por índice (IPC cada 3 meses), rescisión y entrega del inmueble con devolución del depósito.
 --   4. Garante: garantes de cada contrato.
+--   5. Traducciones (español e inglés) de los controles agregados a los formularios.
 -- ====================================================
 USE [TpIngSoft];
 GO
@@ -190,6 +191,43 @@ BEGIN
     );
     PRINT N'Tabla Garante creada.';
 END
+GO
+
+-- ====================================================
+-- 5. Traducciones de los controles nuevos (español e inglés)
+--    Van acá y no en schema-init.sql para que también las reciban las bases existentes.
+--    Solo se agregan las que faltan: no pisa textos editados desde Gestión de Idiomas.
+-- ====================================================
+
+DECLARE @Nuevos TABLE ([nombre] NVARCHAR(100), [formulario] NVARCHAR(100), [es] NVARCHAR(500), [en] NVARCHAR(500));
+INSERT INTO @Nuevos VALUES
+    -- PN1: tipo de publicación (venta / alquiler)
+    ('lblTipoPublicacion', 'FormRegistrarCaptacion', N'Operación:', 'Listing type:'),
+    ('chkAutorizacionAlquiler', 'FormRegistrarCaptacion', N'Autorización de Alquiler firmada recibida', 'Signed Rental Authorization received'),
+    ('dgvCaptaciones.tipoPublicacion', 'FormGestionarCaptaciones', N'Operación', 'Listing type'),
+    ('dgvPendientes.tipoPublicacion', 'FormValidarTasacion', N'Operación', 'Listing type'),
+    ('dgvInmuebles.tipoPublicacion', 'FormCargarMaterialAudiovisual', N'Operación', 'Listing type'),
+    ('dgvInmuebles.tipoPublicacion', 'FormPublicarInmueble', N'Operación', 'Listing type'),
+    ('dgvInmuebles.tipoPublicacion', 'FormInmueblesPublicados', N'Operación', 'Listing type');
+
+INSERT INTO [dbo].[Control] ([nombre], [formulario])
+SELECT n.[nombre], n.[formulario]
+FROM @Nuevos n
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Control] c WHERE c.[nombre] = n.[nombre] AND c.[formulario] = n.[formulario]);
+
+INSERT INTO [dbo].[Traducciones] ([idcontrol], [ididioma], [texto])
+SELECT c.[id], 1, n.[es]
+FROM @Nuevos n
+JOIN [dbo].[Control] c ON c.[nombre] = n.[nombre] AND c.[formulario] = n.[formulario]
+WHERE EXISTS (SELECT 1 FROM [dbo].[Idioma] WHERE [id] = 1)
+  AND NOT EXISTS (SELECT 1 FROM [dbo].[Traducciones] t WHERE t.[idcontrol] = c.[id] AND t.[ididioma] = 1);
+
+INSERT INTO [dbo].[Traducciones] ([idcontrol], [ididioma], [texto])
+SELECT c.[id], 2, n.[en]
+FROM @Nuevos n
+JOIN [dbo].[Control] c ON c.[nombre] = n.[nombre] AND c.[formulario] = n.[formulario]
+WHERE EXISTS (SELECT 1 FROM [dbo].[Idioma] WHERE [id] = 2)
+  AND NOT EXISTS (SELECT 1 FROM [dbo].[Traducciones] t WHERE t.[idcontrol] = c.[id] AND t.[ididioma] = 2);
 GO
 
 PRINT N'Actualización del schema terminada.';

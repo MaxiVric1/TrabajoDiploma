@@ -46,6 +46,7 @@ namespace TpIngSoft
                 .ConColumna("Cliente", BE.NombreControl.FormCargarMaterialAudiovisual_dgvInmuebles_cliente)
                 .ConColumna("Direccion", BE.NombreControl.FormCargarMaterialAudiovisual_dgvInmuebles_direccion)
                 .ConColumna("TipoInmueble", BE.NombreControl.FormCargarMaterialAudiovisual_dgvInmuebles_tipo)
+                .ConColumna("TipoPublicacion", BE.NombreControl.FormCargarMaterialAudiovisual_dgvInmuebles_tipoPublicacion)
                 .ConColumna("ValorFinal", BE.NombreControl.FormCargarMaterialAudiovisual_dgvInmuebles_valorFinal));
             _grillasTraducibles.Add(new DataGridTraducible(dgvArchivos, "FormCargarMaterialAudiovisual.dgvArchivos")
                 .ConColumna("colArchivo", BE.NombreControl.FormCargarMaterialAudiovisual_dgvArchivos_archivo)
@@ -108,7 +109,7 @@ namespace TpIngSoft
                 dgvInmuebles.DataSource = null;
                 dgvInmuebles.DataSource = captacionBLL.LeerResumen(EstadoInmueble.Tasado);
 
-                string[] visibles = { "NroCaptacion", "Cliente", "Direccion", "TipoInmueble", "ValorFinal" };
+                string[] visibles = { "NroCaptacion", "Cliente", "Direccion", "TipoInmueble", "TipoPublicacion", "ValorFinal" };
                 foreach (DataGridViewColumn col in dgvInmuebles.Columns)
                 {
                     col.Visible = visibles.Contains(col.Name);

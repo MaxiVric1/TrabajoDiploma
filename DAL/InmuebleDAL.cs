@@ -34,6 +34,7 @@ namespace DAL
                 acceso.CrearParametro("@MetrosCuadrados", inmueble.MetrosCuadrados),
                 acceso.CrearParametro("@CantidadAmbientes", inmueble.CantidadAmbientes),
                 acceso.CrearParametro("@IdCliente", inmueble.IdCliente),
+                acceso.CrearParametro("@TipoPublicacion", inmueble.TipoPublicacion.ToString()),
                 outParam
             };
             // Opcional en el SP: al captar todavía no hay texto, y así sigue funcionando con el SP anterior a la migración
@@ -64,7 +65,8 @@ namespace DAL
                     acceso.CrearParametro("@CantidadAmbientes", inmueble.CantidadAmbientes),
                     acceso.CrearParametro("@EstadoActual", inmueble.EstadoActual.ToString()),
                     acceso.CrearParametro("@TextoComercial", inmueble.TextoComercial),
-                    acceso.CrearParametro("@IdCliente", inmueble.IdCliente)
+                    acceso.CrearParametro("@IdCliente", inmueble.IdCliente),
+                    acceso.CrearParametro("@TipoPublicacion", inmueble.TipoPublicacion.ToString())
                 };
                 return acceso.Escribir("ActualizarInmueble", parameters) != -1;
             }
@@ -215,6 +217,9 @@ namespace DAL
                 MetrosCuadrados = Convert.ToDecimal(row["metros_cuadrados"]),
                 CantidadAmbientes = Convert.ToInt32(row["cantidad_ambientes"]),
                 EstadoActual = (EstadoInmueble)Enum.Parse(typeof(EstadoInmueble), row["estado_actual"].ToString()),
+                TipoPublicacion = row.Table.Columns.Contains("tipo_publicacion")
+                    ? (TipoPublicacion)Enum.Parse(typeof(TipoPublicacion), row["tipo_publicacion"].ToString())
+                    : TipoPublicacion.Venta,
                 TextoComercial = row.Table.Columns.Contains("texto_comercial") && row["texto_comercial"] != DBNull.Value ? row["texto_comercial"].ToString() : "",
                 FechaPublicacion = row.Table.Columns.Contains("fecha_publicacion") && row["fecha_publicacion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["fecha_publicacion"]) : null,
                 FechaDespublicacion = row.Table.Columns.Contains("fecha_despublicacion") && row["fecha_despublicacion"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["fecha_despublicacion"]) : null,

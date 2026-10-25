@@ -40,6 +40,8 @@ namespace TpIngSoft
             this.lblValorPretendido = new System.Windows.Forms.Label();
             this.nudValorPretendido = new System.Windows.Forms.NumericUpDown();
             this.chkAutorizacionRecibida = new System.Windows.Forms.CheckBox();
+            this.lblTipoPublicacion = new System.Windows.Forms.Label();
+            this.cmbTipoPublicacion = new System.Windows.Forms.ComboBox();
             this.btnGuardar = new System.Windows.Forms.Button();
             this.btnCancelar = new System.Windows.Forms.Button();
             this.grpCliente.SuspendLayout();
@@ -296,6 +298,8 @@ namespace TpIngSoft
             this.grpCaptacion.Controls.Add(this.lblValorPretendido);
             this.grpCaptacion.Controls.Add(this.nudValorPretendido);
             this.grpCaptacion.Controls.Add(this.chkAutorizacionRecibida);
+            this.grpCaptacion.Controls.Add(this.lblTipoPublicacion);
+            this.grpCaptacion.Controls.Add(this.cmbTipoPublicacion);
             this.grpCaptacion.ForeColor = System.Drawing.Color.White;
             this.grpCaptacion.Location = new System.Drawing.Point(12, 257);
             this.grpCaptacion.Name = "grpCaptacion";
@@ -336,6 +340,28 @@ namespace TpIngSoft
             this.chkAutorizacionRecibida.TabIndex = 2;
             this.chkAutorizacionRecibida.Text = "Autorización de Venta firmada recibida";
             this.chkAutorizacionRecibida.UseVisualStyleBackColor = true;
+            //
+            // lblTipoPublicacion
+            //
+            this.lblTipoPublicacion.Location = new System.Drawing.Point(296, 25);
+            this.lblTipoPublicacion.Name = "lblTipoPublicacion";
+            this.lblTipoPublicacion.Size = new System.Drawing.Size(100, 21);
+            this.lblTipoPublicacion.TabIndex = 3;
+            this.lblTipoPublicacion.Text = "Operación:";
+            this.lblTipoPublicacion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
+            // cmbTipoPublicacion
+            //
+            this.cmbTipoPublicacion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.cmbTipoPublicacion.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTipoPublicacion.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmbTipoPublicacion.ForeColor = System.Drawing.Color.White;
+            this.cmbTipoPublicacion.FormattingEnabled = true;
+            this.cmbTipoPublicacion.Location = new System.Drawing.Point(402, 25);
+            this.cmbTipoPublicacion.Name = "cmbTipoPublicacion";
+            this.cmbTipoPublicacion.Size = new System.Drawing.Size(200, 21);
+            this.cmbTipoPublicacion.TabIndex = 4;
+            this.cmbTipoPublicacion.SelectedIndexChanged += new System.EventHandler(this.cmbTipoPublicacion_SelectedIndexChanged);
             //
             // btnGuardar
             //
@@ -420,6 +446,8 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblValorPretendido;
         private System.Windows.Forms.NumericUpDown nudValorPretendido;
         private System.Windows.Forms.CheckBox chkAutorizacionRecibida;
+        private System.Windows.Forms.Label lblTipoPublicacion;
+        private System.Windows.Forms.ComboBox cmbTipoPublicacion;
         private System.Windows.Forms.Button btnGuardar;
         private System.Windows.Forms.Button btnCancelar;
     }

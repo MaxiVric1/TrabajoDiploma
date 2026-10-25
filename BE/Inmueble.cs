@@ -2,13 +2,23 @@ using System;
 
 namespace BE
 {
-    // Los nombres deben coincidir con el CHECK de Inmueble.estado_actual en la base
+    // Los nombres deben coincidir con el CHECK de Inmueble.estado_actual en la base.
+    // Ciclo: Captado -> Tasado -> Publicado; un inmueble de alquiler pasa a Alquilado con el contrato y vuelve a
+    // Publicado cuando el contrato finaliza.
     public enum EstadoInmueble
     {
         Captado,
         Tasado,
         Rechazado,
-        Publicado
+        Publicado,
+        Alquilado
+    }
+
+    // Los nombres deben coincidir con el CHECK de Inmueble.tipo_publicacion en la base
+    public enum TipoPublicacion
+    {
+        Venta,
+        Alquiler
     }
 
     public class Inmueble
@@ -19,6 +29,7 @@ namespace BE
         public decimal MetrosCuadrados { get; set; }
         public int CantidadAmbientes { get; set; }
         public EstadoInmueble EstadoActual { get; set; } = EstadoInmueble.Captado;
+        public TipoPublicacion TipoPublicacion { get; set; } = TipoPublicacion.Venta;
         public string TextoComercial { get; set; } // texto de la publicación, lo carga Marketing
         public DateTime? FechaPublicacion { get; set; }    // última publicación
         public DateTime? FechaDespublicacion { get; set; } // última despublicación (null si está publicado)

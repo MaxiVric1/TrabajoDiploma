@@ -32,16 +32,22 @@ namespace BLL
         }
 
         public const string MENSAJE_AUTORIZACION_REQUERIDA = "Debe confirmar que recibió la Autorización de Venta firmada.";
+        public const string MENSAJE_AUTORIZACION_ALQUILER_REQUERIDA = "Debe confirmar que recibió la Autorización de Alquiler firmada.";
+
+        // La autorización que firma el propietario depende de la operación
+        public static string MensajeAutorizacionRequerida(TipoPublicacion tipo) =>
+            tipo == TipoPublicacion.Alquiler ? MENSAJE_AUTORIZACION_ALQUILER_REQUERIDA : MENSAJE_AUTORIZACION_REQUERIDA;
 
         // Caso de uso "Registrar Captación": cliente + inmueble nuevo + captación en una sola transacción.
         // Si ya hay un cliente con ese DNI se usa el existente (sus datos no se modifican).
-        // No se registra una captación sin la Autorización de Venta firmada (el agente la confirma; el documento no se guarda).
+        // No se registra una captación sin la Autorización de Venta (o de Alquiler) firmada (el agente la confirma; el
+        // documento no se guarda). Para un alquiler, el valor pretendido es el alquiler mensual.
         public int RegistrarCaptacion(Cliente cliente, Inmueble inmueble, Captacion captacion, bool autorizacionRecibida)
         {
-            if (!autorizacionRecibida)
-                throw new ArgumentException(MENSAJE_AUTORIZACION_REQUERIDA);
             if (cliente == null) throw new ArgumentNullException(nameof(cliente));
             if (inmueble == null) throw new ArgumentNullException(nameof(inmueble));
+            if (!autorizacionRecibida)
+                throw new ArgumentException(MensajeAutorizacionRequerida(inmueble.TipoPublicacion));
             if (captacion == null) throw new ArgumentNullException(nameof(captacion));
 
             Cliente existente = clienteDAL.BuscarPorDni(cliente.Dni?.Trim());
@@ -57,6 +63,7 @@ namespace BLL
 
             inmueble.IdInmueble = 0;
             inmueble.IdCliente = cliente.IdCliente;
+            inmueble.EstadoActual = EstadoInmueble.Captado;
             new InmuebleBLL().Validar(inmueble, validarCliente: existente != null);
 
             if (captacion.IdUsuarioAgente == 0 && SessionManager.Instance.EstaLogueado())
@@ -69,7 +76,7 @@ namespace BLL
 
             string detalleCliente = existente != null ? $"cliente existente DNI {cliente.Dni}" : $"cliente nuevo DNI {cliente.Dni}";
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Captación",
-                $"Captación N° {result} registrada: inmueble {inmueble.IdInmueble} ({inmueble.Direccion}), {detalleCliente}.");
+                $"Captación N° {result} registrada: inmueble {inmueble.IdInmueble} ({inmueble.Direccion}) para {inmueble.TipoPublicacion}, {detalleCliente}.");
             return result;
         }
 
@@ -172,12 +179,13 @@ namespace BLL
                     Cliente = cliente != null ? $"{cliente.Nombre} {cliente.Apellido}" : "Desconocido",
                     Direccion = inmueble.Direccion,
                     TipoInmueble = inmueble.TipoInmueble,
+                    TipoPublicacion = inmueble.TipoPublicacion,
                     MetrosCuadrados = inmueble.MetrosCuadrados,
                     CantidadAmbientes = inmueble.CantidadAmbientes,
                     ValorPretendido = c.ValorPretendido,
                     ValorFinal = dictamen != null && dictamen.EstadoDictamen == EstadoDictamen.Aprobada ? dictamen.ValorFinal : null,
                     CantidadArchivos = archivosPorInmueble.TryGetValue(inmueble.IdInmueble, out int archivos) ? archivos : 0,
-                    EstadoPublicacion = inmueble.EstadoActual == EstadoInmueble.Publicado ? "Publicado" : inmueble.Despublicado ? "Despublicado" : "",
+                    EstadoPublicacion = EstadoDePublicacion(inmueble),
                     FechaPublicacion = inmueble.FechaPublicacion,
                     FechaDespublicacion = inmueble.FechaDespublicacion,
                     EstadoInmueble = inmueble.EstadoActual,
@@ -188,6 +196,20 @@ namespace BLL
             return lista;
         }
 
+        public const string PUBLICACION_PUBLICADO = "Publicado";
+        public const string PUBLICACION_DESPUBLICADO = "Despublicado";
+        public const string PUBLICACION_ALQUILADO = "Alquilado";
+
+        // Estado de la publicación para los listados ("" si nunca se publicó). Un inmueble alquilado se publicó antes
+        // y vuelve a Publicado cuando termina el contrato.
+        public static string EstadoDePublicacion(Inmueble inmueble)
+        {
+            if (inmueble.EstadoActual == EstadoInmueble.Publicado) return PUBLICACION_PUBLICADO;
+            if (inmueble.EstadoActual == EstadoInmueble.Alquilado) return PUBLICACION_ALQUILADO;
+            if (inmueble.Despublicado) return PUBLICACION_DESPUBLICADO;
+            return "";
+        }
+
         // Listos para la primera publicación: Tasado, con material y nunca publicados
         // (los despublicados se republican desde FormInmueblesPublicados)
         public List<CaptacionResumen> LeerListosParaPublicar()
@@ -195,7 +217,7 @@ namespace BLL
             return LeerResumen(EstadoInmueble.Tasado).Where(r => r.CantidadArchivos > 0 && !r.FechaPublicacion.HasValue).ToList();
         }
 
-        // Publicados y despublicados (Tasado que ya estuvo publicado)
+        // Publicados, alquilados y despublicados (Tasado que ya estuvo publicado)
         public List<CaptacionResumen> LeerPublicados()
         {
             return LeerResumen().Where(r => r.EstadoPublicacion != "").ToList();

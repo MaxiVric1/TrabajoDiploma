@@ -13,7 +13,9 @@ namespace TpIngSoft
     {
         private const string PUBLICADO = "Publicado";
         private const string DESPUBLICADO = "Despublicado";
+        private const string ALQUILADO = "Alquilado"; // no se puede despublicar mientras dure el contrato
         private static readonly Color COLOR_DESPUBLICADO = Color.FromArgb(170, 165, 190);
+        private static readonly Color COLOR_ALQUILADO = Color.FromArgb(130, 200, 150);
 
         private CaptacionBLL captacionBLL = new CaptacionBLL();
         private InmuebleBLL inmuebleBLL = new InmuebleBLL();
@@ -50,6 +52,7 @@ namespace TpIngSoft
                 .ConColumna("Cliente", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_cliente)
                 .ConColumna("Direccion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_direccion)
                 .ConColumna("TipoInmueble", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_tipo)
+                .ConColumna("TipoPublicacion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_tipoPublicacion)
                 .ConColumna("ValorFinal", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_valorFinal)
                 .ConColumna("EstadoPublicacion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_estado)
                 .ConColumna("FechaPublicacion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_fechaPublicacion)
@@ -110,7 +113,7 @@ namespace TpIngSoft
                 dgvInmuebles.DataSource = null;
                 dgvInmuebles.DataSource = captacionBLL.LeerPublicados();
 
-                string[] visibles = { "NroCaptacion", "Cliente", "Direccion", "TipoInmueble", "ValorFinal",
+                string[] visibles = { "NroCaptacion", "Cliente", "Direccion", "TipoInmueble", "TipoPublicacion", "ValorFinal",
                                       "EstadoPublicacion", "FechaPublicacion", "FechaDespublicacion" };
                 foreach (DataGridViewColumn col in dgvInmuebles.Columns)
                 {
@@ -131,6 +134,7 @@ namespace TpIngSoft
                 {
                     if (!(row.DataBoundItem is CaptacionResumen r)) continue;
                     if (r.EstadoPublicacion == DESPUBLICADO) row.DefaultCellStyle.ForeColor = COLOR_DESPUBLICADO;
+                    else if (r.EstadoPublicacion == ALQUILADO) row.DefaultCellStyle.ForeColor = COLOR_ALQUILADO;
                     if (nroASeleccionar.HasValue && r.NroCaptacion == nroASeleccionar.Value)
                     {
                         row.Selected = true;

@@ -40,7 +40,8 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblAmbientes, BE.NombreControl.FormRegistrarCaptacion_lblAmbientes));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpCaptacion, BE.NombreControl.FormRegistrarCaptacion_grpCaptacion));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblValorPretendido, BE.NombreControl.FormRegistrarCaptacion_lblValorPretendido));
-            _controlesTraducibles.Add(new EtiquetaTraducible(chkAutorizacionRecibida, BE.NombreControl.FormRegistrarCaptacion_chkAutorizacionRecibida));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblTipoPublicacion, BE.NombreControl.FormRegistrarCaptacion_lblTipoPublicacion));
+            // chkAutorizacionRecibida: su texto depende de la operación (venta / alquiler), ver ActualizarTextoAutorizacion
             _controlesTraducibles.Add(new EtiquetaTraducible(btnGuardar, BE.NombreControl.FormRegistrarCaptacion_btnGuardar));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnCancelar, BE.NombreControl.FormRegistrarCaptacion_btnCancelar));
         }
@@ -51,6 +52,29 @@ namespace TpIngSoft
             {
                 control.Traducir(traducciones);
             }
+            ActualizarTextoAutorizacion(traducciones);
+        }
+
+        private TipoPublicacion TipoPublicacionSeleccionado()
+        {
+            return cmbTipoPublicacion.SelectedItem is TipoPublicacion tipo ? tipo : TipoPublicacion.Venta;
+        }
+
+        // "Autorización de Venta/Alquiler firmada recibida": una traducción por operación, igual que EtiquetaTraducible
+        private void ActualizarTextoAutorizacion(Dictionary<string, string> traducciones = null)
+        {
+            traducciones = traducciones ?? GestorIdioma.Instancia.ObtenerTraduccionesActuales();
+            string clave = TipoPublicacionSeleccionado() == TipoPublicacion.Alquiler
+                ? BE.NombreControl.FormRegistrarCaptacion_chkAutorizacionAlquiler
+                : BE.NombreControl.FormRegistrarCaptacion_chkAutorizacionRecibida;
+            chkAutorizacionRecibida.Text = traducciones != null && traducciones.TryGetValue(clave, out string texto) && !string.IsNullOrWhiteSpace(texto)
+                ? texto
+                : $"<{clave}>";
+        }
+
+        private void cmbTipoPublicacion_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ActualizarTextoAutorizacion();
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -64,6 +88,10 @@ namespace TpIngSoft
             cmbTipo.Items.Clear();
             cmbTipo.Items.AddRange(new object[] { "Casa", "Departamento", "Local", "Terreno", "Oficina" });
             cmbTipo.SelectedIndex = 0;
+
+            cmbTipoPublicacion.Items.Clear();
+            cmbTipoPublicacion.Items.AddRange(new object[] { TipoPublicacion.Venta, TipoPublicacion.Alquiler });
+            cmbTipoPublicacion.SelectedIndex = 0;
 
             Limpiar();
         }
@@ -119,7 +147,8 @@ namespace TpIngSoft
 
             if (!chkAutorizacionRecibida.Checked)
             {
-                MessageBox.Show(CaptacionBLL.MENSAJE_AUTORIZACION_REQUERIDA, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(CaptacionBLL.MensajeAutorizacionRequerida(TipoPublicacionSeleccionado()), "Validación",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 chkAutorizacionRecibida.Focus();
                 return;
             }
@@ -153,6 +182,7 @@ namespace TpIngSoft
                 Inmueble inmueble = new Inmueble
                 {
                     TipoInmueble = cmbTipo.SelectedItem?.ToString(),
+                    TipoPublicacion = TipoPublicacionSeleccionado(),
                     Direccion = txtDireccion.Text,
                     MetrosCuadrados = nudMetros.Value,
                     CantidadAmbientes = (int)nudAmbientes.Value
@@ -213,6 +243,7 @@ namespace TpIngSoft
             txtDni.Clear();
             LiberarDatosCliente(limpiar: true);
             if (cmbTipo.Items.Count > 0) cmbTipo.SelectedIndex = 0;
+            if (cmbTipoPublicacion.Items.Count > 0) cmbTipoPublicacion.SelectedIndex = 0;
             txtDireccion.Clear();
             nudMetros.Value = 0;
             nudAmbientes.Value = 1;

@@ -53,6 +53,8 @@ namespace BE
         public const string FormRegistrarCaptacion_grpCaptacion = "FormRegistrarCaptacion.grpCaptacion";
         public const string FormRegistrarCaptacion_lblValorPretendido = "FormRegistrarCaptacion.lblValorPretendido";
         public const string FormRegistrarCaptacion_chkAutorizacionRecibida = "FormRegistrarCaptacion.chkAutorizacionRecibida";
+        public const string FormRegistrarCaptacion_chkAutorizacionAlquiler = "FormRegistrarCaptacion.chkAutorizacionAlquiler";
+        public const string FormRegistrarCaptacion_lblTipoPublicacion = "FormRegistrarCaptacion.lblTipoPublicacion";
         public const string FormRegistrarCaptacion_btnGuardar = "FormRegistrarCaptacion.btnGuardar";
         public const string FormRegistrarCaptacion_btnCancelar = "FormRegistrarCaptacion.btnCancelar";
 
@@ -71,6 +73,7 @@ namespace BE
         public const string FormGestionarCaptaciones_dgvCaptaciones_cliente = "FormGestionarCaptaciones.dgvCaptaciones.cliente";
         public const string FormGestionarCaptaciones_dgvCaptaciones_direccion = "FormGestionarCaptaciones.dgvCaptaciones.direccion";
         public const string FormGestionarCaptaciones_dgvCaptaciones_tipo = "FormGestionarCaptaciones.dgvCaptaciones.tipo";
+        public const string FormGestionarCaptaciones_dgvCaptaciones_tipoPublicacion = "FormGestionarCaptaciones.dgvCaptaciones.tipoPublicacion";
         public const string FormGestionarCaptaciones_dgvCaptaciones_valor = "FormGestionarCaptaciones.dgvCaptaciones.valor";
         public const string FormGestionarCaptaciones_dgvCaptaciones_estado = "FormGestionarCaptaciones.dgvCaptaciones.estado";
 
@@ -96,6 +99,7 @@ namespace BE
         public const string FormValidarTasacion_dgvPendientes_cliente = "FormValidarTasacion.dgvPendientes.cliente";
         public const string FormValidarTasacion_dgvPendientes_direccion = "FormValidarTasacion.dgvPendientes.direccion";
         public const string FormValidarTasacion_dgvPendientes_tipo = "FormValidarTasacion.dgvPendientes.tipo";
+        public const string FormValidarTasacion_dgvPendientes_tipoPublicacion = "FormValidarTasacion.dgvPendientes.tipoPublicacion";
         public const string FormValidarTasacion_dgvPendientes_metros = "FormValidarTasacion.dgvPendientes.metros";
         public const string FormValidarTasacion_dgvPendientes_ambientes = "FormValidarTasacion.dgvPendientes.ambientes";
         public const string FormValidarTasacion_dgvPendientes_valor = "FormValidarTasacion.dgvPendientes.valor";
@@ -113,6 +117,7 @@ namespace BE
         public const string FormCargarMaterialAudiovisual_dgvInmuebles_cliente = "FormCargarMaterialAudiovisual.dgvInmuebles.cliente";
         public const string FormCargarMaterialAudiovisual_dgvInmuebles_direccion = "FormCargarMaterialAudiovisual.dgvInmuebles.direccion";
         public const string FormCargarMaterialAudiovisual_dgvInmuebles_tipo = "FormCargarMaterialAudiovisual.dgvInmuebles.tipo";
+        public const string FormCargarMaterialAudiovisual_dgvInmuebles_tipoPublicacion = "FormCargarMaterialAudiovisual.dgvInmuebles.tipoPublicacion";
         public const string FormCargarMaterialAudiovisual_dgvInmuebles_valorFinal = "FormCargarMaterialAudiovisual.dgvInmuebles.valorFinal";
         public const string FormCargarMaterialAudiovisual_dgvArchivos_archivo = "FormCargarMaterialAudiovisual.dgvArchivos.archivo";
         public const string FormCargarMaterialAudiovisual_dgvArchivos_tipo = "FormCargarMaterialAudiovisual.dgvArchivos.tipo";
@@ -134,6 +139,7 @@ namespace BE
         public const string FormPublicarInmueble_dgvInmuebles_cliente = "FormPublicarInmueble.dgvInmuebles.cliente";
         public const string FormPublicarInmueble_dgvInmuebles_direccion = "FormPublicarInmueble.dgvInmuebles.direccion";
         public const string FormPublicarInmueble_dgvInmuebles_tipo = "FormPublicarInmueble.dgvInmuebles.tipo";
+        public const string FormPublicarInmueble_dgvInmuebles_tipoPublicacion = "FormPublicarInmueble.dgvInmuebles.tipoPublicacion";
         public const string FormPublicarInmueble_dgvInmuebles_valorFinal = "FormPublicarInmueble.dgvInmuebles.valorFinal";
         public const string FormPublicarInmueble_dgvInmuebles_archivos = "FormPublicarInmueble.dgvInmuebles.archivos";
         public const string FormPublicarInmueble_dgvMaterial_tipo = "FormPublicarInmueble.dgvMaterial.tipo";
@@ -154,6 +160,7 @@ namespace BE
         public const string FormInmueblesPublicados_dgvInmuebles_cliente = "FormInmueblesPublicados.dgvInmuebles.cliente";
         public const string FormInmueblesPublicados_dgvInmuebles_direccion = "FormInmueblesPublicados.dgvInmuebles.direccion";
         public const string FormInmueblesPublicados_dgvInmuebles_tipo = "FormInmueblesPublicados.dgvInmuebles.tipo";
+        public const string FormInmueblesPublicados_dgvInmuebles_tipoPublicacion = "FormInmueblesPublicados.dgvInmuebles.tipoPublicacion";
         public const string FormInmueblesPublicados_dgvInmuebles_valorFinal = "FormInmueblesPublicados.dgvInmuebles.valorFinal";
         public const string FormInmueblesPublicados_dgvInmuebles_estado = "FormInmueblesPublicados.dgvInmuebles.estado";
         public const string FormInmueblesPublicados_dgvInmuebles_fechaPublicacion = "FormInmueblesPublicados.dgvInmuebles.fechaPublicacion";

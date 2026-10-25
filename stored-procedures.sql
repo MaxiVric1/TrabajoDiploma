@@ -854,10 +854,13 @@ CREATE PROCEDURE [dbo].[CrearInmueble]
     @CantidadAmbientes INT,
     @TextoComercial NVARCHAR(2000) = NULL,
     @IdCliente INT,
+    @TipoPublicacion VARCHAR(10) = 'Venta',     -- 'Venta' / 'Alquiler'
     @NuevoId INT OUTPUT
 AS BEGIN
-    INSERT INTO Inmueble (tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial, id_cliente)
-    VALUES (@TipoInmueble, @Direccion, @MetrosCuadrados, @CantidadAmbientes, 'Captado', @TextoComercial, @IdCliente);
+    INSERT INTO Inmueble (tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial, id_cliente,
+                          tipo_publicacion)
+    VALUES (@TipoInmueble, @Direccion, @MetrosCuadrados, @CantidadAmbientes, 'Captado', @TextoComercial, @IdCliente,
+            @TipoPublicacion);
     SET @NuevoId = SCOPE_IDENTITY();
 END
 GO
@@ -876,12 +879,14 @@ CREATE PROCEDURE [dbo].[ActualizarInmueble]
     @CantidadAmbientes INT,
     @EstadoActual VARCHAR(20),
     @TextoComercial NVARCHAR(2000),
-    @IdCliente INT
+    @IdCliente INT,
+    @TipoPublicacion VARCHAR(10) = NULL        -- NULL conserva el actual
 AS BEGIN
     UPDATE Inmueble
     SET tipo_inmueble = @TipoInmueble, direccion = @Direccion, metros_cuadrados = @MetrosCuadrados,
         cantidad_ambientes = @CantidadAmbientes, estado_actual = @EstadoActual,
-        texto_comercial = @TextoComercial, id_cliente = @IdCliente
+        texto_comercial = @TextoComercial, id_cliente = @IdCliente,
+        tipo_publicacion = ISNULL(@TipoPublicacion, tipo_publicacion)
     WHERE id_inmueble = @Id;
 END
 GO
@@ -921,7 +926,7 @@ GO
 
 CREATE PROCEDURE [dbo].[LeerInmuebles]
 AS BEGIN
-    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial,
+    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, tipo_publicacion, texto_comercial,
            fecha_publicacion, fecha_despublicacion, id_cliente
     FROM Inmueble;
 END
@@ -936,7 +941,7 @@ GO
 CREATE PROCEDURE [dbo].[BuscarInmueblePorId]
     @Id INT
 AS BEGIN
-    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial,
+    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, tipo_publicacion, texto_comercial,
            fecha_publicacion, fecha_despublicacion, id_cliente
     FROM Inmueble
     WHERE id_inmueble = @Id;
@@ -952,7 +957,7 @@ GO
 CREATE PROCEDURE [dbo].[LeerInmueblesPorCliente]
     @IdCliente INT
 AS BEGIN
-    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, texto_comercial,
+    SELECT id_inmueble, tipo_inmueble, direccion, metros_cuadrados, cantidad_ambientes, estado_actual, tipo_publicacion, texto_comercial,
            fecha_publicacion, fecha_despublicacion, id_cliente
     FROM Inmueble
     WHERE id_cliente = @IdCliente;

@@ -10,12 +10,13 @@ namespace BE
         public string Cliente { get; set; }
         public string Direccion { get; set; }
         public string TipoInmueble { get; set; }
+        public TipoPublicacion TipoPublicacion { get; set; } // Venta / Alquiler
         public decimal MetrosCuadrados { get; set; }
         public int CantidadAmbientes { get; set; }
         public decimal ValorPretendido { get; set; }
         public decimal? ValorFinal { get; set; } // valor de la última tasación, si fue aprobada
         public int CantidadArchivos { get; set; } // material audiovisual cargado para el inmueble
-        public string EstadoPublicacion { get; set; } // "Publicado" / "Despublicado" (vacío si nunca se publicó)
+        public string EstadoPublicacion { get; set; } // "Publicado" / "Despublicado" / "Alquilado" (vacío si nunca se publicó)
         public DateTime? FechaPublicacion { get; set; }
         public DateTime? FechaDespublicacion { get; set; }
         public EstadoInmueble EstadoInmueble { get; set; }

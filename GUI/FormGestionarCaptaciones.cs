@@ -44,6 +44,7 @@ namespace TpIngSoft
                 .ConColumna("Cliente", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_cliente)
                 .ConColumna("Direccion", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_direccion)
                 .ConColumna("TipoInmueble", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_tipo)
+                .ConColumna("TipoPublicacion", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_tipoPublicacion)
                 .ConColumna("ValorPretendido", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_valor)
                 .ConColumna("EstadoInmueble", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_estado);
         }

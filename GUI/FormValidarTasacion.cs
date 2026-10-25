@@ -50,6 +50,7 @@ namespace TpIngSoft
                 .ConColumna("Cliente", BE.NombreControl.FormValidarTasacion_dgvPendientes_cliente)
                 .ConColumna("Direccion", BE.NombreControl.FormValidarTasacion_dgvPendientes_direccion)
                 .ConColumna("TipoInmueble", BE.NombreControl.FormValidarTasacion_dgvPendientes_tipo)
+                .ConColumna("TipoPublicacion", BE.NombreControl.FormValidarTasacion_dgvPendientes_tipoPublicacion)
                 .ConColumna("MetrosCuadrados", BE.NombreControl.FormValidarTasacion_dgvPendientes_metros)
                 .ConColumna("CantidadAmbientes", BE.NombreControl.FormValidarTasacion_dgvPendientes_ambientes)
                 .ConColumna("ValorPretendido", BE.NombreControl.FormValidarTasacion_dgvPendientes_valor);
