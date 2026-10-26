@@ -62,7 +62,12 @@ namespace TpIngSoft
                 .ConItem(registrarPagoToolStripMenuItem, BE.NombreControl.FormMain_registrarPagoToolStripMenuItem)
                 .ConItem(gestionarMoraToolStripMenuItem, BE.NombreControl.FormMain_gestionarMoraToolStripMenuItem)
                 .ConItem(gestionarLitigiosToolStripMenuItem, BE.NombreControl.FormMain_gestionarLitigiosToolStripMenuItem)
-                .ConItem(contratosPorVencerToolStripMenuItem, BE.NombreControl.FormMain_contratosPorVencerToolStripMenuItem);
+                .ConItem(contratosPorVencerToolStripMenuItem, BE.NombreControl.FormMain_contratosPorVencerToolStripMenuItem)
+                .ConItem(pn3ToolStripMenuItem, BE.NombreControl.FormMain_pn3ToolStripMenuItem)
+                .ConItem(identificarOportunidadesToolStripMenuItem, BE.NombreControl.FormMain_identificarOportunidadesToolStripMenuItem)
+                .ConItem(evaluacionArquitectonicaToolStripMenuItem, BE.NombreControl.FormMain_evaluacionArquitectonicaToolStripMenuItem)
+                .ConItem(decisionDirectorioToolStripMenuItem, BE.NombreControl.FormMain_decisionDirectorioToolStripMenuItem)
+                .ConItem(gestionFideicomisoToolStripMenuItem, BE.NombreControl.FormMain_gestionFideicomisoToolStripMenuItem);
 
             _controlesTraducibles.Add(menuTraducible);
         }
@@ -209,6 +214,17 @@ namespace TpIngSoft
                 registrarPagoToolStripMenuItem.Visible = analistaCobranzas;
                 gestionarMoraToolStripMenuItem.Visible = analistaCobranzas;
                 gestionarLitigiosToolStripMenuItem.Visible = asesorLegal;
+
+                // PN3: misma lógica (Admin tiene los cuatro roles)
+                bool analista = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN3Analisis);
+                bool arquitectura = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN3Arquitectura);
+                bool directorio = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN3Directorio);
+                bool inversiones = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN3Inversiones);
+                pn3ToolStripMenuItem.Visible = analista || arquitectura || directorio || inversiones;
+                identificarOportunidadesToolStripMenuItem.Visible = analista;
+                evaluacionArquitectonicaToolStripMenuItem.Visible = arquitectura;
+                decisionDirectorioToolStripMenuItem.Visible = directorio;
+                gestionFideicomisoToolStripMenuItem.Visible = inversiones;
             }
             else
             {
@@ -221,6 +237,7 @@ namespace TpIngSoft
                 verificarIntegridadToolStripMenuItem.Visible = false;
                 pn1ToolStripMenuItem.Visible = false;
                 pn2ToolStripMenuItem.Visible = false;
+                pn3ToolStripMenuItem.Visible = false;
             }
 
             // Re-sync selected language in combobox when session config updates
@@ -456,6 +473,34 @@ namespace TpIngSoft
         private void contratosPorVencerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormContratosPorVencer frm = new FormContratosPorVencer();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void identificarOportunidadesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormIdentificarOportunidades frm = new FormIdentificarOportunidades();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void evaluacionArquitectonicaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormEvaluacionArquitectonica frm = new FormEvaluacionArquitectonica();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void decisionDirectorioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormDecisionDirectorio frm = new FormDecisionDirectorio();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void gestionFideicomisoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormGestionFideicomiso frm = new FormGestionFideicomiso();
             frm.MdiParent = this;
             frm.Show();
         }

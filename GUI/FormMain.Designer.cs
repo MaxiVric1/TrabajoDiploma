@@ -40,6 +40,11 @@ namespace TpIngSoft
             this.gestionarMoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionarLitigiosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contratosPorVencerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pn3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.identificarOportunidadesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.evaluacionArquitectonicaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.decisionDirectorioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gestionFideicomisoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbIdioma = new System.Windows.Forms.ToolStripComboBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblSesionInfo = new System.Windows.Forms.ToolStripStatusLabel();
@@ -55,6 +60,7 @@ namespace TpIngSoft
             this.adminToolStripMenuItem,
             this.pn1ToolStripMenuItem,
             this.pn2ToolStripMenuItem,
+            this.pn3ToolStripMenuItem,
             this.cmbIdioma});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -299,6 +305,55 @@ namespace TpIngSoft
             this.contratosPorVencerToolStripMenuItem.Text = "Contratos Por Vencer";
             this.contratosPorVencerToolStripMenuItem.Click += new System.EventHandler(this.contratosPorVencerToolStripMenuItem_Click);
             //
+            // pn3ToolStripMenuItem
+            //
+            this.pn3ToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.pn3ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.identificarOportunidadesToolStripMenuItem,
+            this.evaluacionArquitectonicaToolStripMenuItem,
+            this.decisionDirectorioToolStripMenuItem,
+            this.gestionFideicomisoToolStripMenuItem});
+            this.pn3ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.pn3ToolStripMenuItem.Name = "pn3ToolStripMenuItem";
+            this.pn3ToolStripMenuItem.Size = new System.Drawing.Size(40, 23);
+            this.pn3ToolStripMenuItem.Text = "PN3";
+            //
+            // identificarOportunidadesToolStripMenuItem
+            //
+            this.identificarOportunidadesToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.identificarOportunidadesToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.identificarOportunidadesToolStripMenuItem.Name = "identificarOportunidadesToolStripMenuItem";
+            this.identificarOportunidadesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.identificarOportunidadesToolStripMenuItem.Text = "Identificar Oportunidades";
+            this.identificarOportunidadesToolStripMenuItem.Click += new System.EventHandler(this.identificarOportunidadesToolStripMenuItem_Click);
+            //
+            // evaluacionArquitectonicaToolStripMenuItem
+            //
+            this.evaluacionArquitectonicaToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.evaluacionArquitectonicaToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.evaluacionArquitectonicaToolStripMenuItem.Name = "evaluacionArquitectonicaToolStripMenuItem";
+            this.evaluacionArquitectonicaToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.evaluacionArquitectonicaToolStripMenuItem.Text = "Evaluación Arquitectónica";
+            this.evaluacionArquitectonicaToolStripMenuItem.Click += new System.EventHandler(this.evaluacionArquitectonicaToolStripMenuItem_Click);
+            //
+            // decisionDirectorioToolStripMenuItem
+            //
+            this.decisionDirectorioToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.decisionDirectorioToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.decisionDirectorioToolStripMenuItem.Name = "decisionDirectorioToolStripMenuItem";
+            this.decisionDirectorioToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.decisionDirectorioToolStripMenuItem.Text = "Decisión del Directorio";
+            this.decisionDirectorioToolStripMenuItem.Click += new System.EventHandler(this.decisionDirectorioToolStripMenuItem_Click);
+            //
+            // gestionFideicomisoToolStripMenuItem
+            //
+            this.gestionFideicomisoToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.gestionFideicomisoToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.gestionFideicomisoToolStripMenuItem.Name = "gestionFideicomisoToolStripMenuItem";
+            this.gestionFideicomisoToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.gestionFideicomisoToolStripMenuItem.Text = "Gestión del Fideicomiso";
+            this.gestionFideicomisoToolStripMenuItem.Click += new System.EventHandler(this.gestionFideicomisoToolStripMenuItem_Click);
+            //
             // cmbIdioma
             // 
             this.cmbIdioma.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -382,5 +437,10 @@ namespace TpIngSoft
         private System.Windows.Forms.ToolStripMenuItem gestionarMoraToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionarLitigiosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contratosPorVencerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pn3ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem identificarOportunidadesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem evaluacionArquitectonicaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem decisionDirectorioToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gestionFideicomisoToolStripMenuItem;
     }
 }

@@ -11,6 +11,31 @@ namespace SERVICIOS
     {
         public const string USER_AGENT = "LandSmart/1.0";
 
+        public static byte[] GetBytes(string url, string servicio, int timeoutMs = 15000)
+        {
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            HttpWebRequest pedido = (HttpWebRequest)WebRequest.Create(url);
+            pedido.Timeout = pedido.ReadWriteTimeout = timeoutMs;
+            pedido.UserAgent = USER_AGENT;
+            try
+            {
+                using (HttpWebResponse respuesta = (HttpWebResponse)pedido.GetResponse())
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    respuesta.GetResponseStream().CopyTo(ms);
+                    return ms.ToArray();
+                }
+            }
+            catch (WebException ex) when (ex.Response is HttpWebResponse error)
+            {
+                throw new Exception($"{servicio} respondió con error HTTP {(int)error.StatusCode}.", ex);
+            }
+            catch (WebException ex)
+            {
+                throw new Exception($"No se pudo conectar con {servicio}: {ex.Message}", ex);
+            }
+        }
+
         public static string Get(string url, string servicio, int timeoutMs = 15000, string accept = null)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;

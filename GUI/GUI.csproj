@@ -164,6 +164,49 @@
     </Compile>
     <Compile Include="MaterialVisual.cs" />
     <Compile Include="EstadosPN2.cs" />
+    <Compile Include="PN3Comun.cs" />
+    <Compile Include="FormIdentificarOportunidades.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormIdentificarOportunidades.Designer.cs">
+      <DependentUpon>FormIdentificarOportunidades.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormEvaluacionArquitectonica.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormEvaluacionArquitectonica.Designer.cs">
+      <DependentUpon>FormEvaluacionArquitectonica.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PanelAnalisis.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PanelAnalisis.Designer.cs">
+      <DependentUpon>PanelAnalisis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormDecisionDirectorio.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormDecisionDirectorio.Designer.cs">
+      <DependentUpon>FormDecisionDirectorio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormVerAnalisis.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormVerAnalisis.Designer.cs">
+      <DependentUpon>FormVerAnalisis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGestionFideicomiso.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGestionFideicomiso.Designer.cs">
+      <DependentUpon>FormGestionFideicomiso.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormAgregarSuscripcion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAgregarSuscripcion.Designer.cs">
+      <DependentUpon>FormAgregarSuscripcion.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormGestionarContratos.cs">
       <SubType>Form</SubType>
     </Compile>
