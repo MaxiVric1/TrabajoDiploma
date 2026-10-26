@@ -100,8 +100,11 @@ namespace BLL
 
             pdf.Subtitulo("Datos técnicos (Arquitectura)");
             pdf.Campo("Superficie del lote", $"{p.SuperficieLote:N2} m²");
-            pdf.Campo("FOS", $"{p.Fos:0.##} (ocupación del suelo: {p.SuperficieLote * p.Fos:N2} m²)");
-            pdf.Campo("FOT", $"{p.Fot:0.##} ({p.MetrosConstruibles:N2} m² construibles)");
+            pdf.Campo("Superficie edificable", $"{p.SuperficieEdificablePlanta:N2} m² por planta");
+            pdf.Campo("Altura máxima", $"{p.AlturaMaxima:0.##} m: {p.Pisos} pisos de {ParcelaCaba.ALTURA_POR_PISO:0} m");
+            pdf.Campo("M² construibles", $"{p.MetrosConstruibles:N2} m² ({p.Pisos} pisos x {p.SuperficieEdificablePlanta:N2} m²)");
+            pdf.Campo("SMP / distrito", p.Smp == null && p.DistritoUrbanistico == null ? "Carga manual (sin consulta a catastro)"
+                : $"{p.Smp ?? "-"} / {p.DistritoUrbanistico ?? "-"} (Código Urbanístico de CABA, EPOK)");
             pdf.Campo("Costo de obra", $"USD {p.CostoObraM2:N2} por m² - total USD {p.CostoTotalObra:N2}");
             pdf.Campo("Proyectado con el ICC", $"USD {a.CostoObraProyectadoUSD:N2} (obra de {a.Parametros.PlazoObraMeses} meses)");
             pdf.Campo("Valor de las unidades", $"USD {p.ValorVentaM2Unidades:N2} por m² - total USD {a.ValorUnidadesUSD:N2}");
@@ -199,7 +202,8 @@ namespace BLL
             pdf.Encabezado(ContratoBLL.Logo(), "PROPUESTA DE INVERSIÓN", $"Proyecto N° {p.IdProyecto}", $"{DateTime.Now:dd/MM/yyyy}");
             pdf.Subtitulo("El proyecto");
             pdf.Campo("Ubicación", $"{p.Direccion}" + (string.IsNullOrEmpty(p.Localidad) ? "" : $", {p.Localidad}"));
-            pdf.Campo("Lote", $"{p.SuperficieLote:N2} m² (FOS {p.Fos:0.##}, FOT {p.Fot:0.##})");
+            pdf.Campo("Lote", $"{p.SuperficieLote:N2} m²");
+            pdf.Campo("Edificabilidad", $"{p.Pisos} pisos (altura máxima {p.AlturaMaxima:0.##} m) de {p.SuperficieEdificablePlanta:N2} m² por planta");
             pdf.Campo("Superficie a construir", $"{p.MetrosConstruibles:N2} m²");
             pdf.Campo("Costo de obra", $"USD {p.CostoObraM2:N2} por m² - USD {p.CostoTotalObra:N2} en total");
             pdf.Campo("Valor de las unidades", $"USD {p.ValorVentaM2Unidades:N2} por m² - USD {p.ValorTotalUnidades:N2} en total");

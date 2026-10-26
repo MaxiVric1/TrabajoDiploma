@@ -74,17 +74,41 @@ namespace BLL
             return id;
         }
 
-        // Datos técnicos de Arquitectura (lote, FOS, FOT, costo de obra y valor de venta por m², en USD): solo En Análisis
+        // ---------- Parámetros urbanísticos (CABA) ----------
+
+        public static bool EsCaba(string localidad) => ClienteEpok.EsCaba(localidad);
+
+        // Superficie de la parcela, superficie edificable en planta, altura máxima, SMP y distrito según el Código
+        // Urbanístico (USIG + EPOK). Solo para inmuebles de CABA: en otras localidades Arquitectura los carga a mano.
+        public ParcelaCaba ConsultarParametrosCaba(int idProyecto)
+        {
+            ExigirPermiso(PermisosDefinidos.AccesoPN3Arquitectura, "Arquitectura");
+            ProyectoInversion proyecto = proyectoDAL.BuscarPorId(idProyecto);
+            if (proyecto == null)
+                throw new Exception("El proyecto no existe.");
+            if (!EsCaba(proyecto.Localidad))
+                throw new ArgumentException($"Carga manual requerida para esta localidad ({proyecto.Localidad ?? "sin localidad"}): la consulta automática es solo para CABA.");
+            return new ClienteEpok().Consultar(proyecto.Direccion);
+        }
+
+        // Datos técnicos de Arquitectura (lote, superficie edificable en planta, altura máxima, costo de obra y valor de
+        // venta por m² en USD; SMP y distrito como referencia): solo En Análisis
         public void ActualizarDatosTecnicos(ProyectoInversion datos)
         {
             ExigirPermiso(PermisosDefinidos.AccesoPN3Arquitectura, "Arquitectura");
             if (datos == null) throw new ArgumentNullException(nameof(datos));
             if (!(datos.SuperficieLote > 0))
                 throw new ArgumentException("La superficie del lote debe ser mayor a cero.");
-            if (!(datos.Fos > 0 && datos.Fos <= 1))
-                throw new ArgumentException("El FOS debe estar entre 0 y 1 (por ejemplo 0,6 = 60% del lote).");
-            if (!(datos.Fot > 0 && datos.Fot <= 20))
-                throw new ArgumentException("El FOT debe ser mayor a cero y como máximo 20.");
+            if (!(datos.SuperficieEdificablePlanta > 0))
+                throw new ArgumentException("La superficie edificable en planta debe ser mayor a cero.");
+            if (datos.SuperficieEdificablePlanta > datos.SuperficieLote * 1.01m)
+                throw new ArgumentException("La superficie edificable en planta no puede superar la del lote.");
+            if (!(datos.AlturaMaxima >= ParcelaCaba.ALTURA_POR_PISO && datos.AlturaMaxima <= 200))
+                throw new ArgumentException($"La altura máxima debe estar entre {ParcelaCaba.ALTURA_POR_PISO:0} m (un piso) y 200 m.");
+            datos.Smp = string.IsNullOrWhiteSpace(datos.Smp) ? null : datos.Smp.Trim();
+            datos.DistritoUrbanistico = string.IsNullOrWhiteSpace(datos.DistritoUrbanistico) ? null : datos.DistritoUrbanistico.Trim();
+            if (datos.Smp?.Length > 20 || datos.DistritoUrbanistico?.Length > 60)
+                throw new ArgumentException("El SMP admite hasta 20 caracteres y el distrito hasta 60.");
             if (!(datos.CostoObraM2 > 0))
                 throw new ArgumentException("El costo de obra por m² debe ser mayor a cero.");
             if (!(datos.ValorVentaM2Unidades > 0))
@@ -103,7 +127,8 @@ namespace BLL
 
             ProyectoInversion guardado = proyectoDAL.BuscarPorId(datos.IdProyecto);
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Datos Técnicos Proyecto",
-                $"Proyecto N° {datos.IdProyecto}: lote {datos.SuperficieLote:N2} m², FOS {datos.Fos}, FOT {datos.Fot}, " +
+                $"Proyecto N° {datos.IdProyecto}: lote {datos.SuperficieLote:N2} m², planta {datos.SuperficieEdificablePlanta:N2} m², altura {datos.AlturaMaxima:0.##} m" +
+                (datos.Smp != null ? $", SMP {datos.Smp}" : "") + (datos.DistritoUrbanistico != null ? $", distrito {datos.DistritoUrbanistico}" : "") + ", " +
                 $"{guardado.MetrosConstruibles:N2} m² construibles, obra USD {guardado.CostoTotalObra:N2}, unidades USD {guardado.ValorTotalUnidades:N2}.");
         }
 
@@ -276,7 +301,7 @@ namespace BLL
                 ResultadoUSD = a.UnidadesPropietarioUSD,
                 Detalle =
                 {
-                    $"{proyecto.MetrosConstruibles:N2} m² construibles (lote {proyecto.SuperficieLote:N2} m² x FOT {proyecto.Fot})",
+                    $"{proyecto.MetrosConstruibles:N2} m² construibles ({proyecto.Pisos} pisos en {proyecto.AlturaMaxima:0.##} m x {proyecto.SuperficieEdificablePlanta:N2} m² por planta)",
                     $"Unidades: {proyecto.MetrosConstruibles:N2} m² x USD {proyecto.ValorVentaM2Unidades:N2} = USD {a.ValorUnidadesUSD:N2}",
                     $"El propietario aporta el lote y recibe el {proyecto.PorcentajeCanje:0.##}% de las unidades: USD {a.UnidadesPropietarioUSD:N2} al terminar la obra ({p.PlazoObraMeses} meses)",
                     $"Costo de obra USD {proyecto.CostoTotalObra:N2}, proyectado con el ICC: USD {a.CostoObraProyectadoUSD:N2}",

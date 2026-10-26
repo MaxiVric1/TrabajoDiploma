@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BE;
 using BLL;
@@ -9,8 +10,10 @@ using TpIngSoft.Traduccion;
 
 namespace TpIngSoft
 {
-    // PN3 - Arquitectura: datos técnicos de los proyectos En Análisis (lote, FOS, FOT, costo de obra y valor de venta
-    // por m² en USD). Los totales se ven al instante y los guarda calculados la base.
+    // PN3 - Arquitectura: datos técnicos de los proyectos En Análisis (lote, superficie edificable en planta, altura
+    // máxima, costo de obra y valor de venta por m² en USD). En CABA, "Consultar CABA" los trae del Código Urbanístico
+    // (USIG + EPOK) y Arquitectura puede corregirlos; en otras localidades se cargan a mano. Los totales se ven al
+    // instante y los guarda calculados la base.
     public partial class FormEvaluacionArquitectonica : Form, IObservador
     {
         private class FilaProyecto
@@ -29,6 +32,7 @@ namespace TpIngSoft
         private List<IControlTraducible> _controlesTraducibles = new List<IControlTraducible>();
         private DataGridTraducible _grilla;
         private bool _cargando;
+        private string _smp, _distrito; // de la última consulta a EPOK (o los ya guardados), como referencia
 
         public FormEvaluacionArquitectonica()
         {
@@ -49,8 +53,9 @@ namespace TpIngSoft
                 (lblEmail, BE.NombreControl.FormEvaluacionArquitectonica_lblEmail),
                 (grpDatosTecnicos, BE.NombreControl.FormEvaluacionArquitectonica_grpDatosTecnicos),
                 (lblLote, BE.NombreControl.FormEvaluacionArquitectonica_lblLote),
-                (lblFos, BE.NombreControl.FormEvaluacionArquitectonica_lblFos),
-                (lblFot, BE.NombreControl.FormEvaluacionArquitectonica_lblFot),
+                (lblSupEdificable, BE.NombreControl.FormEvaluacionArquitectonica_lblSupEdificable),
+                (lblAltura, BE.NombreControl.FormEvaluacionArquitectonica_lblAltura),
+                (btnConsultarCaba, BE.NombreControl.FormEvaluacionArquitectonica_btnConsultarCaba),
                 (lblCostoM2, BE.NombreControl.FormEvaluacionArquitectonica_lblCostoM2),
                 (lblValorM2, BE.NombreControl.FormEvaluacionArquitectonica_lblValorM2),
                 (lblMetros, BE.NombreControl.FormEvaluacionArquitectonica_lblMetros),
@@ -85,7 +90,8 @@ namespace TpIngSoft
 
         private void FormEvaluacionArquitectonica_Load(object sender, EventArgs e)
         {
-            nudFos.Increment = nudFot.Increment = 0.1m;
+            nudSupEdificable.Increment = 10;
+            nudAltura.Increment = 0.5m;
             nudCostoM2.Increment = nudValorM2.Increment = 50;
             MostrarIcc();
             CargarProyectos();
@@ -154,6 +160,9 @@ namespace TpIngSoft
         {
             ProyectoInversion p = Seleccionado();
             grpDatosTecnicos.Enabled = btnGuardar.Enabled = p != null;
+            _smp = p?.Smp;
+            _distrito = p?.DistritoUrbanistico;
+            MostrarParcela(p);
             foreach (Label l in new[] { lblDireccionValor, lblLocalidadValor, lblTipoValor, lblSuperficieValor, lblCanjeValor,
                                         lblPropietarioValor, lblDniValor, lblTelefonoValor, lblEmailValor })
                 l.Text = "-";
@@ -182,8 +191,8 @@ namespace TpIngSoft
 
                 _cargando = true;
                 nudLote.Value = Math.Min(p.SuperficieLote ?? inmueble.SuperficieLote ?? 0, nudLote.Maximum);
-                nudFos.Value = p.Fos ?? 0;
-                nudFot.Value = p.Fot ?? 0;
+                nudSupEdificable.Value = Math.Min(p.SuperficieEdificablePlanta ?? 0, nudSupEdificable.Maximum);
+                nudAltura.Value = Math.Min(p.AlturaMaxima ?? 0, nudAltura.Maximum);
                 nudCostoM2.Value = p.CostoObraM2 ?? 0;
                 nudValorM2.Value = p.ValorVentaM2Unidades ?? 0;
             }
@@ -195,14 +204,76 @@ namespace TpIngSoft
             DatosTecnicos_Changed(this, EventArgs.Empty);
         }
 
-        // Mismo cálculo que las columnas calculadas de ProyectoInversion
+        // CABA: botón de consulta a EPOK y la parcela de referencia; otras localidades: carga manual
+        private void MostrarParcela(ProyectoInversion p)
+        {
+            bool caba = p != null && ProyectoInversionBLL.EsCaba(p.Localidad);
+            btnConsultarCaba.Visible = caba;
+            btnConsultarCaba.Enabled = true;
+            lblParcela.ForeColor = System.Drawing.Color.White;
+            if (p == null)
+                lblParcela.Text = "";
+            else if (!caba)
+            {
+                lblParcela.Text = $"Carga manual requerida para esta localidad ({p.Localidad ?? "sin localidad"}).";
+                lblParcela.ForeColor = PN3Comun.AMARILLO;
+            }
+            else
+                lblParcela.Text = _smp != null || _distrito != null
+                    ? $"SMP {_smp ?? "-"} - distrito {_distrito ?? "-"}"
+                    : "Inmueble de CABA: \"Consultar CABA\" trae los parámetros del Código Urbanístico.";
+        }
+
+        // Consulta a USIG + EPOK fuera del hilo de la interfaz (los servicios del GCBA pueden tardar)
+        private async void btnConsultarCaba_Click(object sender, EventArgs e)
+        {
+            ProyectoInversion p = Seleccionado();
+            if (p == null) return;
+            btnConsultarCaba.Enabled = btnGuardar.Enabled = false;
+            lblParcela.ForeColor = System.Drawing.Color.White;
+            lblParcela.Text = $"Consultando USIG y EPOK para {p.Direccion}...";
+            Cursor = Cursors.WaitCursor;
+            try
+            {
+                ParcelaCaba parcela = await Task.Run(() => proyectoBLL.ConsultarParametrosCaba(p.IdProyecto));
+                if (Seleccionado()?.IdProyecto != p.IdProyecto) return; // cambió la selección mientras consultaba
+                _cargando = true;
+                if (parcela.SuperficieParcela.HasValue) nudLote.Value = Math.Min(parcela.SuperficieParcela.Value, nudLote.Maximum);
+                nudSupEdificable.Value = Math.Min(parcela.SuperficieEdificablePlanta.Value, nudSupEdificable.Maximum);
+                nudAltura.Value = Math.Min(parcela.AlturaMaxima.Value, nudAltura.Maximum);
+                _cargando = false;
+                _smp = parcela.Smp;
+                _distrito = parcela.Distrito;
+                lblParcela.ForeColor = PN3Comun.VERDE;
+                lblParcela.Text = $"SMP {parcela.Smp} - distrito {parcela.Distrito} - parcela {parcela.SuperficieParcela:N2} m² " +
+                                  $"(catastro: {parcela.DireccionCatastral}; {parcela.Busqueda}). Puede corregir los valores antes de guardar.";
+                DatosTecnicos_Changed(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                _cargando = false;
+                lblParcela.ForeColor = PN3Comun.ROJO;
+                lblParcela.Text = "Sin datos de EPOK: cargue los valores a mano.";
+                MessageBox.Show(ex.Message + Environment.NewLine + Environment.NewLine + "Puede cargar los datos técnicos a mano.",
+                    "Consultar CABA", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+                btnConsultarCaba.Enabled = true;
+                btnGuardar.Enabled = Seleccionado() != null;
+            }
+        }
+
+        // Mismo cálculo que las columnas calculadas de ProyectoInversion: pisos (altura / 3 m) x superficie en planta
         private void DatosTecnicos_Changed(object sender, EventArgs e)
         {
             if (_cargando) return;
-            decimal metros = Math.Round(nudLote.Value * nudFot.Value, 2);
+            int pisos = (int)Math.Floor(nudAltura.Value / ParcelaCaba.ALTURA_POR_PISO);
+            decimal metros = Math.Round(pisos * nudSupEdificable.Value, 2);
             decimal costo = Math.Round(metros * nudCostoM2.Value, 2);
             decimal valor = Math.Round(metros * nudValorM2.Value, 2);
-            lblMetrosValor.Text = $"{metros:N2} m² (lote {nudLote.Value:N2} x FOT {nudFot.Value:0.##}); ocupación del suelo {nudLote.Value * nudFos.Value:N2} m²";
+            lblMetrosValor.Text = $"{metros:N2} m² ({pisos} pisos en {nudAltura.Value:0.##} m x {nudSupEdificable.Value:N2} m² por planta)";
             lblCostoTotalValor.Text = $"{PN3Comun.Usd(costo)} ({metros:N2} m² x USD {nudCostoM2.Value:N2})";
             lblValorTotalValor.Text = $"{PN3Comun.Usd(valor)} ({metros:N2} m² x USD {nudValorM2.Value:N2})";
             lblMargenValor.Text = $"{PN3Comun.Usd(valor - costo)} (valor de las unidades menos la obra)";
@@ -219,8 +290,10 @@ namespace TpIngSoft
                 {
                     IdProyecto = p.IdProyecto,
                     SuperficieLote = nudLote.Value,
-                    Fos = nudFos.Value,
-                    Fot = nudFot.Value,
+                    SuperficieEdificablePlanta = nudSupEdificable.Value,
+                    AlturaMaxima = nudAltura.Value,
+                    Smp = _smp,
+                    DistritoUrbanistico = _distrito,
                     CostoObraM2 = nudCostoM2.Value,
                     ValorVentaM2Unidades = nudValorM2.Value
                 });

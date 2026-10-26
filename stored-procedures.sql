@@ -2437,22 +2437,26 @@ AS BEGIN
 END
 GO
 
--- Datos técnicos de Arquitectura: solo mientras el proyecto está En Análisis (0 filas si no)
+-- Datos técnicos de Arquitectura: solo mientras el proyecto está En Análisis (0 filas si no). En CABA, la superficie
+-- edificable, la altura, el SMP y el distrito salen de EPOK; Arquitectura puede corregirlos.
 DROP PROCEDURE IF EXISTS [dbo].[ActualizarDatosTecnicosProyecto];
 GO
 
 CREATE PROCEDURE [dbo].[ActualizarDatosTecnicosProyecto]
     @Id INT,
     @SuperficieLote DECIMAL(10,2),
-    @Fos DECIMAL(5,2),
-    @Fot DECIMAL(5,2),
+    @SuperficieEdificablePlanta DECIMAL(10,2),
+    @AlturaMaxima DECIMAL(6,2),
+    @Smp VARCHAR(20) = NULL,
+    @DistritoUrbanistico VARCHAR(60) = NULL,
     @CostoObraM2 DECIMAL(18,2),
     @ValorVentaM2Unidades DECIMAL(18,2),
     @IdUsuarioArquitectura INT,
     @Observaciones NVARCHAR(1000) = NULL       -- NULL conserva las actuales
 AS BEGIN
     UPDATE ProyectoInversion
-    SET superficie_lote = @SuperficieLote, fos = @Fos, fot = @Fot, costo_obra_m2 = @CostoObraM2,
+    SET superficie_lote = @SuperficieLote, superficie_edificable_planta = @SuperficieEdificablePlanta, altura_maxima = @AlturaMaxima,
+        smp = @Smp, distrito_urbanistico = @DistritoUrbanistico, costo_obra_m2 = @CostoObraM2,
         valor_venta_m2_unidades = @ValorVentaM2Unidades, id_usuario_arquitectura = @IdUsuarioArquitectura,
         observaciones = ISNULL(@Observaciones, observaciones)
     WHERE id_proyecto = @Id AND estado = 'EnAnalisis';
@@ -2514,7 +2518,8 @@ GO
 CREATE PROCEDURE [dbo].[LeerProyectosInversion]
     @Estado VARCHAR(20) = NULL
 AS BEGIN
-    SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
+    SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.superficie_edificable_planta, p.altura_maxima, p.smp,
+           p.distrito_urbanistico, p.metros_construibles, p.costo_obra_m2,
            p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
            p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones, p.porcentaje_canje,
            p.porcentaje_estructuracion, p.porcentaje_administracion_mensual, p.porcentaje_venta_unidades,
@@ -2535,7 +2540,8 @@ GO
 CREATE PROCEDURE [dbo].[BuscarProyectoInversionPorId]
     @Id INT
 AS BEGIN
-    SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
+    SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.superficie_edificable_planta, p.altura_maxima, p.smp,
+           p.distrito_urbanistico, p.metros_construibles, p.costo_obra_m2,
            p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
            p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones, p.porcentaje_canje,
            p.porcentaje_estructuracion, p.porcentaje_administracion_mensual, p.porcentaje_venta_unidades,

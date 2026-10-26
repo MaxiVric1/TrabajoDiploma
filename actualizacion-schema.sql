@@ -315,9 +315,9 @@ GO
 -- 4c. PN3 - Evaluación de desarrollo de inversión
 -- ====================================================
 
--- Proyecto de desarrollo en fideicomiso sobre un inmueble del inventario. Arquitectura carga los datos técnicos;
--- los totales los calcula SQL Server. Montos por m² en dólares (USD).
---   metros_construibles = superficie_lote x FOT
+-- Proyecto de desarrollo en fideicomiso sobre un inmueble del inventario. Arquitectura carga los datos técnicos
+-- (en CABA los consulta a EPOK: Código Urbanístico); los totales los calcula SQL Server. Montos por m² en dólares (USD).
+--   metros_construibles = FLOOR(altura_maxima / 3 m por piso) x superficie_edificable_planta
 --   costo_total_obra    = metros_construibles x costo_obra_m2
 --   valor_total_unidades = metros_construibles x valor_venta_m2_unidades
 IF OBJECT_ID('[dbo].[ProyectoInversion]', 'U') IS NULL
@@ -326,13 +326,15 @@ BEGIN
         [id_proyecto] INT IDENTITY(1,1) PRIMARY KEY,
         [id_inmueble] INT NOT NULL CONSTRAINT [FK_ProyectoInversion_Inmueble] FOREIGN KEY REFERENCES [dbo].[Inmueble]([id_inmueble]),
         [superficie_lote] DECIMAL(10,2) NULL CONSTRAINT [CK_ProyectoInversion_SuperficieLote] CHECK ([superficie_lote] > 0),
-        [fos] DECIMAL(5,2) NULL CONSTRAINT [CK_ProyectoInversion_Fos] CHECK ([fos] > 0 AND [fos] <= 1),
-        [fot] DECIMAL(5,2) NULL CONSTRAINT [CK_ProyectoInversion_Fot] CHECK ([fot] > 0 AND [fot] <= 20),
-        [metros_construibles] AS CAST([superficie_lote] * [fot] AS DECIMAL(12,2)) PERSISTED,
+        [superficie_edificable_planta] DECIMAL(10,2) NULL CONSTRAINT [CK_ProyectoInversion_SuperficieEdificablePlanta] CHECK ([superficie_edificable_planta] > 0),
+        [altura_maxima] DECIMAL(6,2) NULL CONSTRAINT [CK_ProyectoInversion_AlturaMaxima] CHECK ([altura_maxima] >= 3 AND [altura_maxima] <= 200),
+        [smp] VARCHAR(20) NULL,                     -- sección-manzana-parcela (catastro de CABA)
+        [distrito_urbanistico] VARCHAR(60) NULL,    -- distrito según EPOK (referencia)
+        [metros_construibles] AS CAST(FLOOR([altura_maxima] / 3.0) * [superficie_edificable_planta] AS DECIMAL(12,2)) PERSISTED,
         [costo_obra_m2] DECIMAL(18,2) NULL CONSTRAINT [CK_ProyectoInversion_CostoObraM2] CHECK ([costo_obra_m2] > 0),
-        [costo_total_obra] AS CAST([superficie_lote] * [fot] * [costo_obra_m2] AS DECIMAL(18,2)) PERSISTED,
+        [costo_total_obra] AS CAST(FLOOR([altura_maxima] / 3.0) * [superficie_edificable_planta] * [costo_obra_m2] AS DECIMAL(18,2)) PERSISTED,
         [valor_venta_m2_unidades] DECIMAL(18,2) NULL CONSTRAINT [CK_ProyectoInversion_ValorVentaM2] CHECK ([valor_venta_m2_unidades] > 0),
-        [valor_total_unidades] AS CAST([superficie_lote] * [fot] * [valor_venta_m2_unidades] AS DECIMAL(18,2)) PERSISTED,
+        [valor_total_unidades] AS CAST(FLOOR([altura_maxima] / 3.0) * [superficie_edificable_planta] * [valor_venta_m2_unidades] AS DECIMAL(18,2)) PERSISTED,
         [estado] VARCHAR(20) NOT NULL CONSTRAINT [DF_ProyectoInversion_Estado] DEFAULT 'EnAnalisis'
             CONSTRAINT [CK_ProyectoInversion_Estado] CHECK ([estado] IN ('EnAnalisis', 'Aprobado', 'Rechazado')),
         [id_usuario_arquitectura] INT NULL CONSTRAINT [FK_ProyectoInversion_Arquitectura] FOREIGN KEY REFERENCES [dbo].[Usuario]([id]),
@@ -344,11 +346,58 @@ BEGIN
         CONSTRAINT [CK_ProyectoInversion_Decision] CHECK (
             ([estado] = 'EnAnalisis' AND [fecha_decision] IS NULL AND [id_usuario_directorio] IS NULL)
             OR ([estado] <> 'EnAnalisis' AND [fecha_decision] IS NOT NULL AND [id_usuario_directorio] IS NOT NULL
-                AND [superficie_lote] IS NOT NULL AND [fos] IS NOT NULL AND [fot] IS NOT NULL AND [costo_obra_m2] IS NOT NULL
-                AND [valor_venta_m2_unidades] IS NOT NULL))
+                AND [superficie_lote] IS NOT NULL AND [superficie_edificable_planta] IS NOT NULL AND [altura_maxima] IS NOT NULL
+                AND [costo_obra_m2] IS NOT NULL AND [valor_venta_m2_unidades] IS NOT NULL))
     );
     PRINT N'Tabla ProyectoInversion creada.';
 END
+GO
+
+-- Del modelo FOS/FOT al del Código Urbanístico (altura máxima y superficie edificable en planta), para las bases
+-- creadas con la versión anterior. Los proyectos existentes conservan sus m² construibles (y con ellos el capital
+-- de un fideicomiso ya aprobado): pisos = FOT / FOS redondeado hacia arriba, altura = pisos x 3 m y
+-- planta = lote x FOT / pisos (nunca mayor que lote x FOS).
+IF COL_LENGTH('dbo.ProyectoInversion', 'superficie_edificable_planta') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[ProyectoInversion] ADD
+        [superficie_edificable_planta] DECIMAL(10,2) NULL CONSTRAINT [CK_ProyectoInversion_SuperficieEdificablePlanta] CHECK ([superficie_edificable_planta] > 0),
+        [altura_maxima] DECIMAL(6,2) NULL CONSTRAINT [CK_ProyectoInversion_AlturaMaxima] CHECK ([altura_maxima] >= 3 AND [altura_maxima] <= 200),
+        [smp] VARCHAR(20) NULL,
+        [distrito_urbanistico] VARCHAR(60) NULL;
+    PRINT N'ProyectoInversion: columnas superficie_edificable_planta, altura_maxima, smp y distrito_urbanistico agregadas.';
+END
+GO
+
+IF COL_LENGTH('dbo.ProyectoInversion', 'fot') IS NOT NULL
+BEGIN
+    EXEC(N'UPDATE [dbo].[ProyectoInversion]
+           SET [superficie_edificable_planta] = ROUND([superficie_lote] * [fot] / CEILING([fot] / [fos]), 2),
+               [altura_maxima] = CEILING([fot] / [fos]) * 3
+           WHERE [fos] IS NOT NULL AND [fot] IS NOT NULL AND [superficie_lote] IS NOT NULL;');
+    ALTER TABLE [dbo].[ProyectoInversion] DROP CONSTRAINT [CK_ProyectoInversion_Decision];
+    ALTER TABLE [dbo].[ProyectoInversion] DROP COLUMN [metros_construibles], [costo_total_obra], [valor_total_unidades];
+    ALTER TABLE [dbo].[ProyectoInversion] DROP CONSTRAINT [CK_ProyectoInversion_Fos], [CK_ProyectoInversion_Fot];
+    ALTER TABLE [dbo].[ProyectoInversion] DROP COLUMN [fos], [fot];
+    PRINT N'ProyectoInversion: FOS y FOT reemplazados por altura máxima y superficie edificable en planta.';
+END
+GO
+
+IF COL_LENGTH('dbo.ProyectoInversion', 'metros_construibles') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[ProyectoInversion] ADD
+        [metros_construibles] AS CAST(FLOOR([altura_maxima] / 3.0) * [superficie_edificable_planta] AS DECIMAL(12,2)) PERSISTED,
+        [costo_total_obra] AS CAST(FLOOR([altura_maxima] / 3.0) * [superficie_edificable_planta] * [costo_obra_m2] AS DECIMAL(18,2)) PERSISTED,
+        [valor_total_unidades] AS CAST(FLOOR([altura_maxima] / 3.0) * [superficie_edificable_planta] * [valor_venta_m2_unidades] AS DECIMAL(18,2)) PERSISTED;
+    PRINT N'ProyectoInversion: m² construibles, costo y valor recalculados con altura máxima y superficie edificable.';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE [name] = 'CK_ProyectoInversion_Decision')
+    ALTER TABLE [dbo].[ProyectoInversion] ADD CONSTRAINT [CK_ProyectoInversion_Decision] CHECK (
+        ([estado] = 'EnAnalisis' AND [fecha_decision] IS NULL AND [id_usuario_directorio] IS NULL)
+        OR ([estado] <> 'EnAnalisis' AND [fecha_decision] IS NOT NULL AND [id_usuario_directorio] IS NOT NULL
+            AND [superficie_lote] IS NOT NULL AND [superficie_edificable_planta] IS NOT NULL AND [altura_maxima] IS NOT NULL
+            AND [costo_obra_m2] IS NOT NULL AND [valor_venta_m2_unidades] IS NOT NULL));
 GO
 
 -- Canje: porcentaje de las unidades que recibe el propietario por aportar el lote (lo define el Analista al crear
@@ -627,8 +676,9 @@ INSERT INTO @Nuevos VALUES
     ('lblEmail', 'FormEvaluacionArquitectonica', 'Email:', 'Email:'),
     ('grpDatosTecnicos', 'FormEvaluacionArquitectonica', N'Datos técnicos', 'Technical data'),
     ('lblLote', 'FormEvaluacionArquitectonica', N'Superficie lote (m²):', N'Lot area (m²):'),
-    ('lblFos', 'FormEvaluacionArquitectonica', 'FOS (0 a 1):', 'FOS (0 to 1):'),
-    ('lblFot', 'FormEvaluacionArquitectonica', 'FOT:', 'FOT:'),
+    ('lblSupEdificable', 'FormEvaluacionArquitectonica', N'Sup. edificable (m²):', N'Buildable area (m²):'),
+    ('lblAltura', 'FormEvaluacionArquitectonica', N'Altura máxima (m):', 'Maximum height (m):'),
+    ('btnConsultarCaba', 'FormEvaluacionArquitectonica', 'Consultar CABA', 'Query CABA'),
     ('lblCostoM2', 'FormEvaluacionArquitectonica', N'Costo obra / m² (USD):', N'Build cost / m² (USD):'),
     ('lblValorM2', 'FormEvaluacionArquitectonica', N'Venta unid. / m² (USD):', N'Unit sale / m² (USD):'),
     ('lblMetros', 'FormEvaluacionArquitectonica', N'M² construibles:', N'Buildable m²:'),
@@ -751,7 +801,10 @@ INSERT INTO @Quitados VALUES
     ('btnCancelarInmueble', 'FormRegistrarContrato'),
     -- PN2 (paso 4): Registrar Contrato en pestañas
     ('grpInmueble', 'FormRegistrarContrato'),
-    ('btnGuardar', 'FormRegistrarContrato');
+    ('btnGuardar', 'FormRegistrarContrato'),
+    -- PN3: FOS y FOT reemplazados por superficie edificable en planta y altura máxima (Código Urbanístico)
+    ('lblFos', 'FormEvaluacionArquitectonica'),
+    ('lblFot', 'FormEvaluacionArquitectonica');
 
 DELETE t FROM [dbo].[Traducciones] t
 JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]

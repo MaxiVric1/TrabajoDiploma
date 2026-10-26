@@ -18,9 +18,12 @@ namespace BE
         public int IdProyecto { get; set; }
         public int IdInmueble { get; set; }
         public decimal? SuperficieLote { get; set; }
-        public decimal? Fos { get; set; }                   // factor de ocupación del suelo (0 a 1)
-        public decimal? Fot { get; set; }                   // factor de ocupación total (m² construibles por m² de lote)
-        public decimal? MetrosConstruibles { get; set; }    // lote x FOT
+        // Código Urbanístico (en CABA los trae EPOK): superficie edificable por planta y altura máxima
+        public decimal? SuperficieEdificablePlanta { get; set; }
+        public decimal? AlturaMaxima { get; set; }          // metros
+        public string Smp { get; set; }                     // sección-manzana-parcela (catastro de CABA)
+        public string DistritoUrbanistico { get; set; }
+        public decimal? MetrosConstruibles { get; set; }    // pisos (altura / 3 m) x superficie edificable en planta
         public decimal? CostoObraM2 { get; set; }
         public decimal? CostoTotalObra { get; set; }        // m² construibles x costo por m² = capital necesario
         public decimal? ValorVentaM2Unidades { get; set; }
@@ -47,7 +50,11 @@ namespace BE
         public decimal CapitalSuscripto { get; set; }
         public int CantidadInversores { get; set; }
 
-        public bool DatosTecnicosCompletos => SuperficieLote.HasValue && Fos.HasValue && Fot.HasValue && CostoObraM2.HasValue && ValorVentaM2Unidades.HasValue;
+        public bool DatosTecnicosCompletos => SuperficieLote.HasValue && SuperficieEdificablePlanta.HasValue && AlturaMaxima.HasValue &&
+                                              CostoObraM2.HasValue && ValorVentaM2Unidades.HasValue;
+
+        // Pisos que entran en la altura máxima (3 m por piso), como lo calcula la base
+        public int? Pisos => AlturaMaxima.HasValue ? (int?)Math.Floor(AlturaMaxima.Value / ParcelaCaba.ALTURA_POR_PISO) : null;
 
         public decimal CapitalNecesario => CostoTotalObra ?? 0;
 
