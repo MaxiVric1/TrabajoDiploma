@@ -2416,16 +2416,22 @@ GO
 DROP PROCEDURE IF EXISTS [dbo].[CrearProyectoInversion];
 GO
 
--- Nace En Análisis. La superficie del lote se toma del inmueble si no se indica; el canje, 30% si no se indica.
+-- Nace En Análisis. La superficie del lote se toma del inmueble si no se indica; el canje (30%) y las comisiones
+-- (2% estructuración, 1% administración mensual, 5% venta de unidades) toman su valor por defecto si no se indican.
 CREATE PROCEDURE [dbo].[CrearProyectoInversion]
     @IdInmueble INT,
     @SuperficieLote DECIMAL(10,2) = NULL,
     @Observaciones NVARCHAR(1000) = NULL,
     @PorcentajeCanje DECIMAL(5,2) = 30,
+    @PorcentajeEstructuracion DECIMAL(5,2) = 2,
+    @PorcentajeAdministracionMensual DECIMAL(5,2) = 1,
+    @PorcentajeVentaUnidades DECIMAL(5,2) = 5,
     @NuevoId INT OUTPUT
 AS BEGIN
-    INSERT INTO ProyectoInversion (id_inmueble, superficie_lote, observaciones, porcentaje_canje)
-    SELECT id_inmueble, ISNULL(@SuperficieLote, superficie_lote), @Observaciones, @PorcentajeCanje
+    INSERT INTO ProyectoInversion (id_inmueble, superficie_lote, observaciones, porcentaje_canje,
+                                   porcentaje_estructuracion, porcentaje_administracion_mensual, porcentaje_venta_unidades)
+    SELECT id_inmueble, ISNULL(@SuperficieLote, superficie_lote), @Observaciones, @PorcentajeCanje,
+           @PorcentajeEstructuracion, @PorcentajeAdministracionMensual, @PorcentajeVentaUnidades
     FROM Inmueble WHERE id_inmueble = @IdInmueble;
     SET @NuevoId = SCOPE_IDENTITY();
 END
@@ -2449,6 +2455,23 @@ AS BEGIN
     SET superficie_lote = @SuperficieLote, fos = @Fos, fot = @Fot, costo_obra_m2 = @CostoObraM2,
         valor_venta_m2_unidades = @ValorVentaM2Unidades, id_usuario_arquitectura = @IdUsuarioArquitectura,
         observaciones = ISNULL(@Observaciones, observaciones)
+    WHERE id_proyecto = @Id AND estado = 'EnAnalisis';
+END
+GO
+
+-- Comisiones de LandSmart: las define el Directorio, solo mientras el proyecto está En Análisis (0 filas si no)
+DROP PROCEDURE IF EXISTS [dbo].[ActualizarComisionesProyecto];
+GO
+
+CREATE PROCEDURE [dbo].[ActualizarComisionesProyecto]
+    @Id INT,
+    @PorcentajeEstructuracion DECIMAL(5,2),
+    @PorcentajeAdministracionMensual DECIMAL(5,2),
+    @PorcentajeVentaUnidades DECIMAL(5,2)
+AS BEGIN
+    UPDATE ProyectoInversion
+    SET porcentaje_estructuracion = @PorcentajeEstructuracion, porcentaje_administracion_mensual = @PorcentajeAdministracionMensual,
+        porcentaje_venta_unidades = @PorcentajeVentaUnidades
     WHERE id_proyecto = @Id AND estado = 'EnAnalisis';
 END
 GO
@@ -2494,6 +2517,7 @@ AS BEGIN
     SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
            p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
            p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones, p.porcentaje_canje,
+           p.porcentaje_estructuracion, p.porcentaje_administracion_mensual, p.porcentaje_venta_unidades,
            n.direccion, n.localidad, n.tipo_inmueble, n.tipo_publicacion, n.latitud, n.longitud,
            ISNULL(s.capital_suscripto, 0) AS capital_suscripto, ISNULL(s.inversores, 0) AS inversores
     FROM ProyectoInversion p
@@ -2514,6 +2538,7 @@ AS BEGIN
     SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
            p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
            p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones, p.porcentaje_canje,
+           p.porcentaje_estructuracion, p.porcentaje_administracion_mensual, p.porcentaje_venta_unidades,
            n.direccion, n.localidad, n.tipo_inmueble, n.tipo_publicacion, n.latitud, n.longitud,
            ISNULL((SELECT SUM(monto_aportado) FROM SuscripcionFideicomiso s WHERE s.id_proyecto = p.id_proyecto), 0) AS capital_suscripto,
            (SELECT COUNT(DISTINCT id_inversor) FROM SuscripcionFideicomiso s WHERE s.id_proyecto = p.id_proyecto) AS inversores

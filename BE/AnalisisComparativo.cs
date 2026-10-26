@@ -22,6 +22,26 @@ namespace BE
         public List<string> Detalle { get; set; } = new List<string>();
     }
 
+    // Lo que gana LandSmart con el fideicomiso (en USD), según las tres comisiones del proyecto
+    public class GananciaInmobiliaria
+    {
+        public decimal PorcentajeEstructuracion { get; set; }
+        public decimal BaseEstructuracionUSD { get; set; }          // costo de obra
+        public decimal EstructuracionUSD { get; set; }
+
+        public decimal PorcentajeAdministracionMensual { get; set; }
+        public decimal CuotaMensualObraUSD { get; set; }            // costo de obra / meses de obra
+        public int MesesObra { get; set; }
+        public decimal AdministracionMensualUSD { get; set; }
+        public decimal AdministracionUSD { get; set; }              // la mensual por los meses de obra
+
+        public decimal PorcentajeVentaUnidades { get; set; }
+        public decimal BaseVentaUSD { get; set; }                   // unidades de los inversores (las del propietario no se venden)
+        public decimal VentaUSD { get; set; }
+
+        public decimal TotalUSD => EstructuracionUSD + AdministracionUSD + VentaUSD;
+    }
+
     // Comparación de una propiedad: escenario tradicional (venta o alquiler) contra desarrollo en fideicomiso
     public class AnalisisComparativo
     {
@@ -45,8 +65,12 @@ namespace BE
         public decimal CostoObraProyectadoUSD { get; set; }
         public decimal ValorUnidadesUSD { get; set; }
         public decimal UnidadesPropietarioUSD { get; set; }
-        public decimal MargenInversoresUSD { get; set; }
-        public decimal RentabilidadInversoresPorcentaje { get; set; }
+        public GananciaInmobiliaria GananciaInmobiliaria { get; set; }
+        public decimal MargenInversoresUSD { get; set; }                // descontadas las comisiones de LandSmart
+        public decimal RentabilidadInversoresPorcentaje { get; set; }   // sobre la obra, en todo el plazo
+
+        // Comisión de LandSmart en el escenario tradicional (venta, o alquiler durante el horizonte)
+        public decimal ComisionTradicionalUSD { get; set; }
 
         public EscenarioAnalisis Tradicional { get; set; }
         public EscenarioAnalisis Fideicomiso { get; set; }

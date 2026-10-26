@@ -35,6 +35,7 @@ namespace TpIngSoft
             this.dgvInversores = new System.Windows.Forms.DataGridView();
             this.lblActualizacion = new System.Windows.Forms.Label();
             this.btnAgregarInversor = new System.Windows.Forms.Button();
+            this.btnInforme = new System.Windows.Forms.Button();
             this.grpTablero.SuspendLayout();
             this.grpInversores.SuspendLayout();
             this.SuspendLayout();
@@ -241,6 +242,18 @@ namespace TpIngSoft
             this.btnAgregarInversor.UseVisualStyleBackColor = false;
             this.btnAgregarInversor.Click += new System.EventHandler(this.btnAgregarInversor_Click);
             //
+            // btnInforme
+            //
+            this.btnInforme.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnInforme.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnInforme.ForeColor = System.Drawing.Color.White;
+            this.btnInforme.Location = new System.Drawing.Point(638, 596);
+            this.btnInforme.Name = "btnInforme";
+            this.btnInforme.Size = new System.Drawing.Size(170, 36);
+            this.btnInforme.Text = "Informe Inversores";
+            this.btnInforme.UseVisualStyleBackColor = false;
+            this.btnInforme.Click += new System.EventHandler(this.btnInforme_Click);
+            //
             // FormGestionFideicomiso
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -253,6 +266,7 @@ namespace TpIngSoft
             this.Controls.Add(this.grpInversores);
             this.Controls.Add(this.lblActualizacion);
             this.Controls.Add(this.btnAgregarInversor);
+            this.Controls.Add(this.btnInforme);
             this.ForeColor = System.Drawing.Color.White;
             this.MinimumSize = new System.Drawing.Size(1016, 683);
             this.Name = "FormGestionFideicomiso";
@@ -288,5 +302,6 @@ namespace TpIngSoft
         private System.Windows.Forms.DataGridView dgvInversores;
         private System.Windows.Forms.Label lblActualizacion;
         private System.Windows.Forms.Button btnAgregarInversor;
+        private System.Windows.Forms.Button btnInforme;
     }
 }

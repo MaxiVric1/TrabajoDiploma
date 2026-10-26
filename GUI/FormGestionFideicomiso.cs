@@ -60,7 +60,8 @@ namespace TpIngSoft
                 (lblDolarBlue, BE.NombreControl.FormGestionFideicomiso_lblDolarBlue),
                 (lblRestantePesos, BE.NombreControl.FormGestionFideicomiso_lblRestantePesos),
                 (grpInversores, BE.NombreControl.FormGestionFideicomiso_grpInversores),
-                (btnAgregarInversor, BE.NombreControl.FormGestionFideicomiso_btnAgregarInversor) })
+                (btnAgregarInversor, BE.NombreControl.FormGestionFideicomiso_btnAgregarInversor),
+                (btnInforme, BE.NombreControl.FormGestionFideicomiso_btnInforme) })
                 _controlesTraducibles.Add(new EtiquetaTraducible(control, clave));
             _grillaProyectos = new DataGridTraducible(dgvProyectos, "FormGestionFideicomiso.dgvProyectos")
                 .ConColumna("NroProyecto", BE.NombreControl.FormGestionFideicomiso_dgvProyectos_nroProyecto)
@@ -153,7 +154,7 @@ namespace TpIngSoft
         private void MostrarTablero()
         {
             int? id = Seleccionado();
-            btnAgregarInversor.Enabled = id.HasValue;
+            btnAgregarInversor.Enabled = btnInforme.Enabled = id.HasValue;
             dgvInversores.DataSource = null;
             if (!id.HasValue)
             {
@@ -217,6 +218,23 @@ namespace TpIngSoft
                     if (frm.ShowDialog(this) == DialogResult.OK)
                         CargarProyectos(_resumen.Proyecto.IdProyecto);
                 }
+            }
+            finally { _refresco.Start(); }
+        }
+
+        // Propuesta de inversión con el estado actual del fondeo y la rentabilidad comparada con datos del día
+        private void btnInforme_Click(object sender, EventArgs e)
+        {
+            if (_resumen == null) return;
+            _refresco.Stop();
+            try
+            {
+                ResumenFideicomiso resumen = _resumen;
+                PN3Comun.GuardarPdf(this, $"Propuesta_Inversion_Proyecto_{resumen.Proyecto.IdProyecto}.pdf", "Guardar propuesta de inversión en PDF", ruta =>
+                {
+                    ComparativaRentabilidad c = new InformeInversionBLL().ObtenerComparativaRentabilidad(resumen.Proyecto.IdProyecto);
+                    new InformeInversionBLL().GenerarInformeInversores(resumen, c, GraficosPN3.RentabilidadComparada(c), GraficosPN3.ParticipacionInversores(resumen), ruta);
+                });
             }
             finally { _refresco.Start(); }
         }

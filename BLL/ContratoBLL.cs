@@ -355,7 +355,7 @@ namespace BLL
         }
 
         // Logo de LandSmart incrustado en BLL.dll (GUI\Resources\logo-landsmart.png); null si no estuviera
-        private static byte[] Logo()
+        internal static byte[] Logo()
         {
             using (System.IO.Stream recurso = typeof(ContratoBLL).Assembly.GetManifestResourceStream("BLL.logo-landsmart.png"))
             {

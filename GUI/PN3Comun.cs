@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BE;
@@ -171,6 +172,57 @@ namespace TpIngSoft
                 d.Controls.Add(nud);
                 Botones(d, 70);
                 return d.ShowDialog(owner) == DialogResult.OK ? nud.Value : (decimal?)null;
+            }
+        }
+
+        // Varios números en un mismo diálogo, uno por renglón; null si se cancela
+        public static decimal[] PedirNumeros(IWin32Window owner, string titulo, string etiqueta, (string Rotulo, decimal Valor)[] campos,
+                                             decimal minimo, decimal maximo, int decimales)
+        {
+            using (Form d = Dialogo(titulo, 400, 96 + campos.Length * 30))
+            {
+                d.Controls.Add(new Label { Text = etiqueta, Location = new Point(12, 12), Size = new Size(376, 34) });
+                NumericUpDown[] numeros = new NumericUpDown[campos.Length];
+                for (int i = 0; i < campos.Length; i++)
+                {
+                    d.Controls.Add(new Label { Text = campos[i].Rotulo, Location = new Point(12, 52 + i * 30), Size = new Size(240, 20), TextAlign = ContentAlignment.MiddleLeft });
+                    numeros[i] = new NumericUpDown
+                    {
+                        Location = new Point(258, 52 + i * 30), Size = new Size(90, 20), Minimum = minimo, Maximum = maximo, DecimalPlaces = decimales,
+                        Value = Math.Max(minimo, Math.Min(maximo, campos[i].Valor)), BackColor = CAMPO, ForeColor = Color.White, BorderStyle = BorderStyle.FixedSingle
+                    };
+                    d.Controls.Add(numeros[i]);
+                    d.Controls.Add(new Label { Text = "%", Location = new Point(352, 52 + i * 30), Size = new Size(20, 20), TextAlign = ContentAlignment.MiddleLeft });
+                }
+                Botones(d, 60 + campos.Length * 30);
+                return d.ShowDialog(owner) == DialogResult.OK ? numeros.Select(n => n.Value).ToArray() : null;
+            }
+        }
+
+        // Pide dónde guardar un PDF, lo genera y ofrece abrirlo
+        public static void GuardarPdf(IWin32Window owner, string nombreArchivo, string titulo, Action<string> generar)
+        {
+            using (SaveFileDialog dialogo = new SaveFileDialog { Filter = "Documento PDF (*.pdf)|*.pdf", FileName = nombreArchivo, Title = titulo })
+            {
+                if (dialogo.ShowDialog(owner) != DialogResult.OK) return;
+                try
+                {
+                    Cursor.Current = Cursors.WaitCursor;
+                    generar(dialogo.FileName);
+                    Cursor.Current = Cursors.Default;
+                    if (MessageBox.Show(owner, "PDF generado con éxito. ¿Desea abrirlo?", "Éxito", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                        System.Diagnostics.Process.Start(dialogo.FileName);
+                }
+                catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException)
+                {
+                    Cursor.Current = Cursors.Default;
+                    MessageBox.Show(owner, ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                catch (Exception ex)
+                {
+                    Cursor.Current = Cursors.Default;
+                    MessageBox.Show(owner, "Error al generar el PDF: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

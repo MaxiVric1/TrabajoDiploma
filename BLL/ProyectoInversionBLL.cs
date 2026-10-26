@@ -107,6 +107,49 @@ namespace BLL
                 $"{guardado.MetrosConstruibles:N2} m² construibles, obra USD {guardado.CostoTotalObra:N2}, unidades USD {guardado.ValorTotalUnidades:N2}.");
         }
 
+        // Comisiones de LandSmart sobre el fideicomiso: las fija el Directorio antes de decidir (solo En Análisis)
+        public void ActualizarComisiones(int idProyecto, decimal estructuracion, decimal administracionMensual, decimal ventaUnidades)
+        {
+            ExigirPermiso(PermisosDefinidos.AccesoPN3Directorio, "el Directorio");
+            foreach (var (valor, nombre) in new[] { (estructuracion, "estructuración"), (administracionMensual, "administración mensual"), (ventaUnidades, "venta de unidades") })
+                if (valor < 0 || valor >= 100)
+                    throw new ArgumentException($"La comisión de {nombre} debe ser un porcentaje entre 0 y 100.");
+            ProyectoInversion proyecto = proyectoDAL.BuscarPorId(idProyecto);
+            if (proyecto == null)
+                throw new Exception("El proyecto no existe.");
+            if (proyecto.Estado != EstadoProyecto.EnAnalisis)
+                throw new ArgumentException($"El proyecto ya fue {proyecto.Estado.ToString().ToLower()}: sus comisiones no se modifican.");
+            if (!proyectoDAL.ActualizarComisiones(idProyecto, Math.Round(estructuracion, 2), Math.Round(administracionMensual, 2), Math.Round(ventaUnidades, 2)))
+                throw new Exception("No se pudieron guardar las comisiones.");
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Comisiones Proyecto",
+                $"Proyecto N° {idProyecto}: estructuración {estructuracion:0.##}%, administración {administracionMensual:0.##}% mensual, venta de unidades {ventaUnidades:0.##}%.");
+        }
+
+        // Ganancia de LandSmart con el fideicomiso, en USD:
+        //  - estructuración: % sobre el costo de obra, al armar el fideicomiso
+        //  - administración: % mensual sobre la cuota mensual de obra (costo / meses), durante los meses de obra
+        //  - venta: % sobre las unidades de los inversores (las del propietario son suyas y no se venden)
+        public static GananciaInmobiliaria CalcularGananciaInmobiliaria(ProyectoInversion proyecto, decimal costoObraUSD, decimal unidadesInversoresUSD, int mesesObra)
+        {
+            if (proyecto == null) throw new ArgumentNullException(nameof(proyecto));
+            if (mesesObra <= 0) throw new ArgumentException("Los meses de obra deben ser mayores a cero.");
+            GananciaInmobiliaria g = new GananciaInmobiliaria
+            {
+                PorcentajeEstructuracion = proyecto.PorcentajeEstructuracion,
+                BaseEstructuracionUSD = costoObraUSD,
+                EstructuracionUSD = Math.Round(costoObraUSD * proyecto.PorcentajeEstructuracion / 100, 2),
+                PorcentajeAdministracionMensual = proyecto.PorcentajeAdministracionMensual,
+                CuotaMensualObraUSD = Math.Round(costoObraUSD / mesesObra, 2),
+                MesesObra = mesesObra,
+                PorcentajeVentaUnidades = proyecto.PorcentajeVentaUnidades,
+                BaseVentaUSD = Math.Max(0, unidadesInversoresUSD),
+                VentaUSD = Math.Round(Math.Max(0, unidadesInversoresUSD) * proyecto.PorcentajeVentaUnidades / 100, 2)
+            };
+            g.AdministracionMensualUSD = Math.Round(g.CuotaMensualObraUSD * proyecto.PorcentajeAdministracionMensual / 100, 2);
+            g.AdministracionUSD = g.AdministracionMensualUSD * mesesObra;
+            return g;
+        }
+
         public void AprobarProyecto(int idProyecto, string observaciones = null)
         {
             Decidir(idProyecto, EstadoProyecto.Aprobado, observaciones);
@@ -223,7 +266,8 @@ namespace BLL
             a.CostoObraProyectadoUSD = Math.Round(proyecto.CostoTotalObra.Value * factorIcc / factorDolar, 2);
             a.ValorUnidadesUSD = proyecto.ValorTotalUnidades.Value;
             a.UnidadesPropietarioUSD = Math.Round(a.ValorUnidadesUSD * proyecto.PorcentajeCanje / 100, 2);
-            a.MargenInversoresUSD = Math.Round(a.ValorUnidadesUSD - a.UnidadesPropietarioUSD - a.CostoObraProyectadoUSD, 2);
+            a.GananciaInmobiliaria = CalcularGananciaInmobiliaria(proyecto, a.CostoObraProyectadoUSD, a.ValorUnidadesUSD - a.UnidadesPropietarioUSD, p.PlazoObraMeses);
+            a.MargenInversoresUSD = Math.Round(a.ValorUnidadesUSD - a.UnidadesPropietarioUSD - a.CostoObraProyectadoUSD - a.GananciaInmobiliaria.TotalUSD, 2);
             a.RentabilidadInversoresPorcentaje = a.CostoObraProyectadoUSD > 0 ? Math.Round(a.MargenInversoresUSD * 100 / a.CostoObraProyectadoUSD, 2) : 0;
             a.Fideicomiso = new EscenarioAnalisis
             {
@@ -235,6 +279,8 @@ namespace BLL
                     $"Unidades: {proyecto.MetrosConstruibles:N2} m² x USD {proyecto.ValorVentaM2Unidades:N2} = USD {a.ValorUnidadesUSD:N2}",
                     $"El propietario aporta el lote y recibe el {proyecto.PorcentajeCanje:0.##}% de las unidades: USD {a.UnidadesPropietarioUSD:N2} al terminar la obra ({p.PlazoObraMeses} meses)",
                     $"Costo de obra USD {proyecto.CostoTotalObra:N2}, proyectado con el ICC: USD {a.CostoObraProyectadoUSD:N2}",
+                    $"Comisiones de LandSmart: USD {a.GananciaInmobiliaria.TotalUSD:N2} (estructuración {proyecto.PorcentajeEstructuracion:0.##}%, " +
+                    $"administración {proyecto.PorcentajeAdministracionMensual:0.##}% mensual, venta {proyecto.PorcentajeVentaUnidades:0.##}%)",
                     $"Margen para los inversores: USD {a.MargenInversoresUSD:N2} ({a.RentabilidadInversoresPorcentaje:0.##}% sobre la obra)"
                 }
             };
@@ -244,6 +290,7 @@ namespace BLL
             if (proyecto.TipoPublicacion == TipoPublicacion.Venta)
             {
                 decimal neto = Math.Round(tasadoUSD * (1 - p.ComisionVentaPorcentaje / 100), 2);
+                a.ComisionTradicionalUSD = tasadoUSD - neto;
                 a.Tradicional = new EscenarioAnalisis
                 {
                     Nombre = "Venta tradicional",
@@ -261,6 +308,7 @@ namespace BLL
                 decimal alquilerUSD = tasadoUSD;
                 decimal ingresos = Math.Round(alquilerUSD * p.HorizonteAlquilerMeses * (1 - p.ComisionAlquilerPorcentaje / 100), 2);
                 decimal valorInmueble = Math.Round(alquilerUSD * 12 * 100 / p.RentabilidadAlquilerAnual, 2);
+                a.ComisionTradicionalUSD = Math.Round(alquilerUSD * p.HorizonteAlquilerMeses, 2) - ingresos;
                 a.Tradicional = new EscenarioAnalisis
                 {
                     Nombre = "Alquiler continuo",

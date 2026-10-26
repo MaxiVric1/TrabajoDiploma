@@ -19,6 +19,8 @@ namespace TpIngSoft
             this.lblEstado = new System.Windows.Forms.Label();
             this.btnAprobar = new System.Windows.Forms.Button();
             this.btnRechazar = new System.Windows.Forms.Button();
+            this.btnComisiones = new System.Windows.Forms.Button();
+            this.btnInforme = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
             // dgvProyectos
@@ -41,7 +43,7 @@ namespace TpIngSoft
             this.lblEstado.BackColor = System.Drawing.Color.Transparent;
             this.lblEstado.Location = new System.Drawing.Point(12, 600);
             this.lblEstado.Name = "lblEstado";
-            this.lblEstado.Size = new System.Drawing.Size(640, 36);
+            this.lblEstado.Size = new System.Drawing.Size(320, 36);
             this.lblEstado.Text = "";
             this.lblEstado.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -69,6 +71,30 @@ namespace TpIngSoft
             this.btnRechazar.UseVisualStyleBackColor = false;
             this.btnRechazar.Click += new System.EventHandler(this.btnRechazar_Click);
             //
+            // btnComisiones
+            //
+            this.btnComisiones.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnComisiones.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnComisiones.ForeColor = System.Drawing.Color.White;
+            this.btnComisiones.Location = new System.Drawing.Point(348, 600);
+            this.btnComisiones.Name = "btnComisiones";
+            this.btnComisiones.Size = new System.Drawing.Size(150, 36);
+            this.btnComisiones.Text = "Comisiones";
+            this.btnComisiones.UseVisualStyleBackColor = false;
+            this.btnComisiones.Click += new System.EventHandler(this.btnComisiones_Click);
+            //
+            // btnInforme
+            //
+            this.btnInforme.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnInforme.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnInforme.ForeColor = System.Drawing.Color.White;
+            this.btnInforme.Location = new System.Drawing.Point(508, 600);
+            this.btnInforme.Name = "btnInforme";
+            this.btnInforme.Size = new System.Drawing.Size(150, 36);
+            this.btnInforme.Text = "Informe PDF";
+            this.btnInforme.UseVisualStyleBackColor = false;
+            this.btnInforme.Click += new System.EventHandler(this.btnInforme_Click);
+            //
             // FormDecisionDirectorio
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -81,6 +107,8 @@ namespace TpIngSoft
             this.Controls.Add(this.lblEstado);
             this.Controls.Add(this.btnAprobar);
             this.Controls.Add(this.btnRechazar);
+            this.Controls.Add(this.btnComisiones);
+            this.Controls.Add(this.btnInforme);
             this.ForeColor = System.Drawing.Color.White;
             this.MinimumSize = new System.Drawing.Size(1016, 687);
             this.Name = "FormDecisionDirectorio";
@@ -96,5 +124,7 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblEstado;
         private System.Windows.Forms.Button btnAprobar;
         private System.Windows.Forms.Button btnRechazar;
+        private System.Windows.Forms.Button btnComisiones;
+        private System.Windows.Forms.Button btnInforme;
     }
 }

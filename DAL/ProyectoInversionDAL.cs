@@ -23,6 +23,9 @@ namespace DAL
                     acceso.CrearParametro("@SuperficieLote", proyecto.SuperficieLote),
                     acceso.CrearParametro("@Observaciones", proyecto.Observaciones),
                     acceso.CrearParametro("@PorcentajeCanje", proyecto.PorcentajeCanje),
+                    acceso.CrearParametro("@PorcentajeEstructuracion", proyecto.PorcentajeEstructuracion),
+                    acceso.CrearParametro("@PorcentajeAdministracionMensual", proyecto.PorcentajeAdministracionMensual),
+                    acceso.CrearParametro("@PorcentajeVentaUnidades", proyecto.PorcentajeVentaUnidades),
                     outParam
                 };
                 int result = acceso.Escribir("CrearProyectoInversion", parameters);
@@ -55,6 +58,24 @@ namespace DAL
                     acceso.CrearParametro("@Observaciones", proyecto.Observaciones)
                 };
                 return acceso.Escribir("ActualizarDatosTecnicosProyecto", parameters) > 0;
+            }
+            finally { acceso.Cerrar(); }
+        }
+
+        // Las tres comisiones de LandSmart; false si no se actualizó (el SP solo modifica proyectos En Análisis)
+        public bool ActualizarComisiones(int idProyecto, decimal estructuracion, decimal administracionMensual, decimal ventaUnidades)
+        {
+            acceso.Abrir();
+            try
+            {
+                List<SqlParameter> parameters = new List<SqlParameter>
+                {
+                    acceso.CrearParametro("@Id", idProyecto),
+                    acceso.CrearParametro("@PorcentajeEstructuracion", estructuracion),
+                    acceso.CrearParametro("@PorcentajeAdministracionMensual", administracionMensual),
+                    acceso.CrearParametro("@PorcentajeVentaUnidades", ventaUnidades)
+                };
+                return acceso.Escribir("ActualizarComisionesProyecto", parameters) > 0;
             }
             finally { acceso.Cerrar(); }
         }
@@ -131,6 +152,9 @@ namespace DAL
                 ValorVentaM2Unidades = DecimalONull(row["valor_venta_m2_unidades"]),
                 ValorTotalUnidades = DecimalONull(row["valor_total_unidades"]),
                 PorcentajeCanje = Convert.ToDecimal(row["porcentaje_canje"]),
+                PorcentajeEstructuracion = Convert.ToDecimal(row["porcentaje_estructuracion"]),
+                PorcentajeAdministracionMensual = Convert.ToDecimal(row["porcentaje_administracion_mensual"]),
+                PorcentajeVentaUnidades = Convert.ToDecimal(row["porcentaje_venta_unidades"]),
                 Estado = (EstadoProyecto)Enum.Parse(typeof(EstadoProyecto), row["estado"].ToString()),
                 IdUsuarioArquitectura = row["id_usuario_arquitectura"] != DBNull.Value ? Convert.ToInt32(row["id_usuario_arquitectura"]) : (int?)null,
                 IdUsuarioDirectorio = row["id_usuario_directorio"] != DBNull.Value ? Convert.ToInt32(row["id_usuario_directorio"]) : (int?)null,

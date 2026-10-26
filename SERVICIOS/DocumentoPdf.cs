@@ -11,7 +11,8 @@ using System.Text;
 namespace SERVICIOS
 {
     // Generador mínimo de PDF (A4, Helvetica, sin dependencias externas): encabezado con logo, títulos, párrafos
-    // con ajuste de línea, pares "campo: valor", separadores, firmas y salto de página automático. Los textos se
+    // con ajuste de línea, pares "campo: valor", separadores, firmas, tablas, recuadros destacados, barras de
+    // progreso, imágenes (gráficos) y salto de página automático. Los textos se
     // guardan en WinAnsiEncoding, que cubre los acentos, la ñ y los signos del español. Las imágenes van
     // incrustadas en el PDF (RGB comprimido con Flate), no como archivos externos.
     public class DocumentoPdf
@@ -58,6 +59,7 @@ namespace SERVICIOS
             const float altoLogo = 62f;
             float arriba = ALTO - MARGEN + 16;
             float abajo = arriba - altoLogo;
+            float izquierda = MARGEN;
             if (logo != null)
             {
                 ImagenPdf imagen = PrepararLogo(logo);
@@ -65,11 +67,16 @@ namespace SERVICIOS
                 float anchoLogo = altoLogo * imagen.Ancho / imagen.Alto;
                 _actual.AppendFormat(CultureInfo.InvariantCulture, "q {0:0.##} 0 0 {1:0.##} {2:0.##} {3:0.##} cm /Im{4} Do Q\n",
                     anchoLogo, altoLogo, MARGEN, abajo, _imagenes.Count);
+                izquierda += anchoLogo + 12;
             }
 
+            // Título centrado entre el logo y los renglones de la derecha; si es largo, se achica hasta que entre
             float medio = abajo + altoLogo / 2;
-            Escribir(titulo, (ANCHO - AnchoTexto(titulo, 17, true)) / 2, medio - 6, 17, true);
             float derecha = ANCHO - MARGEN;
+            float limite = derecha - Math.Max(AnchoTexto(derechaArriba, 11, true), AnchoTexto(derechaAbajo, 8.5f, false)) - 12;
+            float tamano = 17;
+            while (tamano > 10 && AnchoTexto(titulo, tamano, true) > limite - izquierda) tamano -= 0.5f;
+            Escribir(titulo, izquierda + (limite - izquierda - AnchoTexto(titulo, tamano, true)) / 2, medio - tamano * 0.35f, tamano, true);
             Escribir(derechaArriba, derecha - AnchoTexto(derechaArriba, 11, true), medio + 4, 11, true);
             Escribir(derechaAbajo, derecha - AnchoTexto(derechaAbajo, 8.5f, false), medio - 10, 8.5f, false);
 
@@ -173,6 +180,128 @@ namespace SERVICIOS
             _y = y - 54 - renglonesMax * 11 - 6;
         }
 
+        public void SaltoPagina()
+        {
+            NuevaPagina();
+        }
+
+        // Imagen (PNG, JPG...) centrada, de 'ancho' puntos y alto proporcional; si no entra, va a la página siguiente.
+        // Se incrusta tal cual (las zonas transparentes quedan blancas): conviene pasarla con el doble de píxeles que
+        // de puntos para que se vea nítida al imprimir.
+        public void Imagen(byte[] png, float ancho)
+        {
+            if (png == null) return;
+            ImagenPdf imagen;
+            using (MemoryStream ms = new MemoryStream(png))
+            using (Bitmap original = new Bitmap(ms))
+            using (Bitmap rgb = SobreBlanco(original))
+                imagen = new ImagenPdf { Ancho = rgb.Width, Alto = rgb.Height, Datos = Zlib(Rgb(rgb)) };
+            ancho = Math.Min(ancho, ANCHO - 2 * MARGEN);
+            float alto = ancho * imagen.Alto / imagen.Ancho;
+            AsegurarLugar(alto + 4);
+            _imagenes.Add(imagen);
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q {0:0.##} 0 0 {1:0.##} {2:0.##} {3:0.##} cm /Im{4} Do Q\n",
+                ancho, alto, (ANCHO - ancho) / 2, _y - alto, _imagenes.Count);
+            _y -= alto + 14;
+        }
+
+        // Tabla con encabezado sombreado: las primeras 'columnasTexto' columnas alineadas a la izquierda y las demás a
+        // la derecha (montos). anchos: proporciones de cada columna sobre el ancho útil. negritaUltima: fila de totales.
+        public void Tabla(float[] anchos, string[] encabezado, IEnumerable<string[]> filas, bool negritaUltima = false, float tamano = 9, int columnasTexto = 1)
+        {
+            float total = 0;
+            foreach (float a in anchos) total += a;
+            float anchoUtil = ANCHO - 2 * MARGEN;
+            float[] columnas = new float[anchos.Length];
+            for (int i = 0; i < anchos.Length; i++) columnas[i] = anchoUtil * anchos[i] / total;
+
+            List<string[]> lista = new List<string[]>(filas);
+            _y += 4; // _y es la línea base del renglón siguiente: la tabla empieza apenas arriba
+            FilaTabla(columnas, encabezado, tamano, true, true, columnasTexto);
+            for (int i = 0; i < lista.Count; i++)
+                FilaTabla(columnas, lista[i], tamano, negritaUltima && i == lista.Count - 1, false, columnasTexto);
+            Espacio(14);
+        }
+
+        private void FilaTabla(float[] columnas, string[] celdas, float tamano, bool negrita, bool sombreada, int columnasTexto)
+        {
+            const float relleno = 4f;
+            List<List<string>> renglones = new List<List<string>>();
+            int maximo = 1;
+            for (int i = 0; i < columnas.Length; i++)
+            {
+                List<string> r = Ajustar(i < celdas.Length ? celdas[i] ?? "" : "", tamano, negrita, columnas[i] - 2 * relleno);
+                renglones.Add(r);
+                maximo = Math.Max(maximo, r.Count);
+            }
+            float interlinea = tamano * 1.3f;
+            float alto = maximo * interlinea + 2 * relleno;
+            AsegurarLugar(alto);
+            float arriba = _y;
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q {0} {1:0.##} {2:0.##} {3:0.##} {4:0.##} re {5} Q\n",
+                sombreada ? "0.89 0.87 0.95 rg 0.6 0.6 0.6 RG 0.5 w" : "0.6 0.6 0.6 RG 0.5 w",
+                MARGEN, arriba - alto, ANCHO - 2 * MARGEN, alto, sombreada ? "B" : "S");
+            float x = MARGEN;
+            for (int i = 0; i < columnas.Length; i++)
+            {
+                if (i > 0)
+                    _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.6 0.6 0.6 RG 0.5 w {0:0.##} {1:0.##} m {0:0.##} {2:0.##} l S Q\n", x, arriba, arriba - alto);
+                for (int r = 0; r < renglones[i].Count; r++)
+                {
+                    string texto = renglones[i][r];
+                    float xTexto = i < columnasTexto ? x + relleno : x + columnas[i] - relleno - AnchoTexto(texto, tamano, negrita);
+                    Escribir(texto, xTexto, arriba - relleno - tamano * 0.85f - r * interlinea, tamano, negrita);
+                }
+                x += columnas[i];
+            }
+            _y = arriba - alto;
+        }
+
+        // Recuadro destacado (fondo de color y borde) con un título en negrita y el texto debajo
+        public void Recuadro(string titulo, string texto, float tamano = 10)
+        {
+            const float relleno = 8f;
+            float anchoUtil = ANCHO - 2 * MARGEN - 2 * relleno;
+            List<string> lineasTitulo = string.IsNullOrEmpty(titulo) ? new List<string>() : Ajustar(titulo, tamano + 1.5f, true, anchoUtil);
+            List<string> lineas = string.IsNullOrEmpty(texto) ? new List<string>() : Ajustar(texto, tamano, false, anchoUtil);
+            float altoTitulo = lineasTitulo.Count * (tamano + 1.5f) * 1.35f;
+            float alto = 2 * relleno + altoTitulo + lineas.Count * tamano * 1.35f;
+            AsegurarLugar(alto + 4);
+            float arriba = _y + 4;
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.93 0.91 0.98 rg 0.35 0.29 0.63 RG 1.2 w {0:0.##} {1:0.##} {2:0.##} {3:0.##} re B Q\n",
+                MARGEN, arriba - alto, ANCHO - 2 * MARGEN, alto);
+            float y = arriba - relleno - tamano;
+            foreach (string l in lineasTitulo)
+            {
+                Escribir(l, MARGEN + relleno, y, tamano + 1.5f, true);
+                y -= (tamano + 1.5f) * 1.35f;
+            }
+            foreach (string l in lineas)
+            {
+                Escribir(l, MARGEN + relleno, y, tamano, false);
+                y -= tamano * 1.35f;
+            }
+            _y = arriba - alto - 16;
+        }
+
+        // Barra de progreso de ancho completo: la parte cumplida en verde y el porcentaje escrito a la derecha
+        public void BarraProgreso(decimal porcentaje, string rotulo = null)
+        {
+            const float alto = 18f, anchoTexto = 60f;
+            float ancho = ANCHO - 2 * MARGEN - anchoTexto;
+            if (!string.IsNullOrEmpty(rotulo)) Parrafo(rotulo, 10, true);
+            AsegurarLugar(alto + 8);
+            float abajo = _y - alto + 8;
+            float lleno = ancho * (float)Math.Max(0, Math.Min(100, porcentaje)) / 100;
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.92 0.92 0.92 rg {0:0.##} {1:0.##} {2:0.##} {3:0.##} re f Q\n", MARGEN, abajo, ancho, alto);
+            if (lleno > 0)
+                _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.31 0.67 0.42 rg {0:0.##} {1:0.##} {2:0.##} {3:0.##} re f Q\n", MARGEN, abajo, lleno, alto);
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.5 0.5 0.5 RG 0.6 w {0:0.##} {1:0.##} {2:0.##} {3:0.##} re S Q\n", MARGEN, abajo, ancho, alto);
+            string texto = porcentaje.ToString("0.##", CultureInfo.CurrentCulture) + "%";
+            Escribir(texto, ANCHO - MARGEN - AnchoTexto(texto, 12, true), abajo + 5, 12, true);
+            _y = abajo - 18;
+        }
+
         public void Guardar(string ruta)
         {
             File.WriteAllBytes(ruta, Generar());
@@ -250,13 +379,8 @@ namespace SERVICIOS
             const int umbralFondo = 225;
             using (MemoryStream ms = new MemoryStream(archivo))
             using (Bitmap original = new Bitmap(ms))
-            using (Bitmap rgb = new Bitmap(original.Width, original.Height, PixelFormat.Format24bppRgb))
+            using (Bitmap rgb = SobreBlanco(original))
             {
-                using (Graphics g = Graphics.FromImage(rgb))
-                {
-                    g.Clear(Color.White); // las zonas transparentes quedan blancas
-                    g.DrawImage(original, 0, 0, original.Width, original.Height);
-                }
                 byte[] px = Pixeles(rgb, out int paso);
 
                 int minX = rgb.Width, minY = rgb.Height, maxX = -1, maxY = -1;
@@ -301,6 +425,34 @@ namespace SERVICIOS
                     return new ImagenPdf { Ancho = ancho, Alto = alto, Datos = Zlib(filas) };
                 }
             }
+        }
+
+        // Copia RGB de 24 bits con las zonas transparentes en blanco
+        private static Bitmap SobreBlanco(Bitmap original)
+        {
+            Bitmap rgb = new Bitmap(original.Width, original.Height, PixelFormat.Format24bppRgb);
+            using (Graphics g = Graphics.FromImage(rgb))
+            {
+                g.Clear(Color.White);
+                g.DrawImage(original, 0, 0, original.Width, original.Height);
+            }
+            return rgb;
+        }
+
+        // Píxeles en el orden que espera el PDF: RGB por filas, sin relleno al final de cada fila
+        private static byte[] Rgb(Bitmap bmp)
+        {
+            byte[] datos = Pixeles(bmp, out int paso);
+            byte[] filas = new byte[bmp.Width * bmp.Height * 3];
+            for (int y = 0; y < bmp.Height; y++)
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    int o = y * paso + x * 3, d = (y * bmp.Width + x) * 3;
+                    filas[d] = datos[o + 2]; // GDI+ guarda BGR
+                    filas[d + 1] = datos[o + 1];
+                    filas[d + 2] = datos[o];
+                }
+            return filas;
         }
 
         private static byte[] Pixeles(Bitmap bmp, out int paso)

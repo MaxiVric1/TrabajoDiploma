@@ -40,6 +40,8 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(this, "FormDecisionDirectorio"));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnAprobar, BE.NombreControl.FormDecisionDirectorio_btnAprobar));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnRechazar, BE.NombreControl.FormDecisionDirectorio_btnRechazar));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnComisiones, BE.NombreControl.FormDecisionDirectorio_btnComisiones));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnInforme, BE.NombreControl.FormDecisionDirectorio_btnInforme));
             _controlesTraducibles.AddRange(panelAnalisis.Traducibles());
             _grilla = new DataGridTraducible(dgvProyectos, "FormDecisionDirectorio.dgvProyectos")
                 .ConColumna("NroProyecto", BE.NombreControl.FormDecisionDirectorio_dgvProyectos_nroProyecto)
@@ -110,7 +112,8 @@ namespace TpIngSoft
         private void MostrarAnalisis()
         {
             ProyectoInversion p = Seleccionado();
-            btnAprobar.Enabled = btnRechazar.Enabled = false;
+            btnAprobar.Enabled = btnRechazar.Enabled = btnInforme.Enabled = false;
+            btnComisiones.Enabled = p != null;
             if (p == null)
             {
                 panelAnalisis.Limpiar(dgvProyectos.Rows.Count == 0 ? "No hay proyectos con datos técnicos esperando la decisión del Directorio." : "-");
@@ -149,7 +152,43 @@ namespace TpIngSoft
             panelAnalisis.Mostrar(a, _icc);
             lblEstado.Text = $"Proyecto N° {a.Proyecto.IdProyecto}: análisis al {a.Fecha:dd/MM/yyyy HH:mm}." +
                              (a.Advertencias.Count > 0 ? $" {a.Advertencias.Count} advertencia(s) en los supuestos." : "");
-            btnAprobar.Enabled = btnRechazar.Enabled = true;
+            btnAprobar.Enabled = btnRechazar.Enabled = btnInforme.Enabled = true;
+        }
+
+        // Comisiones de LandSmart del proyecto: al cambiarlas se recalcula el análisis
+        private void btnComisiones_Click(object sender, EventArgs e)
+        {
+            ProyectoInversion p = Seleccionado();
+            if (p == null) return;
+            decimal[] valores = PN3Comun.PedirNumeros(this, "Comisiones de LandSmart",
+                $"Comisiones sobre el fideicomiso del Proyecto N° {p.IdProyecto} ({p.Direccion}):",
+                new[] { ("Estructuración (sobre el costo de obra):", p.PorcentajeEstructuracion),
+                        ("Administración mensual (por mes de obra):", p.PorcentajeAdministracionMensual),
+                        ("Venta de unidades de los inversores:", p.PorcentajeVentaUnidades) }, 0, 99, 2);
+            if (valores == null) return;
+            try
+            {
+                proyectoBLL.ActualizarComisiones(p.IdProyecto, valores[0], valores[1], valores[2]);
+                _analisis.Remove(p.IdProyecto);
+                CargarProyectos();
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException)
+            {
+                MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar las comisiones: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Informe interno del Directorio con el análisis que se está viendo (mismos datos de mercado)
+        private void btnInforme_Click(object sender, EventArgs e)
+        {
+            ProyectoInversion p = Seleccionado();
+            if (p == null || !_analisis.TryGetValue(p.IdProyecto, out AnalisisComparativo a)) return;
+            PN3Comun.GuardarPdf(this, $"Informe_Proyecto_{p.IdProyecto}.pdf", "Guardar informe de evaluación en PDF",
+                ruta => new InformeInversionBLL().GenerarInformeDirectorio(a, GraficosPN3.GananciaPorEscenario(a), GraficosPN3.DistribucionGanancia(a), ruta));
         }
 
         private void btnAprobar_Click(object sender, EventArgs e)

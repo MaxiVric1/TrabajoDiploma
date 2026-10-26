@@ -362,6 +362,36 @@ BEGIN
 END
 GO
 
+-- Comisiones de LandSmart sobre el fideicomiso (las define el Directorio mientras el proyecto está En Análisis):
+-- estructuración sobre el costo de obra, administración mensual sobre la cuota mensual de obra durante el plazo, y
+-- venta de las unidades de los inversores
+IF COL_LENGTH('dbo.ProyectoInversion', 'porcentaje_estructuracion') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[ProyectoInversion] ADD [porcentaje_estructuracion] DECIMAL(5,2) NOT NULL
+        CONSTRAINT [DF_ProyectoInversion_PorcentajeEstructuracion] DEFAULT 2
+        CONSTRAINT [CK_ProyectoInversion_PorcentajeEstructuracion] CHECK ([porcentaje_estructuracion] >= 0 AND [porcentaje_estructuracion] < 100);
+    PRINT N'ProyectoInversion: columna porcentaje_estructuracion agregada (2% por defecto).';
+END
+GO
+
+IF COL_LENGTH('dbo.ProyectoInversion', 'porcentaje_administracion_mensual') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[ProyectoInversion] ADD [porcentaje_administracion_mensual] DECIMAL(5,2) NOT NULL
+        CONSTRAINT [DF_ProyectoInversion_PorcentajeAdministracionMensual] DEFAULT 1
+        CONSTRAINT [CK_ProyectoInversion_PorcentajeAdministracionMensual] CHECK ([porcentaje_administracion_mensual] >= 0 AND [porcentaje_administracion_mensual] < 100);
+    PRINT N'ProyectoInversion: columna porcentaje_administracion_mensual agregada (1% por defecto).';
+END
+GO
+
+IF COL_LENGTH('dbo.ProyectoInversion', 'porcentaje_venta_unidades') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[ProyectoInversion] ADD [porcentaje_venta_unidades] DECIMAL(5,2) NOT NULL
+        CONSTRAINT [DF_ProyectoInversion_PorcentajeVentaUnidades] DEFAULT 5
+        CONSTRAINT [CK_ProyectoInversion_PorcentajeVentaUnidades] CHECK ([porcentaje_venta_unidades] >= 0 AND [porcentaje_venta_unidades] < 100);
+    PRINT N'ProyectoInversion: columna porcentaje_venta_unidades agregada (5% por defecto).';
+END
+GO
+
 -- Un inmueble tiene como mucho un proyecto en análisis o aprobado (uno rechazado no impide evaluarlo de nuevo)
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE [name] = 'UX_ProyectoInversion_InmuebleVigente')
     CREATE UNIQUE INDEX [UX_ProyectoInversion_InmuebleVigente] ON [dbo].[ProyectoInversion]([id_inmueble])
@@ -618,6 +648,8 @@ INSERT INTO @Nuevos VALUES
     ('grpConclusion', 'PanelAnalisis', N'Diferencia y recomendación', 'Difference and recommendation'),
     ('btnAprobar', 'FormDecisionDirectorio', 'Aprobar', 'Approve'),
     ('btnRechazar', 'FormDecisionDirectorio', 'Rechazar', 'Reject'),
+    ('btnComisiones', 'FormDecisionDirectorio', 'Comisiones', 'Fees'),
+    ('btnInforme', 'FormDecisionDirectorio', 'Informe PDF', 'PDF Report'),
     ('btnCerrar', 'FormVerAnalisis', 'Cerrar', 'Close'),
     ('grpTablero', 'FormGestionFideicomiso', 'Fondeo del fideicomiso', 'Trust funding'),
     ('lblNecesario', 'FormGestionFideicomiso', 'Capital necesario:', 'Required capital:'),
@@ -628,6 +660,7 @@ INSERT INTO @Nuevos VALUES
     ('lblRestantePesos', 'FormGestionFideicomiso', 'Restante en pesos:', 'Remaining in pesos:'),
     ('grpInversores', 'FormGestionFideicomiso', 'Inversores', 'Investors'),
     ('btnAgregarInversor', 'FormGestionFideicomiso', 'Agregar Inversor', 'Add Investor'),
+    ('btnInforme', 'FormGestionFideicomiso', 'Informe Inversores', 'Investor Report'),
     ('grpInversor', 'FormAgregarSuscripcion', 'Inversor', 'Investor'),
     ('lblCuit', 'FormAgregarSuscripcion', 'CUIT:', 'Tax ID (CUIT):'),
     ('btnBuscar', 'FormAgregarSuscripcion', 'Buscar', 'Search'),

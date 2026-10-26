@@ -505,6 +505,8 @@ namespace BE
         public const string PanelAnalisis_grpConclusion = "PanelAnalisis.grpConclusion";
         public const string FormDecisionDirectorio_btnAprobar = "FormDecisionDirectorio.btnAprobar";
         public const string FormDecisionDirectorio_btnRechazar = "FormDecisionDirectorio.btnRechazar";
+        public const string FormDecisionDirectorio_btnComisiones = "FormDecisionDirectorio.btnComisiones";
+        public const string FormDecisionDirectorio_btnInforme = "FormDecisionDirectorio.btnInforme";
         public const string FormVerAnalisis_btnCerrar = "FormVerAnalisis.btnCerrar";
         public const string FormGestionFideicomiso_grpTablero = "FormGestionFideicomiso.grpTablero";
         public const string FormGestionFideicomiso_lblNecesario = "FormGestionFideicomiso.lblNecesario";
@@ -515,6 +517,7 @@ namespace BE
         public const string FormGestionFideicomiso_lblRestantePesos = "FormGestionFideicomiso.lblRestantePesos";
         public const string FormGestionFideicomiso_grpInversores = "FormGestionFideicomiso.grpInversores";
         public const string FormGestionFideicomiso_btnAgregarInversor = "FormGestionFideicomiso.btnAgregarInversor";
+        public const string FormGestionFideicomiso_btnInforme = "FormGestionFideicomiso.btnInforme";
         public const string FormAgregarSuscripcion_grpInversor = "FormAgregarSuscripcion.grpInversor";
         public const string FormAgregarSuscripcion_lblCuit = "FormAgregarSuscripcion.lblCuit";
         public const string FormAgregarSuscripcion_btnBuscar = "FormAgregarSuscripcion.btnBuscar";
