@@ -2608,7 +2608,9 @@ GO
 DROP PROCEDURE IF EXISTS [dbo].[CrearSuscripcionFideicomiso];
 GO
 
--- Solo sobre un proyecto Aprobado: si no lo está no se inserta y @NuevoId queda NULL
+-- Solo sobre un proyecto Aprobado y sin superar el capital necesario (costo total de la obra) con lo ya suscripto:
+-- si no se cumple no se inserta y @NuevoId queda NULL. El bloqueo sobre el proyecto evita que dos suscripciones
+-- simultáneas pasen el control juntas.
 CREATE PROCEDURE [dbo].[CrearSuscripcionFideicomiso]
     @IdProyecto INT,
     @IdInversor INT,
@@ -2616,11 +2618,18 @@ CREATE PROCEDURE [dbo].[CrearSuscripcionFideicomiso]
     @UnidadesAsignadas INT = 0,
     @NuevoId INT OUTPUT
 AS BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
     SET @NuevoId = NULL;
+    BEGIN TRANSACTION;
     INSERT INTO SuscripcionFideicomiso (id_proyecto, id_inversor, monto_aportado, unidades_asignadas)
     SELECT @IdProyecto, @IdInversor, @MontoAportado, @UnidadesAsignadas
-    WHERE EXISTS (SELECT 1 FROM ProyectoInversion WHERE id_proyecto = @IdProyecto AND estado = 'Aprobado');
+    FROM ProyectoInversion p WITH (UPDLOCK, HOLDLOCK)
+    WHERE p.id_proyecto = @IdProyecto AND p.estado = 'Aprobado'
+      AND ISNULL((SELECT SUM(s.monto_aportado) FROM SuscripcionFideicomiso s WITH (UPDLOCK, HOLDLOCK)
+                  WHERE s.id_proyecto = @IdProyecto), 0) + @MontoAportado <= p.costo_total_obra;
     IF @@ROWCOUNT = 1 SET @NuevoId = SCOPE_IDENTITY();
+    COMMIT TRANSACTION;
 END
 GO
 

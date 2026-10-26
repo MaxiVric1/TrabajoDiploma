@@ -88,6 +88,9 @@
     <Compile Include="ActualizacionContratoDAL.cs" />
     <Compile Include="IndiceBCRADAL.cs" />
     <Compile Include="HistorialICCDAL.cs" />
+    <Compile Include="ProyectoInversionDAL.cs" />
+    <Compile Include="InversorDAL.cs" />
+    <Compile Include="SuscripcionFideicomisoDAL.cs" />
     <Compile Include="PagoAlquilerDAL.cs" />
     <Compile Include="AccionLegalDAL.cs" />
     <Compile Include="ContactoCobranzaDAL.cs" />

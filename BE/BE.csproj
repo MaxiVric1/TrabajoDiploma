@@ -88,6 +88,10 @@
     <Compile Include="ImportePeriodo.cs" />
     <Compile Include="CotizacionDolar.cs" />
     <Compile Include="ValorICC.cs" />
+    <Compile Include="ProyectoInversion.cs" />
+    <Compile Include="Inversor.cs" />
+    <Compile Include="SuscripcionFideicomiso.cs" />
+    <Compile Include="AnalisisComparativo.cs" />
     <Compile Include="PagoAlquiler.cs" />
     <Compile Include="PeriodoAPagar.cs" />
     <Compile Include="AccionLegal.cs" />

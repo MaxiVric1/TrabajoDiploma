@@ -84,6 +84,9 @@
     <Compile Include="IccBLL.cs" />
     <Compile Include="CotizacionesBLL.cs" />
     <Compile Include="GeocodificacionBLL.cs" />
+    <Compile Include="ProyectoInversionBLL.cs" />
+    <Compile Include="InversorBLL.cs" />
+    <Compile Include="SuscripcionFideicomisoBLL.cs" />
     <Compile Include="PagoAlquilerBLL.cs" />
     <Compile Include="AccionLegalBLL.cs" />
     <Compile Include="ContactoCobranzaBLL.cs" />
