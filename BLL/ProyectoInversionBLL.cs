@@ -38,10 +38,15 @@ namespace BLL
                 .ToList();
         }
 
-        // Solo para una casa Publicada sin proyecto vigente (uno rechazado no impide evaluarla de nuevo)
-        public int CrearProyecto(int idInmueble, string observaciones = null)
+        public const decimal PORCENTAJE_CANJE_DEFECTO = 30;
+
+        // Solo para una casa Publicada sin proyecto vigente (uno rechazado no impide evaluarla de nuevo).
+        // porcentajeCanje: % de las unidades que recibe el propietario por aportar el lote.
+        public int CrearProyecto(int idInmueble, decimal porcentajeCanje = PORCENTAJE_CANJE_DEFECTO, string observaciones = null)
         {
             ExigirPermiso(PermisosDefinidos.AccesoPN3Analisis, "el Analista de Inversiones");
+            if (porcentajeCanje <= 0 || porcentajeCanje >= 100)
+                throw new ArgumentException("El canje debe ser un porcentaje mayor a 0 y menor a 100.");
             Inmueble inmueble = inmuebleDAL.BuscarPorId(idInmueble);
             if (inmueble == null)
                 throw new ArgumentException("El inmueble no existe.");
@@ -57,6 +62,7 @@ namespace BLL
             {
                 IdInmueble = idInmueble,
                 SuperficieLote = inmueble.SuperficieLote,
+                PorcentajeCanje = Math.Round(porcentajeCanje, 2),
                 Observaciones = string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim()
             };
             int id = proyectoDAL.Crear(proyecto);
@@ -64,7 +70,7 @@ namespace BLL
                 throw new Exception("No se pudo crear el proyecto.");
 
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Alta Proyecto Inversión",
-                $"Proyecto N° {id} sobre el inmueble {idInmueble} ({inmueble.Direccion}, {inmueble.Localidad}).");
+                $"Proyecto N° {id} sobre el inmueble {idInmueble} ({inmueble.Direccion}, {inmueble.Localidad}), canje {proyecto.PorcentajeCanje:0.##}%.");
             return id;
         }
 
@@ -159,7 +165,7 @@ namespace BLL
         public AnalisisComparativo ObtenerAnalisisComparativo(int idProyecto, ParametrosAnalisis parametros = null)
         {
             ParametrosAnalisis p = parametros ?? new ParametrosAnalisis();
-            if (p.PlazoObraMeses <= 0 || p.PorcentajeCanjePropietario <= 0 || p.PorcentajeCanjePropietario >= 100 || p.RentabilidadAlquilerAnual <= 0)
+            if (p.PlazoObraMeses <= 0 || p.HorizonteAlquilerMeses <= 0 || p.RentabilidadAlquilerAnual <= 0)
                 throw new ArgumentException("Parámetros del análisis inválidos.");
 
             ProyectoInversion proyecto = proyectoDAL.BuscarPorId(idProyecto);
@@ -216,7 +222,7 @@ namespace BLL
             decimal factorDolar = (decimal)Math.Pow(1 + (double)a.IpcMensualPromedio / 100, mitad);
             a.CostoObraProyectadoUSD = Math.Round(proyecto.CostoTotalObra.Value * factorIcc / factorDolar, 2);
             a.ValorUnidadesUSD = proyecto.ValorTotalUnidades.Value;
-            a.UnidadesPropietarioUSD = Math.Round(a.ValorUnidadesUSD * p.PorcentajeCanjePropietario / 100, 2);
+            a.UnidadesPropietarioUSD = Math.Round(a.ValorUnidadesUSD * proyecto.PorcentajeCanje / 100, 2);
             a.MargenInversoresUSD = Math.Round(a.ValorUnidadesUSD - a.UnidadesPropietarioUSD - a.CostoObraProyectadoUSD, 2);
             a.RentabilidadInversoresPorcentaje = a.CostoObraProyectadoUSD > 0 ? Math.Round(a.MargenInversoresUSD * 100 / a.CostoObraProyectadoUSD, 2) : 0;
             a.Fideicomiso = new EscenarioAnalisis
@@ -227,7 +233,7 @@ namespace BLL
                 {
                     $"{proyecto.MetrosConstruibles:N2} m² construibles (lote {proyecto.SuperficieLote:N2} m² x FOT {proyecto.Fot})",
                     $"Unidades: {proyecto.MetrosConstruibles:N2} m² x USD {proyecto.ValorVentaM2Unidades:N2} = USD {a.ValorUnidadesUSD:N2}",
-                    $"El propietario aporta el lote y recibe el {p.PorcentajeCanjePropietario:0.##}% de las unidades: USD {a.UnidadesPropietarioUSD:N2} al terminar la obra ({p.PlazoObraMeses} meses)",
+                    $"El propietario aporta el lote y recibe el {proyecto.PorcentajeCanje:0.##}% de las unidades: USD {a.UnidadesPropietarioUSD:N2} al terminar la obra ({p.PlazoObraMeses} meses)",
                     $"Costo de obra USD {proyecto.CostoTotalObra:N2}, proyectado con el ICC: USD {a.CostoObraProyectadoUSD:N2}",
                     $"Margen para los inversores: USD {a.MargenInversoresUSD:N2} ({a.RentabilidadInversoresPorcentaje:0.##}% sobre la obra)"
                 }
@@ -253,7 +259,7 @@ namespace BLL
             {
                 // Alquiler en pesos ajustado por IPC: con el dólar acompañando al IPC, en USD se mantiene constante
                 decimal alquilerUSD = tasadoUSD;
-                decimal ingresos = Math.Round(alquilerUSD * p.PlazoObraMeses * (1 - p.ComisionAlquilerPorcentaje / 100), 2);
+                decimal ingresos = Math.Round(alquilerUSD * p.HorizonteAlquilerMeses * (1 - p.ComisionAlquilerPorcentaje / 100), 2);
                 decimal valorInmueble = Math.Round(alquilerUSD * 12 * 100 / p.RentabilidadAlquilerAnual, 2);
                 a.Tradicional = new EscenarioAnalisis
                 {
@@ -262,7 +268,7 @@ namespace BLL
                     Detalle =
                     {
                         $"Alquiler ${a.ValorTasadoPesos:N2} / MEP {a.DolarMep:N2} = USD {alquilerUSD:N2} por mes",
-                        $"{p.PlazoObraMeses} meses menos comisión {p.ComisionAlquilerPorcentaje:0.##}%: USD {ingresos:N2}",
+                        $"{p.HorizonteAlquilerMeses} meses menos comisión {p.ComisionAlquilerPorcentaje:0.##}%: USD {ingresos:N2}",
                         $"Conserva el inmueble: valor estimado USD {valorInmueble:N2} (renta anual al {p.RentabilidadAlquilerAnual:0.##}%)"
                     }
                 };
@@ -270,7 +276,9 @@ namespace BLL
 
             a.Supuestos.Add($"Valores en dólares MEP ({a.DolarMep:N2} $/USD); oficial BCRA {a.DolarOficial:N2} y blue {a.DolarBlue:N2} como referencia.");
             a.Supuestos.Add($"El dólar acompaña a la inflación (IPC promedio {a.IpcMensualPromedio:0.##}% mensual); el costo de obra sube con el ICC (promedio {a.IccMensualPromedio:0.##}% mensual).");
-            a.Supuestos.Add($"Horizonte de comparación: el plazo de obra ({p.PlazoObraMeses} meses), sin descontar el valor tiempo del dinero.");
+            a.Supuestos.Add(proyecto.TipoPublicacion == TipoPublicacion.Venta
+                ? $"Venta cobrada hoy contra unidades al terminar la obra ({p.PlazoObraMeses} meses), sin descontar el valor tiempo del dinero."
+                : $"Alquiler durante {p.HorizonteAlquilerMeses} meses contra unidades al terminar la obra ({p.PlazoObraMeses} meses), sin descontar el valor tiempo del dinero.");
             a.Supuestos.Add($"Valor de venta por m² de las unidades (USD {proyecto.ValorVentaM2Unidades:N2}) constante en dólares.");
             return a;
         }

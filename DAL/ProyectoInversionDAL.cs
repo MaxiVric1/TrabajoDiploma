@@ -22,6 +22,7 @@ namespace DAL
                     acceso.CrearParametro("@IdInmueble", proyecto.IdInmueble),
                     acceso.CrearParametro("@SuperficieLote", proyecto.SuperficieLote),
                     acceso.CrearParametro("@Observaciones", proyecto.Observaciones),
+                    acceso.CrearParametro("@PorcentajeCanje", proyecto.PorcentajeCanje),
                     outParam
                 };
                 int result = acceso.Escribir("CrearProyectoInversion", parameters);
@@ -129,6 +130,7 @@ namespace DAL
                 CostoTotalObra = DecimalONull(row["costo_total_obra"]),
                 ValorVentaM2Unidades = DecimalONull(row["valor_venta_m2_unidades"]),
                 ValorTotalUnidades = DecimalONull(row["valor_total_unidades"]),
+                PorcentajeCanje = Convert.ToDecimal(row["porcentaje_canje"]),
                 Estado = (EstadoProyecto)Enum.Parse(typeof(EstadoProyecto), row["estado"].ToString()),
                 IdUsuarioArquitectura = row["id_usuario_arquitectura"] != DBNull.Value ? Convert.ToInt32(row["id_usuario_arquitectura"]) : (int?)null,
                 IdUsuarioDirectorio = row["id_usuario_directorio"] != DBNull.Value ? Convert.ToInt32(row["id_usuario_directorio"]) : (int?)null,

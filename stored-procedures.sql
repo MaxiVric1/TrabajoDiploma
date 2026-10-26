@@ -2416,15 +2416,16 @@ GO
 DROP PROCEDURE IF EXISTS [dbo].[CrearProyectoInversion];
 GO
 
--- Nace En Análisis. La superficie del lote se toma del inmueble si no se indica.
+-- Nace En Análisis. La superficie del lote se toma del inmueble si no se indica; el canje, 30% si no se indica.
 CREATE PROCEDURE [dbo].[CrearProyectoInversion]
     @IdInmueble INT,
     @SuperficieLote DECIMAL(10,2) = NULL,
     @Observaciones NVARCHAR(1000) = NULL,
+    @PorcentajeCanje DECIMAL(5,2) = 30,
     @NuevoId INT OUTPUT
 AS BEGIN
-    INSERT INTO ProyectoInversion (id_inmueble, superficie_lote, observaciones)
-    SELECT id_inmueble, ISNULL(@SuperficieLote, superficie_lote), @Observaciones
+    INSERT INTO ProyectoInversion (id_inmueble, superficie_lote, observaciones, porcentaje_canje)
+    SELECT id_inmueble, ISNULL(@SuperficieLote, superficie_lote), @Observaciones, @PorcentajeCanje
     FROM Inmueble WHERE id_inmueble = @IdInmueble;
     SET @NuevoId = SCOPE_IDENTITY();
 END
@@ -2492,7 +2493,7 @@ CREATE PROCEDURE [dbo].[LeerProyectosInversion]
 AS BEGIN
     SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
            p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
-           p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones,
+           p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones, p.porcentaje_canje,
            n.direccion, n.localidad, n.tipo_inmueble, n.tipo_publicacion, n.latitud, n.longitud,
            ISNULL(s.capital_suscripto, 0) AS capital_suscripto, ISNULL(s.inversores, 0) AS inversores
     FROM ProyectoInversion p
@@ -2512,7 +2513,7 @@ CREATE PROCEDURE [dbo].[BuscarProyectoInversionPorId]
 AS BEGIN
     SELECT p.id_proyecto, p.id_inmueble, p.superficie_lote, p.fos, p.fot, p.metros_construibles, p.costo_obra_m2,
            p.costo_total_obra, p.valor_venta_m2_unidades, p.valor_total_unidades, p.estado, p.id_usuario_arquitectura,
-           p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones,
+           p.id_usuario_directorio, p.fecha_creacion, p.fecha_decision, p.observaciones, p.porcentaje_canje,
            n.direccion, n.localidad, n.tipo_inmueble, n.tipo_publicacion, n.latitud, n.longitud,
            ISNULL((SELECT SUM(monto_aportado) FROM SuscripcionFideicomiso s WHERE s.id_proyecto = p.id_proyecto), 0) AS capital_suscripto,
            (SELECT COUNT(DISTINCT id_inversor) FROM SuscripcionFideicomiso s WHERE s.id_proyecto = p.id_proyecto) AS inversores

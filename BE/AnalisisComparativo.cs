@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace BE
 {
-    // Supuestos del análisis comparativo (valores por defecto razonables; se pueden ajustar por proyecto)
+    // Supuestos del análisis comparativo (el canje es de cada proyecto: ProyectoInversion.PorcentajeCanje)
     public class ParametrosAnalisis
     {
-        public int PlazoObraMeses { get; set; } = 24;                 // también es el horizonte de comparación
-        public decimal PorcentajeCanjePropietario { get; set; } = 30; // % de las unidades que recibe el dueño por el lote
-        public decimal ComisionVentaPorcentaje { get; set; } = 3;     // comisión inmobiliaria de una venta tradicional
+        public int PlazoObraMeses { get; set; } = 24;                 // el propietario recibe sus unidades al terminar
+        public int HorizonteAlquilerMeses { get; set; } = 48;         // meses de alquiler del escenario tradicional
+        public decimal ComisionVentaPorcentaje { get; set; } = 5;     // comisión inmobiliaria de una venta tradicional
         public decimal ComisionAlquilerPorcentaje { get; set; } = 4;  // comisión mensual del alquiler (PN2)
         public decimal RentabilidadAlquilerAnual { get; set; } = 5;   // % para estimar el valor de un inmueble de alquiler
         public int MesesPromedioIndices { get; set; } = 12;           // meses para promediar IPC e ICC

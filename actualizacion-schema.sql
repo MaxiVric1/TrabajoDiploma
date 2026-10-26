@@ -351,6 +351,17 @@ BEGIN
 END
 GO
 
+-- Canje: porcentaje de las unidades que recibe el propietario por aportar el lote (lo define el Analista al crear
+-- el proyecto)
+IF COL_LENGTH('dbo.ProyectoInversion', 'porcentaje_canje') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[ProyectoInversion] ADD [porcentaje_canje] DECIMAL(5,2) NOT NULL
+        CONSTRAINT [DF_ProyectoInversion_PorcentajeCanje] DEFAULT 30
+        CONSTRAINT [CK_ProyectoInversion_PorcentajeCanje] CHECK ([porcentaje_canje] > 0 AND [porcentaje_canje] < 100);
+    PRINT N'ProyectoInversion: columna porcentaje_canje agregada (30% por defecto).';
+END
+GO
+
 -- Un inmueble tiene como mucho un proyecto en análisis o aprobado (uno rechazado no impide evaluarlo de nuevo)
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE [name] = 'UX_ProyectoInversion_InmuebleVigente')
     CREATE UNIQUE INDEX [UX_ProyectoInversion_InmuebleVigente] ON [dbo].[ProyectoInversion]([id_inmueble])

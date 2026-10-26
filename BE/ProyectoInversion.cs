@@ -25,6 +25,7 @@ namespace BE
         public decimal? CostoTotalObra { get; set; }        // m² construibles x costo por m² = capital necesario
         public decimal? ValorVentaM2Unidades { get; set; }
         public decimal? ValorTotalUnidades { get; set; }    // m² construibles x valor de venta por m²
+        public decimal PorcentajeCanje { get; set; } = 30;   // % de las unidades para el propietario, por aportar el lote
         public EstadoProyecto Estado { get; set; } = EstadoProyecto.EnAnalisis;
         public int? IdUsuarioArquitectura { get; set; }
         public int? IdUsuarioDirectorio { get; set; }
