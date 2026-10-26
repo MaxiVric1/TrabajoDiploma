@@ -30,7 +30,7 @@ namespace BE
         public decimal EstructuracionUSD { get; set; }
 
         public decimal PorcentajeAdministracionMensual { get; set; }
-        public decimal CuotaMensualObraUSD { get; set; }            // costo de obra / meses de obra
+        public decimal BaseAdministracionUSD { get; set; }          // capital total del fideicomiso (suscripto completo)
         public int MesesObra { get; set; }
         public decimal AdministracionMensualUSD { get; set; }
         public decimal AdministracionUSD { get; set; }              // la mensual por los meses de obra

@@ -160,15 +160,16 @@ namespace BLL
             // ----- Página 3: ganancia de la inmobiliaria -----
             pdf.SaltoPagina();
             pdf.Titulo("Ganancia de la inmobiliaria");
-            pdf.Parrafo("Comisiones de LandSmart sobre el fideicomiso, con los porcentajes definidos para este proyecto. Montos en USD " +
-                        "sobre el costo de obra proyectado con el ICC.", 9.5f);
+            pdf.Parrafo("Comisiones de LandSmart sobre el fideicomiso, con los porcentajes definidos para este proyecto. Montos en USD: " +
+                        "la estructuración sobre el costo de obra proyectado con el ICC y la administración sobre el capital total del " +
+                        "fideicomiso, todos los meses de obra.", 9.5f);
             pdf.Espacio(6);
             pdf.Tabla(new[] { 1.6f, 2.4f, 1.1f, 1.3f },
                 new[] { "Comisión", "Base", "Porcentaje", "Monto" },
                 new[]
                 {
                     new[] { "Estructuración", $"Costo de obra {Usd(g.BaseEstructuracionUSD)}", $"{g.PorcentajeEstructuracion:0.##}%", Usd(g.EstructuracionUSD) },
-                    new[] { "Administración mensual", $"Cuota mensual de obra {Usd(g.CuotaMensualObraUSD)} durante {g.MesesObra} meses",
+                    new[] { "Administración mensual", $"Capital total del fideicomiso {Usd(g.BaseAdministracionUSD)} durante {g.MesesObra} meses",
                             $"{g.PorcentajeAdministracionMensual:0.##}% mensual", $"{Usd(g.AdministracionMensualUSD)} x {g.MesesObra} = {Usd(g.AdministracionUSD)}" },
                     new[] { "Venta de unidades", $"Unidades de los inversores {Usd(g.BaseVentaUSD)}", $"{g.PorcentajeVentaUnidades:0.##}%", Usd(g.VentaUSD) },
                     new[] { "Total", "", "", Usd(g.TotalUSD) }

@@ -163,7 +163,7 @@ namespace TpIngSoft
             decimal[] valores = PN3Comun.PedirNumeros(this, "Comisiones de LandSmart",
                 $"Comisiones sobre el fideicomiso del Proyecto N° {p.IdProyecto} ({p.Direccion}):",
                 new[] { ("Estructuración (sobre el costo de obra):", p.PorcentajeEstructuracion),
-                        ("Administración mensual (por mes de obra):", p.PorcentajeAdministracionMensual),
+                        ("Administración mensual (sobre el capital):", p.PorcentajeAdministracionMensual),
                         ("Venta de unidades de los inversores:", p.PorcentajeVentaUnidades) }, 0, 99, 2);
             if (valores == null) return;
             try

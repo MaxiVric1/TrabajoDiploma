@@ -363,7 +363,7 @@ END
 GO
 
 -- Comisiones de LandSmart sobre el fideicomiso (las define el Directorio mientras el proyecto está En Análisis):
--- estructuración sobre el costo de obra, administración mensual sobre la cuota mensual de obra durante el plazo, y
+-- estructuración sobre el costo de obra, administración mensual sobre el capital total del fideicomiso durante los meses de obra, y
 -- venta de las unidades de los inversores
 IF COL_LENGTH('dbo.ProyectoInversion', 'porcentaje_estructuracion') IS NULL
 BEGIN

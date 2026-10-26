@@ -28,7 +28,7 @@ namespace BE
         public decimal PorcentajeCanje { get; set; } = 30;   // % de las unidades para el propietario, por aportar el lote
         // Comisiones de LandSmart (las define el Directorio): ver GananciaInmobiliaria
         public decimal PorcentajeEstructuracion { get; set; } = 2;         // sobre el costo de obra, al estructurar el fideicomiso
-        public decimal PorcentajeAdministracionMensual { get; set; } = 1;  // por mes de obra, sobre la cuota mensual de obra
+        public decimal PorcentajeAdministracionMensual { get; set; } = 1;  // por mes de obra, sobre el capital total del fideicomiso
         public decimal PorcentajeVentaUnidades { get; set; } = 5;          // sobre la venta de las unidades de los inversores
         public EstadoProyecto Estado { get; set; } = EstadoProyecto.EnAnalisis;
         public int? IdUsuarioArquitectura { get; set; }

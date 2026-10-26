@@ -127,7 +127,8 @@ namespace BLL
 
         // Ganancia de LandSmart con el fideicomiso, en USD:
         //  - estructuración: % sobre el costo de obra, al armar el fideicomiso
-        //  - administración: % mensual sobre la cuota mensual de obra (costo / meses), durante los meses de obra
+        //  - administración: % mensual sobre el capital total del fideicomiso (el capital necesario, suscripto
+        //    completo), durante todos los meses de obra
         //  - venta: % sobre las unidades de los inversores (las del propietario son suyas y no se venden)
         public static GananciaInmobiliaria CalcularGananciaInmobiliaria(ProyectoInversion proyecto, decimal costoObraUSD, decimal unidadesInversoresUSD, int mesesObra)
         {
@@ -139,13 +140,13 @@ namespace BLL
                 BaseEstructuracionUSD = costoObraUSD,
                 EstructuracionUSD = Math.Round(costoObraUSD * proyecto.PorcentajeEstructuracion / 100, 2),
                 PorcentajeAdministracionMensual = proyecto.PorcentajeAdministracionMensual,
-                CuotaMensualObraUSD = Math.Round(costoObraUSD / mesesObra, 2),
+                BaseAdministracionUSD = proyecto.CapitalNecesario,
                 MesesObra = mesesObra,
                 PorcentajeVentaUnidades = proyecto.PorcentajeVentaUnidades,
                 BaseVentaUSD = Math.Max(0, unidadesInversoresUSD),
                 VentaUSD = Math.Round(Math.Max(0, unidadesInversoresUSD) * proyecto.PorcentajeVentaUnidades / 100, 2)
             };
-            g.AdministracionMensualUSD = Math.Round(g.CuotaMensualObraUSD * proyecto.PorcentajeAdministracionMensual / 100, 2);
+            g.AdministracionMensualUSD = Math.Round(g.BaseAdministracionUSD * proyecto.PorcentajeAdministracionMensual / 100, 2);
             g.AdministracionUSD = g.AdministracionMensualUSD * mesesObra;
             return g;
         }
