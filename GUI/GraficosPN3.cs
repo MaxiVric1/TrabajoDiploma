@@ -56,17 +56,18 @@ namespace TpIngSoft
 
         // ---------- Propuesta para inversores ----------
 
-        // Barras: rentabilidad anual del fideicomiso contra plazo fijo y dólar MEP (en %; las que no tienen datos no se dibujan)
+        // Barras: rentabilidad anual en dólares del fideicomiso contra obligaciones negociables y dólar MEP (en %; las
+        // que no tienen datos no se dibujan)
         public static byte[] RentabilidadComparada(ComparativaRentabilidad c)
         {
             PlotModel modelo = Modelo(null);
             var datos = new List<(string, decimal?, OxyColor)>
             {
-                (c.RentabilidadAnualPesos.HasValue ? "Fideicomiso" : "Fideicomiso (USD)", c.RentabilidadAnualPesos ?? c.RentabilidadAnualUSD, MORADO),
-                ("Plazo fijo", c.PlazoFijoTea, VERDE),
+                ("Fideicomiso", c.RentabilidadAnualUSD, MORADO),
+                ("ON en USD (ref.)", c.ObligacionesNegociablesAnualUSD, VERDE),
                 ("Dólar MEP", c.VariacionMepAnual, NARANJA)
             }.Where(d => d.Item2.HasValue).ToList();
-            EjesBarras(modelo, datos.Select(d => d.Item1).ToArray(), "% anual en pesos", miles: false);
+            EjesBarras(modelo, datos.Select(d => d.Item1).ToArray(), "% anual en dólares", miles: false);
             BarSeries serie = new BarSeries { XAxisKey = "valor", YAxisKey = "categoria", LabelFormatString = "{0:0.#}%", LabelPlacement = LabelPlacement.Outside, FontSize = 12, BarWidth = 0.6 };
             foreach (var d in datos) serie.Items.Add(new BarItem((double)d.Item2.Value) { Color = d.Item3 });
             modelo.Series.Add(serie);

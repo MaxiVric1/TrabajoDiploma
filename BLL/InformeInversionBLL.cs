@@ -14,8 +14,8 @@ namespace BLL
     {
         // ---------- Datos ----------
 
-        // Rentabilidad del fideicomiso para los inversores contra plazo fijo y dólar MEP, en % anual en pesos.
-        // El fideicomiso rinde en dólares: para pasarlo a pesos se supone que el MEP sigue al ritmo de los últimos 12 meses.
+        // Rentabilidad del fideicomiso para los inversores contra obligaciones negociables en dólares (valor
+        // referencial) y el dólar MEP, todo en % anual en dólares
         public ComparativaRentabilidad ObtenerComparativaRentabilidad(int idProyecto)
         {
             AnalisisComparativo a = new ProyectoInversionBLL().ObtenerAnalisisComparativo(idProyecto);
@@ -32,21 +32,8 @@ namespace BLL
             CotizacionDolar mepAntes = cotizaciones.MepHaceUnAnio();
             c.MepHaceUnAnio = mepAntes?.Venta;
             c.VariacionMepAnual = cotizaciones.VariacionMepAnual();
-            if (c.VariacionMepAnual.HasValue)
-                c.RentabilidadAnualPesos = Math.Round(((1 + c.RentabilidadAnualUSD / 100) * (1 + c.VariacionMepAnual.Value / 100) - 1) * 100, 2);
-            else
-                a.Advertencias.Add("Sin el dólar MEP de hace un año (ArgentinaDatos): el fideicomiso se compara solo en dólares.");
-
-            var plazoFijo = new IndicesBCRABLL().TasaPlazoFijo();
-            if (plazoFijo.HasValue)
-            {
-                c.FechaPlazoFijo = plazoFijo.Value.Fecha;
-                c.PlazoFijoTna = plazoFijo.Value.Tna;
-                // Renovando cada 30 días durante un año
-                c.PlazoFijoTea = Math.Round((decimal)(Math.Pow(1 + (double)plazoFijo.Value.Tna / 100 * 30 / 365, 365.0 / 30) - 1) * 100, 2);
-            }
-            else
-                a.Advertencias.Add("Sin la tasa de plazo fijo del BCRA.");
+            if (!c.VariacionMepAnual.HasValue)
+                a.Advertencias.Add("Sin el dólar MEP de hace un año (ArgentinaDatos).");
             return c;
         }
 
@@ -234,15 +221,12 @@ namespace BLL
             // ----- Página 2: la oportunidad -----
             pdf.SaltoPagina();
             pdf.Titulo("La oportunidad");
-            pdf.Parrafo("Rentabilidad anual estimada del fideicomiso frente a las alternativas habituales del ahorrista, en % anual en pesos.", 9.5f, centrado: true);
+            pdf.Parrafo("Rentabilidad anual estimada del fideicomiso frente a las alternativas habituales del ahorrista en dólares, en % anual en dólares.", 9.5f, centrado: true);
             pdf.Espacio(4);
             pdf.Imagen(graficoRentabilidad, 440);
-            pdf.Campo("Fideicomiso", c.RentabilidadAnualPesos.HasValue
-                ? $"{c.RentabilidadAnualPesos:0.##}% anual en pesos ({c.RentabilidadAnualUSD:0.##}% anual en dólares, más la suba del dólar MEP)"
-                : $"{c.RentabilidadAnualUSD:0.##}% anual en dólares");
-            pdf.Campo("Plazo fijo", c.PlazoFijoTea.HasValue
-                ? $"{c.PlazoFijoTea:0.##}% efectivo anual (TNA {c.PlazoFijoTna:0.##}% de personas humanas, BCRA al {c.FechaPlazoFijo:dd/MM/yyyy}, renovando cada 30 días)"
-                : "Sin datos del BCRA");
+            pdf.Campo("Fideicomiso", $"{c.RentabilidadAnualUSD:0.##}% anual en dólares ({c.RentabilidadPlazoUSD:0.##}% en los {c.PlazoObraMeses} meses de obra)");
+            pdf.Campo("Obligaciones negociables", $"{c.ObligacionesNegociablesAnualUSD:0.##}% anual en dólares: valor referencial de las ON corporativas " +
+                                                  "argentinas en dólares (rinden aproximadamente entre 6% y 8% anual)");
             pdf.Campo("Dólar MEP", c.VariacionMepAnual.HasValue
                 ? $"{c.VariacionMepAnual:+0.##;-0.##}% en los últimos 12 meses (de ${c.MepHaceUnAnio:N2} a ${a.DolarMep:N2})"
                 : "Sin datos históricos");
@@ -252,9 +236,10 @@ namespace BLL
                 $"Participación: {ComparativaRentabilidad.MONTO_EJEMPLO * 100 / Math.Max(1, r.CapitalNecesario):0.##}% del fideicomiso.", 11);
             pdf.Parrafo($"Supuestos: valores en dólares MEP (${a.DolarMep:N2} por USD). Costo de obra ajustado por el ICC del INDEC (promedio " +
                         $"{a.IccMensualPromedio:0.##}% mensual) frente a un dólar que acompaña a la inflación (IPC promedio {a.IpcMensualPromedio:0.##}% mensual). " +
-                        $"Unidades vendidas a USD {p.ValorVentaM2Unidades:N2} por m² al terminar la obra. Para pasar el fideicomiso a pesos se supone que el " +
-                        "dólar MEP sigue al ritmo de los últimos 12 meses. Los rendimientos pasados del plazo fijo y del dólar no garantizan los futuros; " +
-                        "la ganancia del fideicomiso es una estimación sujeta a los costos y precios de venta reales.", 8);
+                        $"Unidades vendidas a USD {p.ValorVentaM2Unidades:N2} por m² al terminar la obra. Comparación en dólares: el rendimiento de las " +
+                        $"obligaciones negociables ({c.ObligacionesNegociablesAnualUSD:0.##}% anual) es un valor referencial, no una cotización del día (no hay " +
+                        "una fuente pública que lo publique); el del dólar MEP es su variación de los últimos 12 meses (ArgentinaDatos). Los rendimientos " +
+                        "pasados no garantizan los futuros; la ganancia del fideicomiso es una estimación sujeta a los costos y precios de venta reales.", 8);
 
             // ----- Página 3: estado del fideicomiso -----
             pdf.SaltoPagina();

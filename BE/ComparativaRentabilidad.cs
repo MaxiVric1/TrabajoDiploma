@@ -3,21 +3,20 @@ using System;
 namespace BE
 {
     // Para la propuesta a inversores: rentabilidad anual del fideicomiso contra las alternativas habituales de un
-    // ahorrista (plazo fijo en pesos y comprar dólar MEP). Todo en % anual en pesos, para que sea comparable.
+    // ahorrista en dólares (obligaciones negociables y dólar MEP). Todo en % anual en dólares, para que sea comparable.
     public class ComparativaRentabilidad
     {
         public AnalisisComparativo Analisis { get; set; }
         public int PlazoObraMeses { get; set; }
 
-        // Fideicomiso: ganancia de los inversores sobre la obra, en todo el plazo y anualizada (en dólares y en pesos)
+        // Fideicomiso: ganancia de los inversores sobre la obra, en todo el plazo y anualizada, en dólares
         public decimal RentabilidadPlazoUSD { get; set; }
         public decimal RentabilidadAnualUSD { get; set; }
-        public decimal? RentabilidadAnualPesos { get; set; }
 
-        // Plazo fijo en pesos de personas humanas (BCRA): tasa nominal anual y efectiva anual (renovando cada 30 días)
-        public decimal? PlazoFijoTna { get; set; }
-        public decimal? PlazoFijoTea { get; set; }
-        public DateTime? FechaPlazoFijo { get; set; }
+        // Obligaciones negociables corporativas argentinas en dólares: no hay una API pública con su rendimiento, se
+        // usa un valor referencial (rinden aproximadamente entre 6% y 8% anual en USD)
+        public const decimal ON_ANUAL_USD_REFERENCIAL = 7;
+        public decimal ObligacionesNegociablesAnualUSD { get; set; } = ON_ANUAL_USD_REFERENCIAL;
 
         // Dólar MEP: variación de los últimos 12 meses (ArgentinaDatos)
         public decimal? VariacionMepAnual { get; set; }
