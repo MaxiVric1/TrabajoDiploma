@@ -45,46 +45,6 @@ namespace BLL
 
         public CotizacionDolar Blue() => Cotizaciones().FirstOrDefault(c => c.Casa == ClienteDolarAPI.CASA_BLUE);
 
-        // MEP de hace un año (ArgentinaDatos; si ese día no tiene cotización, el día hábil anterior más cercano).
-        // Se guarda en memoria por día. null si no hay datos.
-        private static CotizacionDolar _mepHaceUnAnio;
-        private static DateTime _mepHaceUnAnioDia = DateTime.MinValue;
-
-        public CotizacionDolar MepHaceUnAnio()
-        {
-            lock (_bloqueo)
-            {
-                if (_mepHaceUnAnio != null && _mepHaceUnAnioDia == DateTime.Today) return _mepHaceUnAnio;
-                DateTime fecha = DateTime.Today.AddYears(-1);
-                try
-                {
-                    for (int i = 0; i < 7; i++)
-                    {
-                        CotizacionDolar c = dolarApi.ObtenerHistorico(ClienteDolarAPI.CASA_MEP, fecha.AddDays(-i));
-                        if (c?.Venta > 0)
-                        {
-                            _mepHaceUnAnio = c;
-                            _mepHaceUnAnioDia = DateTime.Today;
-                            return c;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    UltimoError = ex.Message;
-                }
-                return null;
-            }
-        }
-
-        // Variación % del dólar MEP en los últimos 12 meses; null sin datos
-        public decimal? VariacionMepAnual()
-        {
-            CotizacionDolar hoy = Mep(), antes = MepHaceUnAnio();
-            if (!(hoy?.Venta > 0) || !(antes?.Venta > 0)) return null;
-            return Math.Round((hoy.Venta.Value / antes.Venta.Value - 1) * 100, 2);
-        }
-
         // Tipo de cambio oficial del BCRA: el último publicado en los últimos 10 días (no hay valor los fines de
         // semana y feriados). null si no hay datos.
         public (DateTime Fecha, decimal Valor)? Oficial(DateTime? fecha = null)

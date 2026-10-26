@@ -15,7 +15,7 @@ namespace BLL
         // ---------- Datos ----------
 
         // Rentabilidad del fideicomiso para los inversores contra obligaciones negociables en dólares (valor
-        // referencial) y el dólar MEP, todo en % anual en dólares
+        // referencial) y plazo fijo bancario en dólares (BCRA), todo en % anual en dólares
         public ComparativaRentabilidad ObtenerComparativaRentabilidad(int idProyecto)
         {
             AnalisisComparativo a = new ProyectoInversionBLL().ObtenerAnalisisComparativo(idProyecto);
@@ -28,12 +28,14 @@ namespace BLL
                 RentabilidadAnualUSD = Anualizar(a.RentabilidadInversoresPorcentaje, plazo)
             };
 
-            CotizacionesBLL cotizaciones = new CotizacionesBLL();
-            CotizacionDolar mepAntes = cotizaciones.MepHaceUnAnio();
-            c.MepHaceUnAnio = mepAntes?.Venta;
-            c.VariacionMepAnual = cotizaciones.VariacionMepAnual();
-            if (!c.VariacionMepAnual.HasValue)
-                a.Advertencias.Add("Sin el dólar MEP de hace un año (ArgentinaDatos).");
+            var plazoFijoUsd = new IndicesBCRABLL().TasaPlazoFijoUsd();
+            if (plazoFijoUsd.HasValue)
+            {
+                c.PlazoFijoUsdAnual = plazoFijoUsd.Value.Tasa;
+                c.FechaPlazoFijoUsd = plazoFijoUsd.Value.Fecha;
+            }
+            else
+                a.Advertencias.Add($"Sin la tasa de plazo fijo en dólares del BCRA: se usa el valor referencial de {ComparativaRentabilidad.PLAZO_FIJO_USD_REFERENCIAL:0.##}% anual.");
             return c;
         }
 
@@ -179,7 +181,7 @@ namespace BLL
 
         // ---------- Propuesta para inversores ----------
 
-        // graficoRentabilidad: barras fideicomiso / plazo fijo / dólar MEP (% anual). graficoParticipacion: torta de los aportes.
+        // graficoRentabilidad: barras fideicomiso / ON / plazo fijo en dólares (% anual en USD). graficoParticipacion: torta de los aportes.
         public void GenerarInformeInversores(ResumenFideicomiso r, ComparativaRentabilidad c, byte[] graficoRentabilidad, byte[] graficoParticipacion, string ruta)
         {
             ProyectoInversionBLL.ExigirPermiso(PermisosDefinidos.AccesoPN3Inversiones, "Inversiones");
@@ -227,9 +229,10 @@ namespace BLL
             pdf.Campo("Fideicomiso", $"{c.RentabilidadAnualUSD:0.##}% anual en dólares ({c.RentabilidadPlazoUSD:0.##}% en los {c.PlazoObraMeses} meses de obra)");
             pdf.Campo("Obligaciones negociables", $"{c.ObligacionesNegociablesAnualUSD:0.##}% anual en dólares: valor referencial de las ON corporativas " +
                                                   "argentinas en dólares (rinden aproximadamente entre 6% y 8% anual)");
-            pdf.Campo("Dólar MEP", c.VariacionMepAnual.HasValue
-                ? $"{c.VariacionMepAnual:+0.##;-0.##}% en los últimos 12 meses (de ${c.MepHaceUnAnio:N2} a ${a.DolarMep:N2})"
-                : "Sin datos históricos");
+            pdf.Campo("Plazo fijo en dólares", c.PlazoFijoUsdReferencial
+                ? $"{c.PlazoFijoUsdAnual:0.##}% anual en dólares: valor referencial del plazo fijo bancario en dólares (los bancos pagan " +
+                  "aproximadamente entre 0,5% y 1% anual)"
+                : $"{c.PlazoFijoUsdAnual:0.##}% anual en dólares: tasa de plazo fijo en dólares de personas humanas (BCRA al {c.FechaPlazoFijoUsd:dd/MM/yyyy})");
             pdf.Recuadro($"POR CADA USD {ComparativaRentabilidad.MONTO_EJEMPLO:N0} INVERTIDOS",
                 $"Recibe un estimado de {Usd(c.RetornoPorMontoEjemploUSD)} al terminar la obra, en {c.PlazoObraMeses} meses: " +
                 $"una ganancia de {Usd(c.GananciaPorMontoEjemploUSD)} ({c.RentabilidadPlazoUSD:0.##}% en dólares). " +
@@ -238,7 +241,9 @@ namespace BLL
                         $"{a.IccMensualPromedio:0.##}% mensual) frente a un dólar que acompaña a la inflación (IPC promedio {a.IpcMensualPromedio:0.##}% mensual). " +
                         $"Unidades vendidas a USD {p.ValorVentaM2Unidades:N2} por m² al terminar la obra. Comparación en dólares: el rendimiento de las " +
                         $"obligaciones negociables ({c.ObligacionesNegociablesAnualUSD:0.##}% anual) es un valor referencial, no una cotización del día (no hay " +
-                        "una fuente pública que lo publique); el del dólar MEP es su variación de los últimos 12 meses (ArgentinaDatos). Los rendimientos " +
+                        "una fuente pública que lo publique); " + (c.PlazoFijoUsdReferencial
+                            ? $"el del plazo fijo en dólares ({c.PlazoFijoUsdAnual:0.##}% anual) también es referencial, porque no se pudo consultar al BCRA. "
+                            : $"el del plazo fijo en dólares es la tasa nominal anual que publica el BCRA para personas humanas. ") + "Los rendimientos " +
                         "pasados no garantizan los futuros; la ganancia del fideicomiso es una estimación sujeta a los costos y precios de venta reales.", 8);
 
             // ----- Página 3: estado del fideicomiso -----

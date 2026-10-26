@@ -3,7 +3,7 @@ using System;
 namespace BE
 {
     // Para la propuesta a inversores: rentabilidad anual del fideicomiso contra las alternativas habituales de un
-    // ahorrista en dólares (obligaciones negociables y dólar MEP). Todo en % anual en dólares, para que sea comparable.
+    // ahorrista en dólares (obligaciones negociables y plazo fijo bancario en dólares). Todo en % anual en dólares, para que sea comparable.
     public class ComparativaRentabilidad
     {
         public AnalisisComparativo Analisis { get; set; }
@@ -18,9 +18,12 @@ namespace BE
         public const decimal ON_ANUAL_USD_REFERENCIAL = 7;
         public decimal ObligacionesNegociablesAnualUSD { get; set; } = ON_ANUAL_USD_REFERENCIAL;
 
-        // Dólar MEP: variación de los últimos 12 meses (ArgentinaDatos)
-        public decimal? VariacionMepAnual { get; set; }
-        public decimal? MepHaceUnAnio { get; set; }
+        // Plazo fijo bancario en dólares de personas humanas (BCRA, tasa nominal anual). Sin datos de la API se usa un
+        // valor referencial (los bancos pagan aproximadamente entre 0,5% y 1% anual) y FechaPlazoFijoUsd queda en null.
+        public const decimal PLAZO_FIJO_USD_REFERENCIAL = 1;
+        public decimal PlazoFijoUsdAnual { get; set; } = PLAZO_FIJO_USD_REFERENCIAL;
+        public DateTime? FechaPlazoFijoUsd { get; set; }
+        public bool PlazoFijoUsdReferencial => !FechaPlazoFijoUsd.HasValue;
 
         // Por cada USD 100.000 invertidos
         public const decimal MONTO_EJEMPLO = 100000;

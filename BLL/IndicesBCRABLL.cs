@@ -11,6 +11,7 @@ namespace BLL
     public class IndicesBCRABLL
     {
         public const int ID_INFLACION_MENSUAL = 27;  // "Inflación mensual" (IPC, variación % del mes; fecha = último día del mes)
+        public const int ID_TASA_PLAZO_FIJO_USD = 1194; // "Tasa de interés de depósitos a plazo fijo en dólares de personas humanas" (% n.a.)
         public const int ID_TIM = 1197;              // "Tasa de Intereses Moratorios (TIM) CCC, art. 768(c)": índice diario
 
         // Una consulta a la API por serie y rango cada tantos minutos como máximo (los datos que no están
@@ -78,6 +79,20 @@ namespace BLL
             List<DateTime> fechas = meses.Select(m => FechaMes(m.Year, m.Month)).ToList();
             Dictionary<DateTime, decimal> serie = Serie(ID_INFLACION_MENSUAL, fechas.Min().AddDays(-1), fechas.Max(), fechas);
             return fechas.ToDictionary(f => f, f => serie.TryGetValue(f, out decimal v) ? v : (decimal?)null);
+        }
+
+        // ---------- Plazo fijo en dólares ----------
+
+        // Tasa nominal anual (en %) de plazo fijo en dólares de personas humanas: la última publicada en los últimos
+        // 10 días (no hay valor los fines de semana y feriados, y se publica con unos días de demora). null sin datos.
+        public (DateTime Fecha, decimal Tasa)? TasaPlazoFijoUsd()
+        {
+            DateTime hasta = DateTime.Today;
+            Dictionary<DateTime, decimal> serie = Serie(ID_TASA_PLAZO_FIJO_USD, hasta.AddDays(-10), hasta,
+                Enumerable.Range(1, 10).Select(i => hasta.AddDays(-i)).Where(d => d.DayOfWeek != DayOfWeek.Saturday && d.DayOfWeek != DayOfWeek.Sunday));
+            if (serie.Count == 0) return null;
+            var ultimo = serie.OrderByDescending(v => v.Key).First();
+            return (ultimo.Key, ultimo.Value);
         }
 
         // ---------- TIM ----------
