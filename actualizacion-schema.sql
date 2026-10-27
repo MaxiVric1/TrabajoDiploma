@@ -953,6 +953,103 @@ BEGIN
 END
 GO
 
+-- Ventas de ejemplo (últimos 12 meses) para los 4 primeros agentes cuando existen pero no tienen ninguna venta: p. ej.
+-- si se crearon a mano desde la aplicación. Se buscan por usuario (mrossi o MartinaRossi) o por nombre y apellido.
+-- A un agente que ya tiene ventas (con cualquiera de los usuarios que coinciden) no se le agrega nada, así que en las
+-- bases donde el bloque anterior ya cargó las suyas este no hace nada.
+DECLARE @Buscados TABLE ([clave] VARCHAR(20), [usuario] VARCHAR(50), [usuario_largo] VARCHAR(50),
+                         [nombre_persona] NVARCHAR(100), [apellido] NVARCHAR(100));
+INSERT INTO @Buscados VALUES
+    ('rossi',     'mrossi',     'MartinaRossi',    N'Martina',  N'Rossi'),
+    ('morales',   'fmorales',   'FedericoMorales', N'Federico', N'Morales'),
+    ('herrera',   'cherrera',   'CamilaHerrera',   N'Camila',   N'Herrera'),
+    ('benedetti', 'lbenedetti', 'LucasBenedetti',  N'Lucas',    N'Benedetti');
+
+DECLARE @SinVentas TABLE ([clave] VARCHAR(20), [id] INT);
+INSERT INTO @SinVentas ([clave], [id])
+SELECT b.[clave],
+       (SELECT TOP 1 u.[id] FROM [dbo].[Usuario] u
+        WHERE u.[nombre] IN (b.[usuario], b.[usuario_largo])
+           OR (u.[nombre_persona] = b.[nombre_persona] AND u.[apellido] = b.[apellido])
+        ORDER BY CASE WHEN u.[nombre] = b.[usuario] THEN 0 WHEN u.[nombre] = b.[usuario_largo] THEN 1 ELSE 2 END, u.[id])
+FROM @Buscados b
+WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Venta] v JOIN [dbo].[Usuario] u ON u.[id] = v.[id_usuario_agente]
+                  WHERE u.[nombre] IN (b.[usuario], b.[usuario_largo])
+                     OR (u.[nombre_persona] = b.[nombre_persona] AND u.[apellido] = b.[apellido]));
+DELETE FROM @SinVentas WHERE [id] IS NULL;
+
+IF EXISTS (SELECT 1 FROM @SinVentas)
+BEGIN
+    -- Cantidades, montos y fechas distintos para cada agente; las que no tienen precio quedan Publicadas
+    DECLARE @Demo TABLE ([orden] INT IDENTITY(1,1), [agente] VARCHAR(20), [tipo] VARCHAR(50), [direccion] NVARCHAR(200),
+                         [localidad] NVARCHAR(100), [m2] DECIMAL(10,2), [ambientes] INT, [lote] DECIMAL(10,2),
+                         [precio_usd] DECIMAL(18,2), [dias] INT);
+    INSERT INTO @Demo ([agente], [tipo], [direccion], [localidad], [m2], [ambientes], [lote], [precio_usd], [dias]) VALUES
+        ('rossi',     'Departamento', N'Gorriti 4800',            N'Palermo, CABA',          68,  3, NULL, 152000, 6),
+        ('rossi',     'Departamento', N'Cramer 2300',             N'Belgrano, CABA',         82,  3, NULL, 168000, 48),
+        ('rossi',     'Casa',         N'Virrey del Pino 3600',    N'Belgrano, CABA',         210, 5, 280,  295000, 115),
+        ('rossi',     'Departamento', N'Mendoza 2500',            N'Belgrano, CABA',         58,  2, NULL, 109000, 240),
+        ('morales',   'Casa',         N'Pampa 4200',              N'Villa Urquiza, CABA',    240, 6, 310,  365000, 22),
+        ('morales',   'Casa',         N'Tronador 2900',           N'Coghlan, CABA',          270, 6, 330,  445000, 160),
+        ('morales',   'Departamento', N'Av. Congreso 3200',       N'Coghlan, CABA',          120, 4, NULL, 238000, 330),
+        ('herrera',   'Departamento', N'Pringles 900',            N'Almagro, CABA',          40,  1, NULL, 71000,  4),
+        ('herrera',   'Departamento', N'Guardia Vieja 3900',      N'Almagro, CABA',          47,  2, NULL, 83000,  33),
+        ('herrera',   'Departamento', N'Av. Pedro Goyena 600',    N'Caballito, CABA',        63,  3, NULL, 118000, 75),
+        ('herrera',   'Departamento', N'Senillosa 300',           N'Caballito, CABA',        52,  2, NULL, 94000,  190),
+        ('herrera',   'Departamento', N'Carlos Calvo 3800',       N'Boedo, CABA',            39,  1, NULL, 66000,  290),
+        ('herrera',   'Departamento', N'Av. Asamblea 1100',       N'Parque Chacabuco, CABA', 55,  2, NULL, NULL,   14),
+        ('benedetti', 'Departamento', N'Av. Congreso 4900',       N'Villa Urquiza, CABA',    74,  3, NULL, 142000, 85),
+        ('benedetti', 'Casa',         N'Cuenca 3100',             N'Villa del Parque, CABA', 175, 5, 240,  228000, 270),
+        ('benedetti', 'Departamento', N'Av. Beiró 4600',          N'Villa Devoto, CABA',     60,  3, NULL, NULL,   28);
+
+    DECLARE @Tasador INT = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'Tasador');
+    DECLARE @Registro INT = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'Marketing');
+    IF @Tasador IS NULL SET @Tasador = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'admin');
+    DECLARE @Orden INT, @Agente INT, @Tipo VARCHAR(50), @Direccion NVARCHAR(200), @Localidad NVARCHAR(100), @M2 DECIMAL(10,2),
+            @Ambientes INT, @Lote DECIMAL(10,2), @PrecioUsd DECIMAL(18,2), @Dias INT, @Cliente INT, @Inmueble INT, @Captacion INT,
+            @FechaVenta DATE, @FechaCaptacion DATETIME, @Pesos DECIMAL(18,2), @DniCliente VARCHAR(15);
+    DECLARE demo CURSOR LOCAL FAST_FORWARD FOR
+        SELECT d.[orden], s.[id], d.[tipo], d.[direccion], d.[localidad], d.[m2], d.[ambientes], d.[lote], d.[precio_usd], d.[dias]
+        FROM @Demo d JOIN @SinVentas s ON s.[clave] = d.[agente]
+        ORDER BY d.[orden];
+    OPEN demo;
+    FETCH NEXT FROM demo INTO @Orden, @Agente, @Tipo, @Direccion, @Localidad, @M2, @Ambientes, @Lote, @PrecioUsd, @Dias;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @FechaVenta = CAST(DATEADD(DAY, -@Dias, GETDATE()) AS DATE);
+        SET @FechaCaptacion = DATEADD(DAY, -60, CAST(@FechaVenta AS DATETIME));
+        SET @Pesos = ISNULL(@PrecioUsd, 150000) * 1500;
+        -- Clientes 44000001 en adelante (los bloques anteriores usan 41000001... y 43000001...)
+        SET @DniCliente = CAST(44000000 + @Orden AS VARCHAR(15));
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Cliente] WHERE [dni] = @DniCliente)
+            INSERT INTO [dbo].[Cliente] ([dni], [nombre], [apellido], [telefono], [email])
+            VALUES (@DniCliente, N'Cliente', N'Ejemplo ' + CAST(40 + @Orden AS NVARCHAR(10)),
+                    '11-4400-' + RIGHT('0000' + CAST(@Orden AS VARCHAR(4)), 4), NULL);
+        SET @Cliente = (SELECT [id_cliente] FROM [dbo].[Cliente] WHERE [dni] = @DniCliente);
+
+        INSERT INTO [dbo].[Inmueble] ([tipo_inmueble], [direccion], [metros_cuadrados], [cantidad_ambientes], [estado_actual], [id_cliente],
+                                      [tipo_publicacion], [localidad], [superficie_lote], [texto_comercial], [fecha_publicacion])
+        VALUES (@Tipo, @Direccion, @M2, @Ambientes, CASE WHEN @PrecioUsd IS NULL THEN 'Publicado' ELSE 'Vendido' END, @Cliente,
+                'Venta', @Localidad, @Lote, N'Inmueble de ejemplo para el ranking de agentes.', DATEADD(DAY, 15, @FechaCaptacion));
+        SET @Inmueble = SCOPE_IDENTITY();
+        INSERT INTO [dbo].[Captacion] ([fecha_registro], [valor_pretendido], [id_inmueble], [id_usuario_agente])
+        VALUES (@FechaCaptacion, @Pesos, @Inmueble, @Agente);
+        SET @Captacion = SCOPE_IDENTITY();
+        INSERT INTO [dbo].[Tasacion] ([fecha_dictamen], [estado_dictamen], [valor_final], [id_captacion], [id_usuario_tasador])
+        VALUES (DATEADD(DAY, 7, @FechaCaptacion), 'Aprobada', ROUND(@Pesos * 0.95, 2), @Captacion, @Tasador);
+        IF @PrecioUsd IS NOT NULL
+            INSERT INTO [dbo].[Venta] ([id_inmueble], [id_usuario_agente], [fecha_venta], [precio_usd], [id_usuario_registro], [fecha_registro], [observaciones])
+            VALUES (@Inmueble, @Agente, @FechaVenta, @PrecioUsd, @Registro, @FechaVenta, N'Venta de ejemplo para el ranking de agentes.');
+        FETCH NEXT FROM demo INTO @Orden, @Agente, @Tipo, @Direccion, @Localidad, @M2, @Ambientes, @Lote, @PrecioUsd, @Dias;
+    END
+    CLOSE demo;
+    DEALLOCATE demo;
+    DECLARE @Asignados INT = (SELECT COUNT(*) FROM @SinVentas);
+    PRINT N'Ranking de agentes: ventas de ejemplo asignadas a ' + CAST(@Asignados AS NVARCHAR(10)) +
+          N' de los 4 primeros agentes (no tenían ventas).';
+END
+GO
+
 -- ====================================================
 -- 5. Traducciones de los controles nuevos (español e inglés)
 --    Van acá y no en schema-init.sql para que también las reciban las bases existentes.
