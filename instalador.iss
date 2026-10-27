@@ -632,7 +632,7 @@ begin
   // Sin SQL Server: guía propia y página de descarga de Microsoft
   if CantidadInstancias = 0 then
   begin
-    Boton := CrearBoton('Ver tutorial', 0, TextoEstado.Top + ScaleY(22), @BotonTutorialClick);
+    Boton := CrearBoton('Ver guía de instalación', 0, TextoEstado.Top + ScaleY(22), @BotonTutorialClick);
     CrearBoton('Abrir página de descarga', Boton.Left + Boton.Width + ScaleX(10), Boton.Top, @BotonDescargaClick);
   end;
 end;
@@ -721,7 +721,7 @@ begin
   PaginaBase.SelectedValueIndex := Elegir;
 
   if CantidadInstancias = 0 then
-    TextoEstado.Caption := 'Para instalar SQL Server Express paso a paso, abra el tutorial:'
+    TextoEstado.Caption := 'Para instalar SQL Server Express paso a paso, abra la guía de instalación:'
   else if ConBase >= 0 then
     TextoEstado.Caption := 'La base {#SqlBase} ya existe en ' + OpcionServidor[ConBase] + '.'
   else
