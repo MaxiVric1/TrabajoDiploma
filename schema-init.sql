@@ -28,6 +28,7 @@ GO
 -- Se borran en orden inverso a sus dependencias: primero PN2, después PN1 y por último el sistema base
 -- Tablas del PN2: referencian a Usuario, se borran primero
 -- (Garante la crea actualizacion-schema.sql; referencia a Contrato y se borra antes)
+IF OBJECT_ID('[dbo].[Venta]', 'U') IS NOT NULL DROP TABLE [dbo].[Venta];
 IF OBJECT_ID('[dbo].[SuscripcionFideicomiso]', 'U') IS NOT NULL DROP TABLE [dbo].[SuscripcionFideicomiso];
 IF OBJECT_ID('[dbo].[Inversor]', 'U') IS NOT NULL DROP TABLE [dbo].[Inversor];
 IF OBJECT_ID('[dbo].[ProyectoInversion]', 'U') IS NOT NULL DROP TABLE [dbo].[ProyectoInversion];

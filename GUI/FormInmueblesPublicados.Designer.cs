@@ -29,6 +29,7 @@ namespace TpIngSoft
             this.lblSinVistaPrevia = new System.Windows.Forms.Label();
             this.picVistaPrevia = new System.Windows.Forms.PictureBox();
             this.btnDespublicar = new System.Windows.Forms.Button();
+            this.btnRegistrarVenta = new System.Windows.Forms.Button();
             this.btnRepublicar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvInmuebles)).BeginInit();
             this.grpDetalle.SuspendLayout();
@@ -224,6 +225,20 @@ namespace TpIngSoft
             this.btnDespublicar.UseVisualStyleBackColor = false;
             this.btnDespublicar.Click += new System.EventHandler(this.btnDespublicar_Click);
             //
+            // btnRegistrarVenta
+            //
+            this.btnRegistrarVenta.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRegistrarVenta.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnRegistrarVenta.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnRegistrarVenta.ForeColor = System.Drawing.Color.White;
+            this.btnRegistrarVenta.Location = new System.Drawing.Point(658, 572);
+            this.btnRegistrarVenta.Name = "btnRegistrarVenta";
+            this.btnRegistrarVenta.Size = new System.Drawing.Size(140, 36);
+            this.btnRegistrarVenta.TabIndex = 6;
+            this.btnRegistrarVenta.Text = "Registrar venta";
+            this.btnRegistrarVenta.UseVisualStyleBackColor = false;
+            this.btnRegistrarVenta.Click += new System.EventHandler(this.btnRegistrarVenta_Click);
+            //
             // btnRepublicar (mismo lugar que btnDespublicar: se muestra uno u otro según el inmueble)
             //
             this.btnRepublicar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -250,6 +265,7 @@ namespace TpIngSoft
             this.Controls.Add(this.dgvInmuebles);
             this.Controls.Add(this.grpDetalle);
             this.Controls.Add(this.btnDespublicar);
+            this.Controls.Add(this.btnRegistrarVenta);
             this.Controls.Add(this.btnRepublicar);
             this.MinimumSize = new System.Drawing.Size(976, 659);
             this.Name = "FormInmueblesPublicados";
@@ -277,6 +293,7 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblSinVistaPrevia;
         private System.Windows.Forms.PictureBox picVistaPrevia;
         private System.Windows.Forms.Button btnDespublicar;
+        private System.Windows.Forms.Button btnRegistrarVenta;
         private System.Windows.Forms.Button btnRepublicar;
     }
 }

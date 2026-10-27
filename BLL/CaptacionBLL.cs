@@ -206,6 +206,7 @@ namespace BLL
         public const string PUBLICACION_PUBLICADO = "Publicado";
         public const string PUBLICACION_DESPUBLICADO = "Despublicado";
         public const string PUBLICACION_ALQUILADO = "Alquilado";
+        public const string PUBLICACION_VENDIDO = "Vendido";
 
         // Estado de la publicación para los listados ("" si nunca se publicó). Un inmueble alquilado se publicó antes
         // y vuelve a Publicado cuando termina el contrato.
@@ -213,6 +214,7 @@ namespace BLL
         {
             if (inmueble.EstadoActual == EstadoInmueble.Publicado) return PUBLICACION_PUBLICADO;
             if (inmueble.EstadoActual == EstadoInmueble.Alquilado) return PUBLICACION_ALQUILADO;
+            if (inmueble.EstadoActual == EstadoInmueble.Vendido) return PUBLICACION_VENDIDO;
             if (inmueble.Despublicado) return PUBLICACION_DESPUBLICADO;
             return "";
         }
@@ -224,7 +226,7 @@ namespace BLL
             return LeerResumen(EstadoInmueble.Tasado).Where(r => r.CantidadArchivos > 0 && !r.FechaPublicacion.HasValue).ToList();
         }
 
-        // Publicados, alquilados y despublicados (Tasado que ya estuvo publicado)
+        // Publicados, alquilados, vendidos y despublicados (Tasado que ya estuvo publicado)
         public List<CaptacionResumen> LeerPublicados()
         {
             return LeerResumen().Where(r => r.EstadoPublicacion != "").ToList();

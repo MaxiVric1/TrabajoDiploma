@@ -97,10 +97,30 @@ namespace BLL
             }
         }
 
+        // DNI opcional: 7 u 8 dígitos (con o sin puntos), se guarda como 12.345.678; null si viene vacío
+        public static string NormalizarDni(string dni)
+        {
+            if (string.IsNullOrWhiteSpace(dni)) return null;
+            string digitos = new string(dni.Where(char.IsDigit).ToArray());
+            if (digitos.Length < 7 || digitos.Length > 8 || dni.Any(c => !char.IsDigit(c) && c != '.' && c != ' '))
+                throw new ArgumentException("El DNI debe tener 7 u 8 dígitos (por ejemplo 30.456.789).");
+            digitos = digitos.PadLeft(8, '0');
+            return $"{digitos.Substring(0, 2)}.{digitos.Substring(2, 3)}.{digitos.Substring(5, 3)}";
+        }
+
+        // Normaliza el DNI y controla que no lo tenga otro usuario
+        private void ValidarDni(Usuario user)
+        {
+            user.Dni = NormalizarDni(user.Dni);
+            if (user.Dni != null && mapperUsuario.LeerTodos().Any(u => u.Dni == user.Dni && u.Id != user.Id))
+                throw new ArgumentException($"El DNI {user.Dni} ya está registrado para otro usuario.");
+        }
+
         public int Registrar(BE.Usuario user, int idRol = 2)
         {
             if (string.IsNullOrEmpty(user.Nombre) || string.IsNullOrEmpty(user.Password))
                 return -1;
+            ValidarDni(user);
 
             if (mapperUsuario.BuscarPorNombre(user.Nombre) != null)
             {
@@ -138,6 +158,7 @@ namespace BLL
         public void Actualizar(Usuario user)
         {
             Usuario autor = SessionManager.Instance.UsuarioActual;
+            ValidarDni(user);
 
             // T07: Recalcular DVH
             user.DVH = GestorDV.CalcularDVH(user);
@@ -180,6 +201,7 @@ namespace BLL
                 if (actual != null &&
                     actual.NombrePersona == backup.NombrePersona &&
                     actual.Apellido == backup.Apellido &&
+                    actual.Dni == backup.Dni &&
                     actual.Activo == backup.Activo)
                 {
                     throw new Exception("El usuario ya se encuentra en el estado seleccionado.");
@@ -192,6 +214,7 @@ namespace BLL
                     Password = actual.Password, // Mantener password actual
                     NombrePersona = backup.NombrePersona,
                     Apellido = backup.Apellido,
+                    Dni = backup.Dni,
                     Activo = backup.Activo,
                     IdIdioma = actual.IdIdioma,
                     IntentosFallidos = actual.IntentosFallidos,

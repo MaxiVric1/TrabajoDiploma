@@ -45,6 +45,8 @@ namespace TpIngSoft
             this.evaluacionArquitectonicaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.decisionDirectorioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gestionFideicomisoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reportesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rankingAgentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbIdioma = new System.Windows.Forms.ToolStripComboBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblSesionInfo = new System.Windows.Forms.ToolStripStatusLabel();
@@ -61,6 +63,7 @@ namespace TpIngSoft
             this.pn1ToolStripMenuItem,
             this.pn2ToolStripMenuItem,
             this.pn3ToolStripMenuItem,
+            this.reportesToolStripMenuItem,
             this.cmbIdioma});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -354,6 +357,25 @@ namespace TpIngSoft
             this.gestionFideicomisoToolStripMenuItem.Text = "Gestión del Fideicomiso";
             this.gestionFideicomisoToolStripMenuItem.Click += new System.EventHandler(this.gestionFideicomisoToolStripMenuItem_Click);
             //
+            // reportesToolStripMenuItem
+            //
+            this.reportesToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.reportesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rankingAgentesToolStripMenuItem});
+            this.reportesToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.reportesToolStripMenuItem.Name = "reportesToolStripMenuItem";
+            this.reportesToolStripMenuItem.Size = new System.Drawing.Size(65, 23);
+            this.reportesToolStripMenuItem.Text = "Reportes";
+            //
+            // rankingAgentesToolStripMenuItem
+            //
+            this.rankingAgentesToolStripMenuItem.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(93)))), ((int)(((byte)(115)))));
+            this.rankingAgentesToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.rankingAgentesToolStripMenuItem.Name = "rankingAgentesToolStripMenuItem";
+            this.rankingAgentesToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.rankingAgentesToolStripMenuItem.Text = "Ranking de Agentes";
+            this.rankingAgentesToolStripMenuItem.Click += new System.EventHandler(this.rankingAgentesToolStripMenuItem_Click);
+            //
             // cmbIdioma
             // 
             this.cmbIdioma.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -442,5 +464,7 @@ namespace TpIngSoft
         private System.Windows.Forms.ToolStripMenuItem evaluacionArquitectonicaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem decisionDirectorioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gestionFideicomisoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reportesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rankingAgentesToolStripMenuItem;
     }
 }

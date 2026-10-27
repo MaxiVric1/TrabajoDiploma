@@ -199,6 +199,43 @@ namespace TpIngSoft
             }
         }
 
+        // Fecha, monto y observaciones en un mismo diálogo (por ejemplo, una venta); null si se cancela
+        public static (DateTime Fecha, decimal Monto, string Observaciones)? PedirFechaMonto(IWin32Window owner, string titulo, string etiqueta,
+            string rotuloFecha, DateTime fechaMinima, string rotuloMonto, decimal montoMaximo)
+        {
+            using (Form d = Dialogo(titulo, 420, 196))
+            {
+                d.Controls.Add(new Label { Text = etiqueta, Location = new Point(12, 12), Size = new Size(396, 34) });
+                d.Controls.Add(new Label { Text = rotuloFecha, Location = new Point(12, 52), Size = new Size(150, 20), TextAlign = ContentAlignment.MiddleLeft });
+                DateTimePicker fecha = new DateTimePicker
+                {
+                    Location = new Point(168, 52), Size = new Size(120, 20), Format = DateTimePickerFormat.Short,
+                    MinDate = fechaMinima.Date > DateTime.Today ? DateTime.Today : fechaMinima.Date, MaxDate = DateTime.Today, Value = DateTime.Today
+                };
+                d.Controls.Add(fecha);
+                d.Controls.Add(new Label { Text = rotuloMonto, Location = new Point(12, 82), Size = new Size(150, 20), TextAlign = ContentAlignment.MiddleLeft });
+                NumericUpDown monto = new NumericUpDown
+                {
+                    Location = new Point(168, 82), Size = new Size(140, 20), Minimum = 0, Maximum = montoMaximo, DecimalPlaces = 2, ThousandsSeparator = true,
+                    Increment = 1000, BackColor = CAMPO, ForeColor = Color.White, BorderStyle = BorderStyle.FixedSingle
+                };
+                d.Controls.Add(monto);
+                d.Controls.Add(new Label { Text = "Observaciones:", Location = new Point(12, 112), Size = new Size(150, 20), TextAlign = ContentAlignment.MiddleLeft });
+                TextBox observaciones = new TextBox
+                {
+                    Location = new Point(168, 112), Size = new Size(240, 20), MaxLength = 500, BackColor = CAMPO, ForeColor = Color.White, BorderStyle = BorderStyle.FixedSingle
+                };
+                d.Controls.Add(observaciones);
+                Botones(d, 156);
+                while (true)
+                {
+                    if (d.ShowDialog(owner) != DialogResult.OK) return null;
+                    if (monto.Value > 0) return (fecha.Value.Date, monto.Value, observaciones.Text.Trim());
+                    MessageBox.Show(d, "Indique un monto mayor a cero.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
         // Pide dónde guardar un PDF, lo genera y ofrece abrirlo
         public static void GuardarPdf(IWin32Window owner, string nombreArchivo, string titulo, Action<string> generar)
         {

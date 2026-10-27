@@ -67,7 +67,9 @@ namespace TpIngSoft
                 .ConItem(identificarOportunidadesToolStripMenuItem, BE.NombreControl.FormMain_identificarOportunidadesToolStripMenuItem)
                 .ConItem(evaluacionArquitectonicaToolStripMenuItem, BE.NombreControl.FormMain_evaluacionArquitectonicaToolStripMenuItem)
                 .ConItem(decisionDirectorioToolStripMenuItem, BE.NombreControl.FormMain_decisionDirectorioToolStripMenuItem)
-                .ConItem(gestionFideicomisoToolStripMenuItem, BE.NombreControl.FormMain_gestionFideicomisoToolStripMenuItem);
+                .ConItem(gestionFideicomisoToolStripMenuItem, BE.NombreControl.FormMain_gestionFideicomisoToolStripMenuItem)
+                .ConItem(reportesToolStripMenuItem, BE.NombreControl.FormMain_reportesToolStripMenuItem)
+                .ConItem(rankingAgentesToolStripMenuItem, BE.NombreControl.FormMain_rankingAgentesToolStripMenuItem);
 
             _controlesTraducibles.Add(menuTraducible);
         }
@@ -225,6 +227,11 @@ namespace TpIngSoft
                 evaluacionArquitectonicaToolStripMenuItem.Visible = arquitectura;
                 decisionDirectorioToolStripMenuItem.Visible = directorio;
                 gestionFideicomisoToolStripMenuItem.Visible = inversiones;
+
+                // Reportes: ranking de agentes para el Administrador y el Directorio
+                bool rankingAgentes = SERVICIOS.SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoAdmin) || directorio;
+                reportesToolStripMenuItem.Visible = rankingAgentes;
+                rankingAgentesToolStripMenuItem.Visible = rankingAgentes;
             }
             else
             {
@@ -238,6 +245,7 @@ namespace TpIngSoft
                 pn1ToolStripMenuItem.Visible = false;
                 pn2ToolStripMenuItem.Visible = false;
                 pn3ToolStripMenuItem.Visible = false;
+                reportesToolStripMenuItem.Visible = false;
             }
 
             // Re-sync selected language in combobox when session config updates
@@ -494,6 +502,13 @@ namespace TpIngSoft
         private void decisionDirectorioToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormDecisionDirectorio frm = new FormDecisionDirectorio();
+            frm.MdiParent = this;
+            frm.Show();
+        }
+
+        private void rankingAgentesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormRankingAgentes frm = new FormRankingAgentes();
             frm.MdiParent = this;
             frm.Show();
         }

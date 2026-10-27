@@ -31,6 +31,7 @@ namespace DAL
                         Nombre = row["nombre"].ToString(),
                         NombrePersona = row["nombre_persona"] != DBNull.Value ? row["nombre_persona"].ToString() : "",
                         Apellido = row["apellido"] != DBNull.Value ? row["apellido"].ToString() : "",
+                        Dni = dt.Columns.Contains("dni") && row["dni"] != DBNull.Value ? row["dni"].ToString() : null,
                         Password = row["pass"].ToString(),
                         Activo = Convert.ToBoolean(row["activo"]),
                         IntentosFallidos = row["intentos_fallidos"] != DBNull.Value ? Convert.ToInt32(row["intentos_fallidos"]) : 0,
@@ -63,6 +64,7 @@ namespace DAL
                         Nombre = row["nombre"].ToString(),
                         NombrePersona = row["nombre_persona"] != DBNull.Value ? row["nombre_persona"].ToString() : "",
                         Apellido = row["apellido"] != DBNull.Value ? row["apellido"].ToString() : "",
+                        Dni = dt.Columns.Contains("dni") && row["dni"] != DBNull.Value ? row["dni"].ToString() : null,
                         Password = row["pass"].ToString(),
                         Activo = Convert.ToBoolean(row["activo"]),
                         IntentosFallidos = row["intentos_fallidos"] != DBNull.Value ? Convert.ToInt32(row["intentos_fallidos"]) : 0,
@@ -89,6 +91,7 @@ namespace DAL
                     acceso.CrearParametro("@Apellido", user.Apellido),
                     acceso.CrearParametro("@Pass", user.Password),
                     acceso.CrearParametro("@DVH", user.DVH),
+                    acceso.CrearParametro("@Dni", user.Dni),
                     outParam
                 };
 
@@ -139,7 +142,8 @@ namespace DAL
                     acceso.CrearParametro("@Apellido", user.Apellido),
                     acceso.CrearParametro("@Pass", user.Password),
                     acceso.CrearParametro("@Activo", user.Activo),
-                    acceso.CrearParametro("@DVH", user.DVH)
+                    acceso.CrearParametro("@DVH", user.DVH),
+                    acceso.CrearParametro("@Dni", user.Dni)
                 };
                 acceso.Escribir("ActualizarUsuario", parameters);
             }
@@ -161,6 +165,7 @@ namespace DAL
                         Nombre = row["nombre"].ToString(),
                         NombrePersona = row["nombre_persona"] != DBNull.Value ? row["nombre_persona"].ToString() : "",
                         Apellido = row["apellido"] != DBNull.Value ? row["apellido"].ToString() : "",
+                        Dni = dt.Columns.Contains("dni") && row["dni"] != DBNull.Value ? row["dni"].ToString() : null,
                         Password = row["pass"].ToString(),
                         Activo = Convert.ToBoolean(row["activo"]),
                         IntentosFallidos = row["intentos_fallidos"] != DBNull.Value ? Convert.ToInt32(row["intentos_fallidos"]) : 0,

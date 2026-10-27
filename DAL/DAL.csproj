@@ -89,6 +89,7 @@
     <Compile Include="IndiceBCRADAL.cs" />
     <Compile Include="HistorialICCDAL.cs" />
     <Compile Include="ProyectoInversionDAL.cs" />
+    <Compile Include="VentaDAL.cs" />
     <Compile Include="InversorDAL.cs" />
     <Compile Include="SuscripcionFideicomisoDAL.cs" />
     <Compile Include="PagoAlquilerDAL.cs" />

@@ -29,6 +29,8 @@ namespace TpIngSoft
             this.txtNombrePersona = new System.Windows.Forms.TextBox();
             this.labelApellido = new System.Windows.Forms.Label();
             this.txtApellido = new System.Windows.Forms.TextBox();
+            this.labelDni = new System.Windows.Forms.Label();
+            this.txtDni = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.txtPassword = new System.Windows.Forms.TextBox();
             this.lblRol = new System.Windows.Forms.Label();
@@ -92,6 +94,8 @@ namespace TpIngSoft
             this.grpAcciones.Controls.Add(this.txtNombrePersona);
             this.grpAcciones.Controls.Add(this.labelApellido);
             this.grpAcciones.Controls.Add(this.txtApellido);
+            this.grpAcciones.Controls.Add(this.labelDni);
+            this.grpAcciones.Controls.Add(this.txtDni);
             this.grpAcciones.Controls.Add(this.label2);
             this.grpAcciones.Controls.Add(this.txtPassword);
             this.grpAcciones.Controls.Add(this.lblRol);
@@ -191,9 +195,28 @@ namespace TpIngSoft
             this.txtApellido.Size = new System.Drawing.Size(180, 20);
             this.txtApellido.TabIndex = 17;
             // 
+            // labelDni
+            // 
+            this.labelDni.Location = new System.Drawing.Point(12, 160);
+            this.labelDni.Name = "labelDni";
+            this.labelDni.Size = new System.Drawing.Size(94, 20);
+            this.labelDni.TabIndex = 16;
+            this.labelDni.Text = "DNI:";
+            this.labelDni.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // txtDni
+            // 
+            this.txtDni.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.txtDni.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtDni.ForeColor = System.Drawing.Color.White;
+            this.txtDni.Location = new System.Drawing.Point(112, 160);
+            this.txtDni.Name = "txtDni";
+            this.txtDni.Size = new System.Drawing.Size(180, 20);
+            this.txtDni.MaxLength = 10;
+            // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(12, 160);
+            this.label2.Location = new System.Drawing.Point(12, 195);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(94, 20);
             this.label2.TabIndex = 4;
@@ -205,7 +228,7 @@ namespace TpIngSoft
             this.txtPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
             this.txtPassword.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtPassword.ForeColor = System.Drawing.Color.White;
-            this.txtPassword.Location = new System.Drawing.Point(112, 160);
+            this.txtPassword.Location = new System.Drawing.Point(112, 195);
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.Size = new System.Drawing.Size(180, 20);
             this.txtPassword.TabIndex = 5;
@@ -213,7 +236,7 @@ namespace TpIngSoft
             // 
             // lblRol
             // 
-            this.lblRol.Location = new System.Drawing.Point(12, 195);
+            this.lblRol.Location = new System.Drawing.Point(12, 230);
             this.lblRol.Name = "lblRol";
             this.lblRol.Size = new System.Drawing.Size(94, 21);
             this.lblRol.TabIndex = 6;
@@ -227,7 +250,7 @@ namespace TpIngSoft
             this.cmbRoles.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.cmbRoles.ForeColor = System.Drawing.Color.White;
             this.cmbRoles.FormattingEnabled = true;
-            this.cmbRoles.Location = new System.Drawing.Point(112, 195);
+            this.cmbRoles.Location = new System.Drawing.Point(112, 230);
             this.cmbRoles.Name = "cmbRoles";
             this.cmbRoles.Size = new System.Drawing.Size(180, 21);
             this.cmbRoles.TabIndex = 7;
@@ -237,7 +260,7 @@ namespace TpIngSoft
             this.chkActivo.AutoSize = true;
             this.chkActivo.Checked = true;
             this.chkActivo.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkActivo.Location = new System.Drawing.Point(112, 230);
+            this.chkActivo.Location = new System.Drawing.Point(112, 265);
             this.chkActivo.Name = "chkActivo";
             this.chkActivo.Size = new System.Drawing.Size(56, 17);
             this.chkActivo.TabIndex = 8;
@@ -246,7 +269,7 @@ namespace TpIngSoft
             // 
             // lblTiempoBloqueo
             // 
-            this.lblTiempoBloqueo.Location = new System.Drawing.Point(6, 260);
+            this.lblTiempoBloqueo.Location = new System.Drawing.Point(6, 295);
             this.lblTiempoBloqueo.Name = "lblTiempoBloqueo";
             this.lblTiempoBloqueo.Size = new System.Drawing.Size(100, 20);
             this.lblTiempoBloqueo.TabIndex = 9;
@@ -260,7 +283,7 @@ namespace TpIngSoft
             this.cmbTiempoBloqueo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.cmbTiempoBloqueo.ForeColor = System.Drawing.Color.White;
             this.cmbTiempoBloqueo.FormattingEnabled = true;
-            this.cmbTiempoBloqueo.Location = new System.Drawing.Point(112, 260);
+            this.cmbTiempoBloqueo.Location = new System.Drawing.Point(112, 295);
             this.cmbTiempoBloqueo.Name = "cmbTiempoBloqueo";
             this.cmbTiempoBloqueo.Size = new System.Drawing.Size(180, 21);
             this.cmbTiempoBloqueo.TabIndex = 10;
@@ -270,7 +293,7 @@ namespace TpIngSoft
             this.btnRegistrar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnRegistrar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnRegistrar.ForeColor = System.Drawing.Color.White;
-            this.btnRegistrar.Location = new System.Drawing.Point(112, 300);
+            this.btnRegistrar.Location = new System.Drawing.Point(112, 335);
             this.btnRegistrar.Name = "btnRegistrar";
             this.btnRegistrar.Size = new System.Drawing.Size(180, 30);
             this.btnRegistrar.TabIndex = 11;
@@ -283,7 +306,7 @@ namespace TpIngSoft
             this.btnBloquear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnBloquear.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnBloquear.ForeColor = System.Drawing.Color.White;
-            this.btnBloquear.Location = new System.Drawing.Point(112, 345);
+            this.btnBloquear.Location = new System.Drawing.Point(112, 380);
             this.btnBloquear.Name = "btnBloquear";
             this.btnBloquear.Size = new System.Drawing.Size(85, 30);
             this.btnBloquear.TabIndex = 12;
@@ -296,7 +319,7 @@ namespace TpIngSoft
             this.btnDesbloquear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnDesbloquear.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDesbloquear.ForeColor = System.Drawing.Color.White;
-            this.btnDesbloquear.Location = new System.Drawing.Point(207, 345);
+            this.btnDesbloquear.Location = new System.Drawing.Point(207, 380);
             this.btnDesbloquear.Name = "btnDesbloquear";
             this.btnDesbloquear.Size = new System.Drawing.Size(85, 30);
             this.btnDesbloquear.TabIndex = 13;
@@ -345,5 +368,7 @@ namespace TpIngSoft
         private System.Windows.Forms.TextBox txtNombrePersona;
         private System.Windows.Forms.Label labelApellido;
         private System.Windows.Forms.TextBox txtApellido;
+        private System.Windows.Forms.Label labelDni;
+        private System.Windows.Forms.TextBox txtDni;
     }
 }

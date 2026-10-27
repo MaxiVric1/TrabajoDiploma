@@ -9,6 +9,7 @@ namespace BE
         public string Nombre { get; set; }
         public string NombrePersona { get; set; }
         public string Apellido { get; set; }
+        public string Dni { get; set; }
         public string Password { get; set; }
         public bool Activo { get; set; }
         public long DVH { get; set; }

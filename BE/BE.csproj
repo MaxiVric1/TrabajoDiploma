@@ -94,6 +94,7 @@
     <Compile Include="AnalisisComparativo.cs" />
     <Compile Include="ComparativaRentabilidad.cs" />
     <Compile Include="ParcelaCaba.cs" />
+    <Compile Include="Venta.cs" />
     <Compile Include="PagoAlquiler.cs" />
     <Compile Include="PeriodoAPagar.cs" />
     <Compile Include="AccionLegal.cs" />

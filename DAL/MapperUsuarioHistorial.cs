@@ -25,7 +25,8 @@ namespace DAL
                     acceso.CrearParametro("@Activo", user.Activo),
                     acceso.CrearParametro("@DVH", user.DVH),
                     acceso.CrearParametro("@IdUsuarioAutor", idAutor),
-                    acceso.CrearParametro("@TipoOperacion", tipoOperacion)
+                    acceso.CrearParametro("@TipoOperacion", tipoOperacion),
+                    acceso.CrearParametro("@Dni", user.Dni)
                 };
                 acceso.Escribir("InsertarUsuarioHistorial", parameters);
             }
@@ -52,6 +53,7 @@ namespace DAL
                         Nombre = row["nombre"].ToString(),
                         NombrePersona = row["nombre_persona"] != DBNull.Value ? row["nombre_persona"].ToString() : "",
                         Apellido = row["apellido"] != DBNull.Value ? row["apellido"].ToString() : "",
+                        Dni = dt.Columns.Contains("dni") && row["dni"] != DBNull.Value ? row["dni"].ToString() : null,
                         Password = row["pass"].ToString(),
                         Activo = Convert.ToBoolean(row["activo"]),
                         DVH = row["dvh"] != DBNull.Value ? Convert.ToInt64(row["dvh"]) : 0,
@@ -85,6 +87,7 @@ namespace DAL
                         Nombre = row["nombre"].ToString(),
                         NombrePersona = row["nombre_persona"] != DBNull.Value ? row["nombre_persona"].ToString() : "",
                         Apellido = row["apellido"] != DBNull.Value ? row["apellido"].ToString() : "",
+                        Dni = dt.Columns.Contains("dni") && row["dni"] != DBNull.Value ? row["dni"].ToString() : null,
                         Password = row["pass"].ToString(),
                         Activo = Convert.ToBoolean(row["activo"]),
                         DVH = row["dvh"] != DBNull.Value ? Convert.ToInt64(row["dvh"]) : 0,

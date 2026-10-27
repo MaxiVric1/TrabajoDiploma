@@ -14,6 +14,8 @@ namespace TpIngSoft
         private const string PUBLICADO = "Publicado";
         private const string DESPUBLICADO = "Despublicado";
         private const string ALQUILADO = "Alquilado"; // no se puede despublicar mientras dure el contrato
+        private const string VENDIDO = "Vendido";
+        private static readonly Color COLOR_VENDIDO = Color.FromArgb(120, 170, 220);
         private static readonly Color COLOR_DESPUBLICADO = Color.FromArgb(170, 165, 190);
         private static readonly Color COLOR_ALQUILADO = Color.FromArgb(130, 200, 150);
 
@@ -45,6 +47,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(lblSinVistaPrevia, BE.NombreControl.FormInmueblesPublicados_lblSinVistaPrevia));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnDespublicar, BE.NombreControl.FormInmueblesPublicados_btnDespublicar));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnRepublicar, BE.NombreControl.FormInmueblesPublicados_btnRepublicar));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnRegistrarVenta, BE.NombreControl.FormInmueblesPublicados_btnRegistrarVenta));
 
             _grillasTraducibles.Clear();
             _grillasTraducibles.Add(new DataGridTraducible(dgvInmuebles, "FormInmueblesPublicados.dgvInmuebles")
@@ -146,6 +149,7 @@ namespace TpIngSoft
                     if (!(row.DataBoundItem is CaptacionResumen r)) continue;
                     if (r.EstadoPublicacion == DESPUBLICADO) row.DefaultCellStyle.ForeColor = COLOR_DESPUBLICADO;
                     else if (r.EstadoPublicacion == ALQUILADO) row.DefaultCellStyle.ForeColor = COLOR_ALQUILADO;
+                    else if (r.EstadoPublicacion == VENDIDO) row.DefaultCellStyle.ForeColor = COLOR_VENDIDO;
                     if (nroASeleccionar.HasValue && r.NroCaptacion == nroASeleccionar.Value)
                     {
                         row.Selected = true;
@@ -225,6 +229,7 @@ namespace TpIngSoft
             btnRepublicar.Visible = despublicado;
             btnDespublicar.Visible = !despublicado;
             btnDespublicar.Enabled = seleccionado?.EstadoPublicacion == PUBLICADO;
+            btnRegistrarVenta.Enabled = seleccionado?.EstadoPublicacion == PUBLICADO && seleccionado.TipoPublicacion == TipoPublicacion.Venta;
         }
 
         private void MostrarSinVistaPrevia(string mensaje)
@@ -270,6 +275,32 @@ namespace TpIngSoft
                 MessageBox.Show("No se pudo despublicar el inmueble: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             CargarInmuebles(seleccionado.NroCaptacion); // refleja el estado actual, haya funcionado o no
+        }
+
+        // Venta de un inmueble publicado en venta: queda Vendido y se le cuenta al agente de la captación (ranking)
+        private void btnRegistrarVenta_Click(object sender, EventArgs e)
+        {
+            CaptacionResumen seleccionado = InmuebleSeleccionado();
+            if (seleccionado == null) return;
+            var venta = PN3Comun.PedirFechaMonto(this, "Registrar venta",
+                $"{seleccionado.TipoInmueble} - {seleccionado.Direccion} (Captación N° {seleccionado.NroCaptacion}). Fecha y precio de venta en dólares:",
+                "Fecha de venta:", seleccionado.FechaPublicacion ?? DateTime.Today.AddYears(-1), "Precio (USD):", VentaBLL.PRECIO_MAXIMO_USD);
+            if (venta == null) return;
+            try
+            {
+                int id = new VentaBLL().RegistrarVenta(seleccionado.IdInmueble, venta.Value.Fecha, venta.Value.Monto, venta.Value.Observaciones);
+                MessageBox.Show($"Venta N° {id} registrada: {seleccionado.Direccion} vendido el {venta.Value.Fecha:dd/MM/yyyy} en USD {venta.Value.Monto:N2}.",
+                    "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException)
+            {
+                MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No se pudo registrar la venta: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            CargarInmuebles(seleccionado.NroCaptacion);
         }
 
         private void btnRepublicar_Click(object sender, EventArgs e)

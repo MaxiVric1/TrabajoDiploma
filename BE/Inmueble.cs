@@ -4,14 +4,15 @@ namespace BE
 {
     // Los nombres deben coincidir con el CHECK de Inmueble.estado_actual en la base.
     // Ciclo: Captado -> Tasado -> Publicado; un inmueble de alquiler pasa a Alquilado con el contrato y vuelve a
-    // Publicado cuando el contrato finaliza.
+    // Publicado cuando el contrato finaliza; uno en venta pasa a Vendido al registrar la venta.
     public enum EstadoInmueble
     {
         Captado,
         Tasado,
         Rechazado,
         Publicado,
-        Alquilado
+        Alquilado,
+        Vendido
     }
 
     // Los nombres deben coincidir con el CHECK de Inmueble.tipo_publicacion en la base

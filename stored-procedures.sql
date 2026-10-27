@@ -26,7 +26,7 @@ CREATE PROCEDURE [dbo].[BuscarUsuarioPorNombre]
     @Nombre VARCHAR(50)
 AS
 BEGIN
-    SELECT id, nombre, nombre_persona, apellido, pass, activo, intentos_fallidos, bloqueado_hasta, dvh, id_idioma
+    SELECT id, nombre, nombre_persona, apellido, dni, pass, activo, intentos_fallidos, bloqueado_hasta, dvh, id_idioma
     FROM Usuario 
     WHERE nombre = @Nombre AND activo = 1;
 END
@@ -43,7 +43,7 @@ CREATE PROCEDURE [dbo].[BuscarUsuarioPorId]
     @Id INT
 AS
 BEGIN
-    SELECT id, nombre, nombre_persona, apellido, pass, activo, intentos_fallidos, bloqueado_hasta, dvh, id_idioma
+    SELECT id, nombre, nombre_persona, apellido, dni, pass, activo, intentos_fallidos, bloqueado_hasta, dvh, id_idioma
     FROM Usuario 
     WHERE id = @Id;
 END
@@ -59,7 +59,7 @@ GO
 CREATE PROCEDURE [dbo].[LeerUsuarios]
 AS
 BEGIN
-    SELECT id, nombre, nombre_persona, apellido, pass, activo, intentos_fallidos, bloqueado_hasta, dvh, id_idioma
+    SELECT id, nombre, nombre_persona, apellido, dni, pass, activo, intentos_fallidos, bloqueado_hasta, dvh, id_idioma
     FROM Usuario;
 END
 GO
@@ -77,11 +77,12 @@ CREATE PROCEDURE [dbo].[CrearUsuario]
     @Apellido NVARCHAR(100),
     @Pass VARCHAR(100),
     @DVH BIGINT,
+    @Dni VARCHAR(11) = NULL,
     @NuevoId INT OUTPUT
 AS
 BEGIN
-    INSERT INTO Usuario (nombre, nombre_persona, apellido, pass, activo, dvh)
-    VALUES (@Nombre, @NombrePersona, @Apellido, @Pass, 1, @DVH);
+    INSERT INTO Usuario (nombre, nombre_persona, apellido, dni, pass, activo, dvh)
+    VALUES (@Nombre, @NombrePersona, @Apellido, @Dni, @Pass, 1, @DVH);
     SET @NuevoId = SCOPE_IDENTITY();
 END
 GO
@@ -100,11 +101,12 @@ CREATE PROCEDURE [dbo].[ActualizarUsuario]
     @Apellido NVARCHAR(100),
     @Pass VARCHAR(100),
     @Activo BIT,
-    @DVH BIGINT
+    @DVH BIGINT,
+    @Dni VARCHAR(11) = NULL
 AS
 BEGIN
     UPDATE Usuario
-    SET nombre = @Nombre, nombre_persona = @NombrePersona, apellido = @Apellido, pass = @Pass, activo = @Activo, dvh = @DVH
+    SET nombre = @Nombre, nombre_persona = @NombrePersona, apellido = @Apellido, dni = @Dni, pass = @Pass, activo = @Activo, dvh = @DVH
     WHERE id = @Id;
 END
 GO
@@ -329,11 +331,12 @@ CREATE PROCEDURE [dbo].[InsertarUsuarioHistorial]
     @Activo BIT, 
     @DVH BIGINT,
     @IdUsuarioAutor INT, 
-    @TipoOperacion VARCHAR(20)
+    @TipoOperacion VARCHAR(20),
+    @Dni VARCHAR(11) = NULL
 AS 
 BEGIN
-    INSERT INTO Usuario_Historial (id_usuario, nombre, nombre_persona, apellido, pass, activo, dvh, id_usuario_autor, tipo_operacion)
-    VALUES (@IdUsuario, @Nombre, @NombrePersona, @Apellido, @Pass, @Activo, @DVH, @IdUsuarioAutor, @TipoOperacion);
+    INSERT INTO Usuario_Historial (id_usuario, nombre, nombre_persona, apellido, dni, pass, activo, dvh, id_usuario_autor, tipo_operacion)
+    VALUES (@IdUsuario, @Nombre, @NombrePersona, @Apellido, @Dni, @Pass, @Activo, @DVH, @IdUsuarioAutor, @TipoOperacion);
 END;
 GO
 
@@ -2724,5 +2727,61 @@ AS BEGIN
     FROM HistorialICC
     WHERE (@Desde IS NULL OR periodo >= @Desde) AND (@Hasta IS NULL OR periodo <= @Hasta)
     ORDER BY periodo;
+END
+GO
+
+-- ====================================================
+-- Ventas y ranking de agentes
+-- ====================================================
+DROP PROCEDURE IF EXISTS [dbo].[RegistrarVenta];
+GO
+
+-- Un inmueble Publicado en venta pasa a Vendido y queda registrada la venta, a nombre del agente de su última
+-- captación. Todo o nada: @NuevoId queda NULL si el inmueble no está publicado en venta o ya tiene una venta.
+CREATE PROCEDURE [dbo].[RegistrarVenta]
+    @IdInmueble INT,
+    @FechaVenta DATE,
+    @PrecioUsd DECIMAL(18,2),
+    @IdUsuarioRegistro INT,
+    @Observaciones NVARCHAR(500) = NULL,
+    @NuevoId INT OUTPUT
+AS BEGIN
+    SET @NuevoId = NULL;
+    DECLARE @Agente INT = (SELECT TOP 1 id_usuario_agente FROM Captacion WHERE id_inmueble = @IdInmueble ORDER BY nro_captacion DESC);
+    IF @Agente IS NULL RETURN;
+    BEGIN TRANSACTION;
+    UPDATE Inmueble SET estado_actual = 'Vendido'
+    WHERE id_inmueble = @IdInmueble AND estado_actual = 'Publicado' AND tipo_publicacion = 'Venta'
+      AND NOT EXISTS (SELECT 1 FROM Venta WHERE id_inmueble = @IdInmueble);
+    IF @@ROWCOUNT = 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+    INSERT INTO Venta (id_inmueble, id_usuario_agente, fecha_venta, precio_usd, id_usuario_registro, observaciones)
+    VALUES (@IdInmueble, @Agente, @FechaVenta, @PrecioUsd, @IdUsuarioRegistro, @Observaciones);
+    SET @NuevoId = SCOPE_IDENTITY();
+    COMMIT TRANSACTION;
+END
+GO
+
+DROP PROCEDURE IF EXISTS [dbo].[LeerRankingAgentes];
+GO
+
+-- Ventas por agente entre dos fechas (NULL = sin límite): los usuarios activos con el rol Agente Comercial (aunque no
+-- hayan vendido) y cualquier otro que tenga ventas en el período
+CREATE PROCEDURE [dbo].[LeerRankingAgentes]
+    @Desde DATE = NULL,
+    @Hasta DATE = NULL
+AS BEGIN
+    SELECT u.id AS id_usuario, u.nombre AS usuario, u.nombre_persona, u.apellido, u.dni,
+           COUNT(v.id_venta) AS cantidad, ISNULL(SUM(v.precio_usd), 0) AS total_usd
+    FROM Usuario u
+    LEFT JOIN Venta v ON v.id_usuario_agente = u.id
+        AND (@Desde IS NULL OR v.fecha_venta >= @Desde) AND (@Hasta IS NULL OR v.fecha_venta <= @Hasta)
+    WHERE (u.activo = 1 AND EXISTS (SELECT 1 FROM UsuarioRol ur JOIN Rol r ON r.id = ur.id_rol
+                                     WHERE ur.id_usuario = u.id AND r.nombre = 'Agente Comercial'))
+       OR v.id_venta IS NOT NULL
+    GROUP BY u.id, u.nombre, u.nombre_persona, u.apellido, u.dni;
 END
 GO

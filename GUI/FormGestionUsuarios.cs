@@ -32,6 +32,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(label1, BE.NombreControl.FormGestionUsuarios_label1));
             _controlesTraducibles.Add(new EtiquetaTraducible(labelNombrePersona, BE.NombreControl.FormGestionUsuarios_labelNombrePersona));
             _controlesTraducibles.Add(new EtiquetaTraducible(labelApellido, BE.NombreControl.FormGestionUsuarios_labelApellido));
+            _controlesTraducibles.Add(new EtiquetaTraducible(labelDni, BE.NombreControl.FormGestionUsuarios_labelDni));
             _controlesTraducibles.Add(new EtiquetaTraducible(label2, BE.NombreControl.FormGestionUsuarios_label2));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblRol, BE.NombreControl.FormGestionUsuarios_lblRol));
             _controlesTraducibles.Add(new EtiquetaTraducible(chkActivo, BE.NombreControl.FormGestionUsuarios_chkActivo));
@@ -44,6 +45,7 @@ namespace TpIngSoft
                 .ConColumna("Nombre", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_nombre)
                 .ConColumna("NombrePersona", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_nombrePersona)
                 .ConColumna("Apellido", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_apellido)
+                .ConColumna("Dni", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_dni)
                 .ConColumna("Activo", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_activo)
                 .ConColumna("IntentosFallidos", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_intentos)
                 .ConColumna("BloqueadoHasta", BE.NombreControl.FormGestionUsuarios_dgvUsuarios_bloqueadoHasta);
@@ -115,6 +117,14 @@ namespace TpIngSoft
                 if (dgvUsuarios.Columns["Password"] != null) dgvUsuarios.Columns["Password"].Visible = false;
                 if (dgvUsuarios.Columns["DVH"] != null) dgvUsuarios.Columns["DVH"].Visible = false;
                 if (dgvUsuarios.Columns["IdIdioma"] != null) dgvUsuarios.Columns["IdIdioma"].Visible = false;
+                // Proporciones para que el DNI se lea completo
+                var proporciones = new Dictionary<string, float>
+                {
+                    { "Id", 28 }, { "Nombre", 90 }, { "NombrePersona", 70 }, { "Apellido", 70 }, { "Dni", 82 },
+                    { "Activo", 40 }, { "IntentosFallidos", 50 }, { "BloqueadoHasta", 60 }
+                };
+                foreach (var p in proporciones)
+                    if (dgvUsuarios.Columns[p.Key] != null) dgvUsuarios.Columns[p.Key].FillWeight = p.Value;
                 
                 // Refresh translation
                 var traducciones = GestorIdioma.Instancia.ObtenerTraduccionesActuales();
@@ -137,6 +147,7 @@ namespace TpIngSoft
                 txtNombre.ReadOnly = false;
                 txtNombrePersona.Text = "";
                 txtApellido.Text = "";
+                txtDni.Text = "";
                 txtPassword.Text = "";
                 chkActivo.Checked = true;
                 chkActivo.Enabled = false; // default for new user is true / active
@@ -170,6 +181,7 @@ namespace TpIngSoft
                     txtNombre.Text = user.Nombre;
                     txtNombrePersona.Text = user.NombrePersona;
                     txtApellido.Text = user.Apellido;
+                    txtDni.Text = user.Dni ?? "";
                     txtPassword.Text = ""; // leave blank to keep existing
                     chkActivo.Checked = user.Activo;
 
@@ -195,6 +207,7 @@ namespace TpIngSoft
                 txtNombre.Text = "";
                 txtNombrePersona.Text = "";
                 txtApellido.Text = "";
+                txtDni.Text = "";
                 txtPassword.Text = "";
                 chkActivo.Checked = false;
                 cmbRoles.SelectedIndex = -1;
@@ -256,6 +269,7 @@ namespace TpIngSoft
                         Nombre = nombre,
                         NombrePersona = nombrePersona,
                         Apellido = apellido,
+                        Dni = txtDni.Text.Trim(),
                         Password = password,
                         Activo = true
                     };
@@ -285,6 +299,7 @@ namespace TpIngSoft
                     selected.Nombre = nombre;
                     selected.NombrePersona = nombrePersona;
                     selected.Apellido = apellido;
+                    selected.Dni = txtDni.Text.Trim();
                     selected.Activo = chkActivo.Checked;
                     if (!string.IsNullOrEmpty(password))
                     {

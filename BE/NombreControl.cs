@@ -572,5 +572,31 @@ namespace BE
         public const string FormMain_evaluacionArquitectonicaToolStripMenuItem = "FormMain.evaluacionArquitectonicaToolStripMenuItem";
         public const string FormMain_decisionDirectorioToolStripMenuItem = "FormMain.decisionDirectorioToolStripMenuItem";
         public const string FormMain_gestionFideicomisoToolStripMenuItem = "FormMain.gestionFideicomisoToolStripMenuItem";
+        public const string FormGestionUsuarios_labelDni = "FormGestionUsuarios.labelDni";
+        public const string FormGestionUsuarios_dgvUsuarios_dni = "FormGestionUsuarios.dgvUsuarios.dni";
+        public const string FormInmueblesPublicados_btnRegistrarVenta = "FormInmueblesPublicados.btnRegistrarVenta";
+        public const string FormMain_reportesToolStripMenuItem = "FormMain.reportesToolStripMenuItem";
+        public const string FormMain_rankingAgentesToolStripMenuItem = "FormMain.rankingAgentesToolStripMenuItem";
+        public const string FormRankingAgentes_grpFiltros = "FormRankingAgentes.grpFiltros";
+        public const string FormRankingAgentes_lblPeriodo = "FormRankingAgentes.lblPeriodo";
+        public const string FormRankingAgentes_lblDesde = "FormRankingAgentes.lblDesde";
+        public const string FormRankingAgentes_lblHasta = "FormRankingAgentes.lblHasta";
+        public const string FormRankingAgentes_lblOrden = "FormRankingAgentes.lblOrden";
+        public const string FormRankingAgentes_lblVista = "FormRankingAgentes.lblVista";
+        public const string FormRankingAgentes_rbMasVendieron = "FormRankingAgentes.rbMasVendieron";
+        public const string FormRankingAgentes_rbMenosVendieron = "FormRankingAgentes.rbMenosVendieron";
+        public const string FormRankingAgentes_btnExportarPdf = "FormRankingAgentes.btnExportarPdf";
+        public const string FormRankingAgentes_cmbPeriodo_esteMes = "FormRankingAgentes.cmbPeriodo.esteMes";
+        public const string FormRankingAgentes_cmbPeriodo_esteTrimestre = "FormRankingAgentes.cmbPeriodo.esteTrimestre";
+        public const string FormRankingAgentes_cmbPeriodo_esteAnio = "FormRankingAgentes.cmbPeriodo.esteAnio";
+        public const string FormRankingAgentes_cmbPeriodo_todo = "FormRankingAgentes.cmbPeriodo.todo";
+        public const string FormRankingAgentes_cmbPeriodo_personalizado = "FormRankingAgentes.cmbPeriodo.personalizado";
+        public const string FormRankingAgentes_cmbOrden_cantidad = "FormRankingAgentes.cmbOrden.cantidad";
+        public const string FormRankingAgentes_cmbOrden_valorTotal = "FormRankingAgentes.cmbOrden.valorTotal";
+        public const string FormRankingAgentes_dgvRanking_posicion = "FormRankingAgentes.dgvRanking.posicion";
+        public const string FormRankingAgentes_dgvRanking_dni = "FormRankingAgentes.dgvRanking.dni";
+        public const string FormRankingAgentes_dgvRanking_agente = "FormRankingAgentes.dgvRanking.agente";
+        public const string FormRankingAgentes_dgvRanking_cantidad = "FormRankingAgentes.dgvRanking.cantidad";
+        public const string FormRankingAgentes_dgvRanking_totalUsd = "FormRankingAgentes.dgvRanking.totalUsd";
     }
 }

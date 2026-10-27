@@ -16,6 +16,7 @@ namespace SERVICIOS
             dvh += CalcularValorString(user.Activo ? "1" : "0", 4);
             dvh += CalcularValorString(user.NombrePersona ?? "", 5);
             dvh += CalcularValorString(user.Apellido ?? "", 6);
+            dvh += CalcularValorString(user.Dni ?? "", 7); // sin DNI suma 0: los DVH anteriores siguen valiendo
             return dvh;
         }
 
