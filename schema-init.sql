@@ -425,7 +425,7 @@ INSERT INTO [dbo].[Traducciones] ([idcontrol], [ididioma], [texto]) VALUES (@Ctr
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario]) VALUES ('label1', 'FormLogin');
 SET @CtrlId = SCOPE_IDENTITY();
-INSERT INTO [dbo].[Traducciones] ([idcontrol], [ididioma], [texto]) VALUES (@CtrlId, 1, 'Bienvenido'), (@CtrlId, 2, 'Welcome');
+INSERT INTO [dbo].[Traducciones] ([idcontrol], [ididioma], [texto]) VALUES (@CtrlId, 1, 'Bienvenido a LandSmart'), (@CtrlId, 2, 'Welcome to LandSmart');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario]) VALUES ('label2', 'FormLogin');
 SET @CtrlId = SCOPE_IDENTITY();

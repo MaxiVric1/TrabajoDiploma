@@ -1049,6 +1049,14 @@ FROM [dbo].[Traducciones] t
 JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
 JOIN @Nuevos n ON n.[nombre] = c.[nombre] AND n.[formulario] = c.[formulario]
 WHERE t.[ididioma] IN (1, 2) AND (t.[texto] LIKE '%napshot%' OR t.[texto] IN ('Decisiones guardadas:', 'Saved decisions:'));
+
+-- Inicio de sesión: "Bienvenido" pasó a "Bienvenido a LandSmart" (solo si conserva el texto original: no se pisa un
+-- texto cambiado desde Gestión de Idiomas)
+UPDATE t SET t.[texto] = CASE t.[ididioma] WHEN 1 THEN N'Bienvenido a LandSmart' ELSE N'Welcome to LandSmart' END
+FROM [dbo].[Traducciones] t
+JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
+WHERE c.[nombre] = 'label1' AND c.[formulario] = 'FormLogin'
+  AND ((t.[ididioma] = 1 AND t.[texto] = N'Bienvenido') OR (t.[ididioma] = 2 AND t.[texto] = N'Welcome'));
 GO
 
 -- Controles que se quitaron de los formularios: sus textos ya no se usan

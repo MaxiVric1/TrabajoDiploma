@@ -342,6 +342,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <!-- Logo de la pantalla de inicio de sesión: va dentro del exe -->
+    <EmbeddedResource Include="Resources\logo-landsmart.png">
+      <LogicalName>TpIngSoft.logo-landsmart.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\mesh-600x600.png" />
   </ItemGroup>
   <ItemGroup>

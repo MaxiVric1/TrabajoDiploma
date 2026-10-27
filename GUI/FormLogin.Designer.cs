@@ -38,20 +38,31 @@ namespace TpIngSoft
             this.lblIdiomaLogin = new System.Windows.Forms.Label();
             this.cmbIdiomaLogin = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.pictureBoxLogo = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLogo)).BeginInit();
             this.SuspendLayout();
+            //
+            // pictureBoxLogo
+            //
+            this.pictureBoxLogo.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBoxLogo.Location = new System.Drawing.Point(148, 10);
+            this.pictureBoxLogo.Name = "pictureBoxLogo";
+            this.pictureBoxLogo.Size = new System.Drawing.Size(112, 112);
+            this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxLogo.TabIndex = 9;
+            this.pictureBoxLogo.TabStop = false;
             // 
             // label1
             // 
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(92, 47);
+            this.label1.Location = new System.Drawing.Point(0, 126);
             this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(0, 0, 15, 0);
-            this.label1.Size = new System.Drawing.Size(304, 39);
+            this.label1.Size = new System.Drawing.Size(408, 39);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Bienvenido";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.label1.Text = "Bienvenido a LandSmart";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // textBoxNombre
             // 
@@ -172,6 +183,7 @@ namespace TpIngSoft
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_1024x600;
             this.ClientSize = new System.Drawing.Size(408, 437);
+            this.Controls.Add(this.pictureBoxLogo);
             this.Controls.Add(this.lblIdiomaLogin);
             this.Controls.Add(this.cmbIdiomaLogin);
             this.Controls.Add(this.label5);
@@ -190,6 +202,7 @@ namespace TpIngSoft
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form3";
             this.Load += new System.EventHandler(this.FormLogin_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLogo)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -206,5 +219,6 @@ namespace TpIngSoft
         private System.Windows.Forms.TextBox textBoxNombre;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.PictureBox pictureBoxLogo;
     }
 }
