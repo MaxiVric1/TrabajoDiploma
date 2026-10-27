@@ -73,6 +73,7 @@
     <Compile Include="ClienteDolarAPI.cs" />
     <Compile Include="ClienteNominatim.cs" />
     <Compile Include="ClienteEpok.cs" />
+    <Compile Include="GestorSnapshots.cs" />
     <Compile Include="MapaOSM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

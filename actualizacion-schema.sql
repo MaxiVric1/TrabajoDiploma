@@ -1016,7 +1016,12 @@ INSERT INTO @Nuevos VALUES
     ('dgvRanking.agente', 'FormRankingAgentes', 'Agente', 'Agent'),
     ('dgvRanking.cantidad', 'FormRankingAgentes', 'Propiedades vendidas', 'Properties sold'),
     ('dgvRanking.totalUsd', 'FormRankingAgentes', 'Valor total (USD)', 'Total value (USD)'),
-    ('(form)', 'FormRankingAgentes', 'Ranking de Agentes', 'Agent Ranking');
+    ('(form)', 'FormRankingAgentes', 'Ranking de Agentes', 'Agent Ranking'),
+    ('btnVerSnapshot', 'FormGestionFideicomiso', 'Ver snapshot', 'View snapshot'),
+    ('lblSnapshots', 'FormVerSnapshot', 'Decisiones guardadas:', 'Saved decisions:'),
+    ('lblDetalle', 'FormVerSnapshot', N'Análisis al momento de la decisión:', 'Analysis at the time of the decision:'),
+    ('btnCerrar', 'FormVerSnapshot', 'Cerrar', 'Close'),
+    ('(form)', 'FormVerSnapshot', N'Snapshot del Análisis', 'Analysis Snapshot');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

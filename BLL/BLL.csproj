@@ -89,6 +89,7 @@
     <Compile Include="SuscripcionFideicomisoBLL.cs" />
     <Compile Include="InformeInversionBLL.cs" />
     <Compile Include="VentaBLL.cs" />
+    <Compile Include="SnapshotBLL.cs" />
     <Compile Include="PagoAlquilerBLL.cs" />
     <Compile Include="AccionLegalBLL.cs" />
     <Compile Include="ContactoCobranzaBLL.cs" />

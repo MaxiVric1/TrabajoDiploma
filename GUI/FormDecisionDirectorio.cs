@@ -198,7 +198,8 @@ namespace TpIngSoft
             string observaciones = PN3Comun.PedirTexto(this, "Aprobar proyecto",
                 $"Aprobar el Proyecto N° {p.IdProyecto} ({p.Direccion}). Observaciones (opcional):", 1000, multilinea: true);
             if (observaciones == null) return;
-            Decidir(() => proyectoBLL.AprobarProyecto(p.IdProyecto, observaciones),
+            _analisis.TryGetValue(p.IdProyecto, out AnalisisComparativo analisis);
+            Decidir(() => proyectoBLL.AprobarProyecto(p.IdProyecto, observaciones, analisis),
                 $"Proyecto N° {p.IdProyecto} aprobado. Inversiones ya puede cargar los inversores del fideicomiso.");
         }
 
@@ -209,15 +210,25 @@ namespace TpIngSoft
             string motivo = PN3Comun.PedirTexto(this, "Rechazar proyecto",
                 $"Motivo del rechazo del Proyecto N° {p.IdProyecto} ({p.Direccion}):", 1000, multilinea: true, obligatorio: true);
             if (motivo == null) return;
-            Decidir(() => proyectoBLL.RechazarProyecto(p.IdProyecto, motivo), $"Proyecto N° {p.IdProyecto} rechazado.");
+            _analisis.TryGetValue(p.IdProyecto, out AnalisisComparativo analisis);
+            Decidir(() => proyectoBLL.RechazarProyecto(p.IdProyecto, motivo, analisis), $"Proyecto N° {p.IdProyecto} rechazado.");
         }
 
-        private void Decidir(Action decision, string exito)
+        // La decisión guarda un snapshot JSON del análisis mostrado; si el archivo falla, la decisión igual queda registrada
+        private void Decidir(Func<ResultadoSnapshot> decision, string exito)
         {
             try
             {
-                decision();
-                MessageBox.Show(exito, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ResultadoSnapshot snapshot = decision();
+                if (snapshot == null || snapshot.Guardado)
+                {
+                    string detalle = snapshot == null ? "" : $"{Environment.NewLine}{Environment.NewLine}Snapshot del análisis guardado en:{Environment.NewLine}{snapshot.Ruta}" +
+                        (snapshot.EnCarpetaAlternativa ? $"{Environment.NewLine}(Sin permiso de escritura en Program Files: se usó la carpeta de datos compartidos.)" : "");
+                    MessageBox.Show(exito + detalle, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                    MessageBox.Show(exito + $"{Environment.NewLine}{Environment.NewLine}No se pudo guardar el snapshot del análisis: {snapshot.Error}",
+                        "Decisión registrada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 CargarProyectos();
             }
             catch (Exception ex) when (ex is ArgumentException || ex is UnauthorizedAccessException)

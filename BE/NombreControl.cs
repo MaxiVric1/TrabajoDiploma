@@ -572,6 +572,10 @@ namespace BE
         public const string FormMain_evaluacionArquitectonicaToolStripMenuItem = "FormMain.evaluacionArquitectonicaToolStripMenuItem";
         public const string FormMain_decisionDirectorioToolStripMenuItem = "FormMain.decisionDirectorioToolStripMenuItem";
         public const string FormMain_gestionFideicomisoToolStripMenuItem = "FormMain.gestionFideicomisoToolStripMenuItem";
+        public const string FormGestionFideicomiso_btnVerSnapshot = "FormGestionFideicomiso.btnVerSnapshot";
+        public const string FormVerSnapshot_lblSnapshots = "FormVerSnapshot.lblSnapshots";
+        public const string FormVerSnapshot_lblDetalle = "FormVerSnapshot.lblDetalle";
+        public const string FormVerSnapshot_btnCerrar = "FormVerSnapshot.btnCerrar";
         public const string FormGestionUsuarios_labelDni = "FormGestionUsuarios.labelDni";
         public const string FormGestionUsuarios_dgvUsuarios_dni = "FormGestionUsuarios.dgvUsuarios.dni";
         public const string FormInmueblesPublicados_btnRegistrarVenta = "FormInmueblesPublicados.btnRegistrarVenta";

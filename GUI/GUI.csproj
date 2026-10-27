@@ -179,6 +179,12 @@
     <Compile Include="EstadosPN2.cs" />
     <Compile Include="PN3Comun.cs" />
     <Compile Include="GraficosPN3.cs" />
+    <Compile Include="FormVerSnapshot.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormVerSnapshot.Designer.cs">
+      <DependentUpon>FormVerSnapshot.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormRankingAgentes.cs">
       <SubType>Form</SubType>
     </Compile>

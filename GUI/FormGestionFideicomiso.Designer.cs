@@ -36,6 +36,7 @@ namespace TpIngSoft
             this.lblActualizacion = new System.Windows.Forms.Label();
             this.btnAgregarInversor = new System.Windows.Forms.Button();
             this.btnInforme = new System.Windows.Forms.Button();
+            this.btnVerSnapshot = new System.Windows.Forms.Button();
             this.grpTablero.SuspendLayout();
             this.grpInversores.SuspendLayout();
             this.SuspendLayout();
@@ -226,7 +227,7 @@ namespace TpIngSoft
             this.lblActualizacion.BackColor = System.Drawing.Color.Transparent;
             this.lblActualizacion.Location = new System.Drawing.Point(12, 598);
             this.lblActualizacion.Name = "lblActualizacion";
-            this.lblActualizacion.Size = new System.Drawing.Size(600, 34);
+            this.lblActualizacion.Size = new System.Drawing.Size(436, 34);
             this.lblActualizacion.Text = "";
             this.lblActualizacion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -254,6 +255,18 @@ namespace TpIngSoft
             this.btnInforme.UseVisualStyleBackColor = false;
             this.btnInforme.Click += new System.EventHandler(this.btnInforme_Click);
             //
+            // btnVerSnapshot
+            //
+            this.btnVerSnapshot.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnVerSnapshot.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnVerSnapshot.ForeColor = System.Drawing.Color.White;
+            this.btnVerSnapshot.Location = new System.Drawing.Point(458, 596);
+            this.btnVerSnapshot.Name = "btnVerSnapshot";
+            this.btnVerSnapshot.Size = new System.Drawing.Size(170, 36);
+            this.btnVerSnapshot.Text = "Ver snapshot";
+            this.btnVerSnapshot.UseVisualStyleBackColor = false;
+            this.btnVerSnapshot.Click += new System.EventHandler(this.btnVerSnapshot_Click);
+            //
             // FormGestionFideicomiso
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -267,6 +280,7 @@ namespace TpIngSoft
             this.Controls.Add(this.lblActualizacion);
             this.Controls.Add(this.btnAgregarInversor);
             this.Controls.Add(this.btnInforme);
+            this.Controls.Add(this.btnVerSnapshot);
             this.ForeColor = System.Drawing.Color.White;
             this.MinimumSize = new System.Drawing.Size(1016, 683);
             this.Name = "FormGestionFideicomiso";
@@ -303,5 +317,6 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblActualizacion;
         private System.Windows.Forms.Button btnAgregarInversor;
         private System.Windows.Forms.Button btnInforme;
+        private System.Windows.Forms.Button btnVerSnapshot;
     }
 }

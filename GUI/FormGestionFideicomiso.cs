@@ -61,7 +61,8 @@ namespace TpIngSoft
                 (lblRestantePesos, BE.NombreControl.FormGestionFideicomiso_lblRestantePesos),
                 (grpInversores, BE.NombreControl.FormGestionFideicomiso_grpInversores),
                 (btnAgregarInversor, BE.NombreControl.FormGestionFideicomiso_btnAgregarInversor),
-                (btnInforme, BE.NombreControl.FormGestionFideicomiso_btnInforme) })
+                (btnInforme, BE.NombreControl.FormGestionFideicomiso_btnInforme),
+                (btnVerSnapshot, BE.NombreControl.FormGestionFideicomiso_btnVerSnapshot) })
                 _controlesTraducibles.Add(new EtiquetaTraducible(control, clave));
             _grillaProyectos = new DataGridTraducible(dgvProyectos, "FormGestionFideicomiso.dgvProyectos")
                 .ConColumna("NroProyecto", BE.NombreControl.FormGestionFideicomiso_dgvProyectos_nroProyecto)
@@ -154,7 +155,7 @@ namespace TpIngSoft
         private void MostrarTablero()
         {
             int? id = Seleccionado();
-            btnAgregarInversor.Enabled = btnInforme.Enabled = id.HasValue;
+            btnAgregarInversor.Enabled = btnInforme.Enabled = btnVerSnapshot.Enabled = id.HasValue;
             dgvInversores.DataSource = null;
             if (!id.HasValue)
             {
@@ -218,6 +219,19 @@ namespace TpIngSoft
                     if (frm.ShowDialog(this) == DialogResult.OK)
                         CargarProyectos(_resumen.Proyecto.IdProyecto);
                 }
+            }
+            finally { _refresco.Start(); }
+        }
+
+        // Análisis tal como estaba cuando el Directorio aprobó el proyecto (snapshots JSON de la decisión)
+        private void btnVerSnapshot_Click(object sender, EventArgs e)
+        {
+            if (_resumen == null) return;
+            _refresco.Stop();
+            try
+            {
+                using (FormVerSnapshot frm = new FormVerSnapshot(_resumen.Proyecto.IdProyecto, _resumen.Proyecto.ToString()))
+                    frm.ShowDialog(this);
             }
             finally { _refresco.Start(); }
         }

@@ -176,22 +176,26 @@ namespace BLL
             return g;
         }
 
-        public void AprobarProyecto(int idProyecto, string observaciones = null)
+        // analisis: el análisis comparativo que vio el Directorio; con él se guarda el snapshot JSON de la decisión
+        // (null = sin snapshot). Devuelve dónde quedó el snapshot.
+        public ResultadoSnapshot AprobarProyecto(int idProyecto, string observaciones = null, AnalisisComparativo analisis = null)
         {
-            Decidir(idProyecto, EstadoProyecto.Aprobado, observaciones);
+            return Decidir(idProyecto, EstadoProyecto.Aprobado, observaciones, analisis);
         }
 
         // El rechazo debe tener motivo
-        public void RechazarProyecto(int idProyecto, string motivo)
+        public ResultadoSnapshot RechazarProyecto(int idProyecto, string motivo, AnalisisComparativo analisis = null)
         {
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new ArgumentException("Indique el motivo del rechazo.");
-            Decidir(idProyecto, EstadoProyecto.Rechazado, motivo);
+            return Decidir(idProyecto, EstadoProyecto.Rechazado, motivo, analisis);
         }
 
-        private void Decidir(int idProyecto, EstadoProyecto estado, string observaciones)
+        private ResultadoSnapshot Decidir(int idProyecto, EstadoProyecto estado, string observaciones, AnalisisComparativo analisis)
         {
             ExigirPermiso(PermisosDefinidos.AccesoPN3Directorio, "el Directorio");
+            if (analisis != null && analisis.Proyecto?.IdProyecto != idProyecto)
+                throw new ArgumentException("El análisis no corresponde al proyecto que se está decidiendo.");
             ProyectoInversion proyecto = proyectoDAL.BuscarPorId(idProyecto);
             if (proyecto == null)
                 throw new Exception("El proyecto no existe.");
@@ -206,6 +210,9 @@ namespace BLL
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual,
                 estado == EstadoProyecto.Aprobado ? "Aprobación Proyecto" : "Rechazo Proyecto",
                 $"Proyecto N° {idProyecto} {estado.ToString().ToLower()} por el Directorio" + (string.IsNullOrWhiteSpace(observaciones) ? "." : $": {observaciones.Trim()}"));
+
+            // Snapshot del análisis con el proyecto ya decidido (estado, fecha y motivo como quedaron en la base)
+            return analisis == null ? null : new SnapshotBLL().GuardarDecision(analisis, proyectoDAL.BuscarPorId(idProyecto));
         }
 
         // Solo En Análisis y sin suscripciones

@@ -58,6 +58,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -95,6 +96,7 @@
     <Compile Include="ComparativaRentabilidad.cs" />
     <Compile Include="ParcelaCaba.cs" />
     <Compile Include="Venta.cs" />
+    <Compile Include="SnapshotDecision.cs" />
     <Compile Include="PagoAlquiler.cs" />
     <Compile Include="PeriodoAPagar.cs" />
     <Compile Include="AccionLegal.cs" />
