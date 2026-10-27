@@ -805,6 +805,154 @@ BEGIN
 END
 GO
 
+-- 5 agentes comerciales más con captaciones y ventas de ejemplo, con perfiles distintos para el ranking (muchas
+-- ventas baratas, pocas muy caras, intermedios y uno con una sola venta). Bloque aparte del anterior para que también
+-- se carguen en las bases que ya lo ejecutaron. Solo la primera vez (si el agente vsosa no existe).
+-- Contraseña: NombreApellido123 (SHA-256 como SERVICIOS.Encriptador).
+IF NOT EXISTS (SELECT 1 FROM [dbo].[Usuario] WHERE [nombre] = 'vsosa')
+BEGIN
+    DECLARE @Tocados TABLE ([id] INT);
+
+    DECLARE @Agentes TABLE ([usuario] VARCHAR(50), [nombre_persona] NVARCHAR(100), [apellido] NVARCHAR(100), [dni] VARCHAR(11), [clave] VARCHAR(100));
+    INSERT INTO @Agentes VALUES
+        ('vsosa',     N'Valentina', N'Sosa',     '39.567.123', 'ValentinaSosa123'),
+        ('squiroga',  N'Santiago',  N'Quiroga',  '40.678.234', 'SantiagoQuiroga123'),
+        ('aledesma',  N'Agustina',  N'Ledesma',  '41.789.345', 'AgustinaLedesma123'),
+        ('mvillalba', N'Mateo',     N'Villalba', '42.890.456', 'MateoVillalba123'),
+        ('pcabrera',  N'Paula',     N'Cabrera',  '38.901.567', 'PaulaCabrera123');
+
+    INSERT INTO [dbo].[Usuario] ([nombre], [nombre_persona], [apellido], [dni], [pass], [activo], [id_idioma])
+    OUTPUT inserted.[id] INTO @Tocados
+    SELECT a.[usuario], a.[nombre_persona], a.[apellido], a.[dni],
+           LOWER(CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', a.[clave]), 2)), 1, 1
+    FROM @Agentes a
+    WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Usuario] u WHERE u.[nombre] = a.[usuario] OR u.[dni] = a.[dni]);
+
+    INSERT INTO [dbo].[UsuarioRol] ([id_usuario], [id_rol])
+    SELECT t.[id], ro.[id]
+    FROM @Tocados t
+    JOIN [dbo].[Rol] ro ON ro.[nombre] = 'Agente Comercial';
+
+    -- Dígitos verificadores (mismo cálculo que SERVICIOS.GestorDV: el DNI es el atributo 7) de los usuarios nuevos
+    DECLARE @Dvh TABLE ([id] INT, [dvh] BIGINT);
+    DECLARE @Id INT, @Texto NVARCHAR(MAX), @Pos INT, @Total BIGINT, @i INT;
+    DECLARE cur CURSOR LOCAL FAST_FORWARD FOR SELECT [id] FROM @Tocados;
+    OPEN cur;
+    FETCH NEXT FROM cur INTO @Id;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @Total = 0;
+        SET @Pos = 1;
+        WHILE @Pos <= 7
+        BEGIN
+            SELECT @Texto = CASE @Pos
+                WHEN 1 THEN CAST(u.[id] AS NVARCHAR(50))
+                WHEN 2 THEN u.[nombre]
+                WHEN 3 THEN u.[pass]
+                WHEN 4 THEN CASE WHEN u.[activo] = 1 THEN N'1' ELSE N'0' END
+                WHEN 5 THEN ISNULL(u.[nombre_persona], N'')
+                WHEN 6 THEN ISNULL(u.[apellido], N'')
+                ELSE ISNULL(u.[dni], N'') END
+            FROM [dbo].[Usuario] u WHERE u.[id] = @Id;
+            SET @i = 1;
+            WHILE @i <= LEN(@Texto)
+            BEGIN
+                SET @Total = @Total + UNICODE(SUBSTRING(@Texto, @i, 1)) * @i * @Pos;
+                SET @i = @i + 1;
+            END
+            SET @Pos = @Pos + 1;
+        END
+        INSERT INTO @Dvh VALUES (@Id, @Total);
+        FETCH NEXT FROM cur INTO @Id;
+    END
+    CLOSE cur;
+    DEALLOCATE cur;
+    UPDATE u SET [dvh] = d.[dvh] FROM [dbo].[Usuario] u JOIN @Dvh d ON d.[id] = u.[id];
+    UPDATE [dbo].[DigitoVerificadorVertical] SET [dvv] = (SELECT ISNULL(SUM([dvh]), 0) FROM [dbo].[Usuario]) WHERE [tabla] = 'Usuario';
+
+    -- Historial: alta de los agentes, con admin como autor
+    INSERT INTO [dbo].[Usuario_Historial] ([id_usuario], [nombre], [nombre_persona], [apellido], [dni], [pass], [activo], [dvh], [id_usuario_autor], [tipo_operacion])
+    SELECT us.[id], us.[nombre], us.[nombre_persona], us.[apellido], us.[dni], us.[pass], us.[activo], us.[dvh],
+           (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'admin'), 'INSERT'
+    FROM @Tocados t
+    JOIN [dbo].[Usuario] us ON us.[id] = t.[id];
+
+    -- Captaciones y ventas, igual que el bloque anterior: cliente, inmueble (Vendido), captación del agente, tasación
+    -- aprobada y venta en USD; sin precio queda Publicado. Fechas relativas al día de la instalación (días atrás).
+    DECLARE @Demo TABLE ([orden] INT IDENTITY(1,1), [agente] VARCHAR(50), [tipo] VARCHAR(50), [direccion] NVARCHAR(200),
+                         [localidad] NVARCHAR(100), [m2] DECIMAL(10,2), [ambientes] INT, [lote] DECIMAL(10,2),
+                         [precio_usd] DECIMAL(18,2), [dias] INT);
+    INSERT INTO @Demo ([agente], [tipo], [direccion], [localidad], [m2], [ambientes], [lote], [precio_usd], [dias]) VALUES
+        -- Muchas ventas de montos bajos
+        ('vsosa',     'Departamento', N'Av. San Martín 2100',     N'Villa Crespo, CABA',     40,  1, NULL, 72000,  3),
+        ('vsosa',     'Departamento', N'Thames 800',              N'Villa Crespo, CABA',     45,  2, NULL, 85000,  15),
+        ('vsosa',     'Departamento', N'Av. Díaz Vélez 4500',     N'Almagro, CABA',          50,  2, NULL, 92000,  45),
+        ('vsosa',     'Departamento', N'Yatay 300',               N'Almagro, CABA',          36,  1, NULL, 64000,  80),
+        ('vsosa',     'Departamento', N'Av. Independencia 3900',  N'Boedo, CABA',            55,  2, NULL, 98000,  160),
+        ('vsosa',     'Departamento', N'Hidalgo 700',             N'Caballito, CABA',        62,  3, NULL, 118000, 380),
+        -- Pocas ventas de mucho valor
+        ('squiroga',  'Casa',         N'Av. Melián 2400',         N'Belgrano R, CABA',       420, 7, 600,  850000, 25),
+        ('squiroga',  'Casa',         N'Paraná 1200',             N'Martínez, Buenos Aires', 310, 6, 450,  480000, 210),
+        ('squiroga',  'Casa',         N'Av. Santa Fe 1800',       N'Olivos, Buenos Aires',   280, 6, 420,  NULL,   18),
+        -- Intermedios
+        ('aledesma',  'Departamento', N'Av. Cabildo 1500',        N'Belgrano, CABA',         78,  3, NULL, 155000, 8),
+        ('aledesma',  'Casa',         N'Bauness 2300',            N'Villa Urquiza, CABA',    160, 4, 220,  195000, 60),
+        ('aledesma',  'Departamento', N'Monroe 4100',             N'Villa Urquiza, CABA',    68,  3, NULL, 128000, 130),
+        ('aledesma',  'Departamento', N'Triunvirato 3800',        N'Villa Urquiza, CABA',    52,  2, NULL, 62000,  420),
+        ('pcabrera',  'Casa',         N'Bolívar 900',             N'San Isidro, Buenos Aires', 190, 5, 300, 240000, 55),
+        ('pcabrera',  'Departamento', N'Av. Maipú 1600',          N'Vicente López, Buenos Aires', 70, 3, NULL, 125000, 140),
+        ('pcabrera',  'Departamento', N'Laprida 2000',            N'Florida, Buenos Aires',  45,  2, NULL, NULL,   10),
+        ('pcabrera',  'Departamento', N'Av. Mitre 500',           N'Avellaneda, Buenos Aires', 48, 2, NULL, 110000, 600),
+        -- Una sola venta (para el Top 5 de los que menos vendieron)
+        ('mvillalba', 'Departamento', N'Av. Rivadavia 9800',      N'Floresta, CABA',         44,  2, NULL, 72000,  95),
+        ('mvillalba', 'Casa',         N'Morón 3200',              N'Flores, CABA',           150, 4, 200,  NULL,   30);
+
+    DECLARE @Tasador INT = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'Tasador');
+    DECLARE @Registro INT = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'Marketing');
+    IF @Tasador IS NULL SET @Tasador = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'admin');
+    DECLARE @Orden INT, @Agente INT, @Tipo VARCHAR(50), @Direccion NVARCHAR(200), @Localidad NVARCHAR(100), @M2 DECIMAL(10,2),
+            @Ambientes INT, @Lote DECIMAL(10,2), @PrecioUsd DECIMAL(18,2), @Dias INT, @Cliente INT, @Inmueble INT, @Captacion INT,
+            @FechaVenta DATE, @FechaCaptacion DATETIME, @Pesos DECIMAL(18,2), @DniCliente VARCHAR(15);
+    DECLARE demo CURSOR LOCAL FAST_FORWARD FOR
+        SELECT d.[orden], u.[id], d.[tipo], d.[direccion], d.[localidad], d.[m2], d.[ambientes], d.[lote], d.[precio_usd], d.[dias]
+        FROM @Demo d JOIN [dbo].[Usuario] u ON u.[nombre] = d.[agente]
+        ORDER BY d.[orden];
+    OPEN demo;
+    FETCH NEXT FROM demo INTO @Orden, @Agente, @Tipo, @Direccion, @Localidad, @M2, @Ambientes, @Lote, @PrecioUsd, @Dias;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @FechaVenta = CAST(DATEADD(DAY, -@Dias, GETDATE()) AS DATE);
+        SET @FechaCaptacion = DATEADD(DAY, -60, CAST(@FechaVenta AS DATETIME));
+        SET @Pesos = ISNULL(@PrecioUsd, 150000) * 1500;
+        -- Clientes 43000001 en adelante (el bloque anterior usa 41000001...)
+        SET @DniCliente = CAST(43000000 + @Orden AS VARCHAR(15));
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Cliente] WHERE [dni] = @DniCliente)
+            INSERT INTO [dbo].[Cliente] ([dni], [nombre], [apellido], [telefono], [email])
+            VALUES (@DniCliente, N'Cliente', N'Ejemplo ' + CAST(20 + @Orden AS NVARCHAR(10)),
+                    '11-4300-' + RIGHT('0000' + CAST(@Orden AS VARCHAR(4)), 4), NULL);
+        SET @Cliente = (SELECT [id_cliente] FROM [dbo].[Cliente] WHERE [dni] = @DniCliente);
+
+        INSERT INTO [dbo].[Inmueble] ([tipo_inmueble], [direccion], [metros_cuadrados], [cantidad_ambientes], [estado_actual], [id_cliente],
+                                      [tipo_publicacion], [localidad], [superficie_lote], [texto_comercial], [fecha_publicacion])
+        VALUES (@Tipo, @Direccion, @M2, @Ambientes, CASE WHEN @PrecioUsd IS NULL THEN 'Publicado' ELSE 'Vendido' END, @Cliente,
+                'Venta', @Localidad, @Lote, N'Inmueble de ejemplo para el ranking de agentes.', DATEADD(DAY, 15, @FechaCaptacion));
+        SET @Inmueble = SCOPE_IDENTITY();
+        INSERT INTO [dbo].[Captacion] ([fecha_registro], [valor_pretendido], [id_inmueble], [id_usuario_agente])
+        VALUES (@FechaCaptacion, @Pesos, @Inmueble, @Agente);
+        SET @Captacion = SCOPE_IDENTITY();
+        INSERT INTO [dbo].[Tasacion] ([fecha_dictamen], [estado_dictamen], [valor_final], [id_captacion], [id_usuario_tasador])
+        VALUES (DATEADD(DAY, 7, @FechaCaptacion), 'Aprobada', ROUND(@Pesos * 0.95, 2), @Captacion, @Tasador);
+        IF @PrecioUsd IS NOT NULL
+            INSERT INTO [dbo].[Venta] ([id_inmueble], [id_usuario_agente], [fecha_venta], [precio_usd], [id_usuario_registro], [fecha_registro], [observaciones])
+            VALUES (@Inmueble, @Agente, @FechaVenta, @PrecioUsd, @Registro, @FechaVenta, N'Venta de ejemplo para el ranking de agentes.');
+        FETCH NEXT FROM demo INTO @Orden, @Agente, @Tipo, @Direccion, @Localidad, @M2, @Ambientes, @Lote, @PrecioUsd, @Dias;
+    END
+    CLOSE demo;
+    DEALLOCATE demo;
+    PRINT N'Ranking de agentes: 5 agentes comerciales más con captaciones y ventas de ejemplo creados.';
+END
+GO
+
 -- ====================================================
 -- 5. Traducciones de los controles nuevos (español e inglés)
 --    Van acá y no en schema-init.sql para que también las reciban las bases existentes.
