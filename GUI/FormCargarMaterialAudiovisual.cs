@@ -312,13 +312,18 @@ namespace TpIngSoft
             }
         }
 
-        // Copia el archivo a la carpeta de la aplicación para que la ruta guardada no dependa del original
+        // Copia el archivo a %LOCALAPPDATA%\LandSmart\MaterialAudiovisual para que la ruta guardada no dependa del
+        // original. Es una carpeta del usuario de Windows: siempre se puede escribir, aunque la aplicación esté
+        // instalada en Program Files y se use sin permisos de administrador.
+        public static string CarpetaMaterial => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "LandSmart", CARPETA_MATERIAL);
+
         private string CopiarArchivo(string origen, int idInmueble, int indice)
         {
             if (string.IsNullOrEmpty(origen) || !File.Exists(origen))
                 throw new ArgumentException("El archivo seleccionado ya no existe: " + origen);
 
-            string carpeta = Path.Combine(Application.StartupPath, CARPETA_MATERIAL, idInmueble.ToString());
+            string carpeta = Path.Combine(CarpetaMaterial, idInmueble.ToString());
             Directory.CreateDirectory(carpeta);
 
             string destino = Path.Combine(carpeta, $"{DateTime.Now:yyyyMMddHHmmss}_{indice}_{Path.GetFileName(origen)}");

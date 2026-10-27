@@ -137,7 +137,6 @@ namespace BE
     public class ResultadoSnapshot
     {
         public string Ruta { get; set; }
-        public bool EnCarpetaAlternativa { get; set; }   // la carpeta de Program Files no tenía permiso de escritura
         public string Error { get; set; }
         public bool Guardado => Ruta != null;
     }

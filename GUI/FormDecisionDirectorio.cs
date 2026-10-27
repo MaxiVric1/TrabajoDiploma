@@ -234,8 +234,7 @@ namespace TpIngSoft
                 ResultadoSnapshot snapshot = decision();
                 if (snapshot == null || snapshot.Guardado)
                 {
-                    string detalle = snapshot == null ? "" : $"{Environment.NewLine}{Environment.NewLine}Acta de Decisión guardada en:{Environment.NewLine}{snapshot.Ruta}" +
-                        (snapshot.EnCarpetaAlternativa ? $"{Environment.NewLine}(Sin permiso de escritura en Program Files: se usó la carpeta de datos compartidos.)" : "");
+                    string detalle = snapshot == null ? "" : $"{Environment.NewLine}{Environment.NewLine}Acta de Decisión guardada en:{Environment.NewLine}{snapshot.Ruta}";
                     MessageBox.Show(exito + detalle, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else

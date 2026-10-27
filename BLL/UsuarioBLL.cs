@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using BE;
 using DAL;
 using SERVICIOS;
-using System.IO;
 using System.Linq;
 
 namespace BLL
@@ -15,8 +14,9 @@ namespace BLL
         private MapperSesion mapperSesion = new MapperSesion();
         private MapperUsuarioHistorial mapperHistorial = new MapperUsuarioHistorial();
         private MapperDVV mapperDVV = new MapperDVV();
-        private const string SESSION_FILE = "session.dat";
 
+        // La sesión vive solo en memoria (SessionManager) y en la tabla Sesion: no se guarda ningún archivo, así
+        // que cada inicio de la aplicación pide usuario y contraseña (y no hace falta escribir en Program Files)
         public bool Login(string nombre, string pass)
         {
             // La verificación de integridad se hace en el arranque (Program.cs)
@@ -58,7 +58,6 @@ namespace BLL
                             GestorIdioma.Instancia.CambiarIdioma(idioma);
                         }
 
-                        GuardarSesionLocal(sessionId);
                         GestorBitacora.Instance.RegistrarEvento(user, "Login", "Inicio de sesión exitoso");
                         return true;
                     }
@@ -91,7 +90,6 @@ namespace BLL
                 int sessionId = SessionManager.Instance.IdSesion.Value;
                 
                 mapperSesion.CerrarSesion(sessionId);
-                BorrarSesionLocal();
                 GestorBitacora.Instance.RegistrarEvento(user, "Logout", "Cierre de sesión");
                 SessionManager.Instance.CerrarSesion();
             }
@@ -265,55 +263,6 @@ namespace BLL
         public void CargarRoles(Usuario user)
         {
             CargarDatosUsuario(user);
-        }
-
-        public void GuardarSesionLocal(int id) => File.WriteAllText(SESSION_FILE, id.ToString());
-
-        public void BorrarSesionLocal() { if (File.Exists(SESSION_FILE)) File.Delete(SESSION_FILE); }
-
-        public bool ValidarSesionLocal()
-        {
-            if (File.Exists(SESSION_FILE))
-            {
-                if (int.TryParse(File.ReadAllText(SESSION_FILE), out int id))
-                {
-                    int idUsuario = mapperSesion.ValidarYRefrescarSesion(id);
-                    if (idUsuario != -1)
-                    {
-                        Usuario user = mapperUsuario.BuscarPorId(idUsuario);
-                        if (user != null)
-                        {
-                            CargarDatosUsuario(user);
-                            SessionManager.Instance.IniciarSesion(user, id);
-
-                             IdiomaBLL idiomaBLL = new IdiomaBLL();
-                             Idioma idioma = null;
-                             if (user.IdIdioma.HasValue)
-                             {
-                                 idioma = idiomaBLL.LeerIdiomaUsuario(user.Id);
-                             }
-                             if (idioma == null || !idioma.Activo)
-                             {
-                                 List<Idioma> activos = idiomaBLL.ObtenerIdiomasActivos();
-                                 if (activos.Count > 0)
-                                 {
-                                     idioma = activos[0];
-                                     idiomaBLL.GuardarIdiomaUsuario(user.Id, idioma.Id);
-                                     user.IdIdioma = idioma.Id;
-                                 }
-                             }
-                             if (idioma != null)
-                             {
-                                 GestorIdioma.Instancia.CambiarIdioma(idioma);
-                             }
-
-                            return true;
-                        }
-                    }
-                }
-                BorrarSesionLocal();
-            }
-            return false;
         }
     }
 }

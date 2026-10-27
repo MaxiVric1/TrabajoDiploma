@@ -11,14 +11,15 @@ namespace SERVICIOS
 {
     // Snapshots de las decisiones del Directorio: serialización y deserialización JSON con DataContractJsonSerializer
     // (atributos DataContract / DataMember de BE.SnapshotDecision) y archivos Proyecto{id}_{yyyyMMdd}_{HHmmss}.json.
-    // Se guardan en Program Files\LandSmart\Snapshots; si Windows no da permiso de escritura ahí (un usuario sin
-    // privilegios de administrador), en ProgramData\LandSmart\Snapshots. Al listar se leen las dos carpetas.
+    // Se guardan en ProgramData\LandSmart\Snapshots: compartida por todos los usuarios de Windows del equipo y
+    // escribible sin privilegios de administrador. Al listar se lee también la carpeta de Program Files que usaban
+    // las versiones anteriores (solo lectura), para no perder las actas guardadas ahí.
     public static class GestorSnapshots
     {
-        public static string CarpetaPrincipal { get; set; } =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "LandSmart", "Snapshots");
-        public static string CarpetaAlternativa { get; set; } =
+        public static string Carpeta { get; set; } =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "LandSmart", "Snapshots");
+        public static string CarpetaAnterior { get; set; } =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "LandSmart", "Snapshots");
 
         // Fechas legibles en el JSON (sin esto el serializador escribe "/Date(1793043022000-0300)/")
         private static readonly DataContractJsonSerializerSettings Configuracion = new DataContractJsonSerializerSettings
@@ -59,21 +60,10 @@ namespace SERVICIOS
 
         // ---------- Archivos ----------
 
-        // Guarda el snapshot y devuelve la ruta; enAlternativa indica que se usó ProgramData por falta de permisos
-        public static string Guardar(SnapshotDecision snapshot, out bool enAlternativa)
+        // Guarda el snapshot y devuelve la ruta
+        public static string Guardar(SnapshotDecision snapshot)
         {
-            string json = Serializar(snapshot);
-            string nombre = NombreArchivo(snapshot.Proyecto.Id, snapshot.FechaDecision);
-            try
-            {
-                enAlternativa = false;
-                return Escribir(CarpetaPrincipal, nombre, json);
-            }
-            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
-            {
-                enAlternativa = true;
-                return Escribir(CarpetaAlternativa, nombre, json);
-            }
+            return Escribir(Carpeta, NombreArchivo(snapshot.Proyecto.Id, snapshot.FechaDecision), Serializar(snapshot));
         }
 
         private static string Escribir(string carpeta, string nombre, string json)
@@ -87,11 +77,11 @@ namespace SERVICIOS
             return ruta;
         }
 
-        // Archivos del proyecto en las dos carpetas, del más reciente al más antiguo
+        // Archivos del proyecto (carpeta actual y la de versiones anteriores), del más reciente al más antiguo
         public static List<string> Listar(int idProyecto)
         {
             string patron = $"Proyecto{idProyecto}_*.json";
-            return new[] { CarpetaPrincipal, CarpetaAlternativa }
+            return new[] { Carpeta, CarpetaAnterior }
                 .Where(Directory.Exists)
                 .SelectMany(c => Directory.GetFiles(c, patron))
                 .OrderByDescending(Path.GetFileName, StringComparer.OrdinalIgnoreCase)

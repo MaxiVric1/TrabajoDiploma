@@ -244,32 +244,10 @@ END
 GO
 
 -- ====================================================
--- ValidarYRefrescarSesion
+-- ValidarYRefrescarSesion: ya no se usa (la sesión vive solo en memoria y no se retoma desde un archivo
+-- local); se borra de las bases que lo tenían
 -- ====================================================
 DROP PROCEDURE IF EXISTS [dbo].[ValidarYRefrescarSesion];
-GO
-
-
-CREATE PROCEDURE [dbo].[ValidarYRefrescarSesion]
-    @IdSesion INT,
-    @IdUsuario INT OUTPUT
-AS
-BEGIN
-    SELECT @IdUsuario = id_usuario 
-    FROM Sesion 
-    WHERE id = @IdSesion AND fecha_logout IS NULL;
-
-    IF @IdUsuario IS NOT NULL
-    BEGIN
-        UPDATE Sesion 
-        SET fecha_login = GETDATE() 
-        WHERE id = @IdSesion;
-    END
-    ELSE
-    BEGIN
-        SET @IdUsuario = -1;
-    END
-END
 GO
 
 -- ====================================================

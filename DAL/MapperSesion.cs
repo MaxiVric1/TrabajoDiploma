@@ -57,30 +57,5 @@ namespace DAL
             }
         }
 
-        public int ValidarYRefrescarSesion(int idSesion)
-        {
-            acceso.Abrir();
-            try
-            {
-                SqlParameter outParam = acceso.CrearParametroOut("@IdUsuario");
-                List<SqlParameter> parameters = new List<SqlParameter>
-                {
-                    acceso.CrearParametro("@IdSesion", idSesion),
-                    outParam
-                };
-
-                acceso.Escribir("ValidarYRefrescarSesion", parameters);
-
-                if (outParam.Value != null && outParam.Value != DBNull.Value)
-                {
-                    return Convert.ToInt32(outParam.Value);
-                }
-                return -1;
-            }
-            finally
-            {
-                acceso.Cerrar();
-            }
-        }
     }
 }

@@ -51,8 +51,8 @@ namespace TpIngSoft
                 }
             }
 
-            BLL.UsuarioBLL usuarioBLL = new BLL.UsuarioBLL();
-            if (usuarioBLL.ValidarSesionLocal() || new FormLogin().ShowDialog() == DialogResult.OK)
+            // Sin sesión guardada: cada inicio pide usuario y contraseña
+            if (new FormLogin().ShowDialog() == DialogResult.OK)
             {
                 Application.Run(new FormMain());
             }

@@ -86,10 +86,10 @@ namespace BLL
             try
             {
                 SnapshotDecision snapshot = Construir(a, decidido, SessionManager.Instance.UsuarioActual, new IccBLL().Ultimo());
-                string ruta = GestorSnapshots.Guardar(snapshot, out bool alternativa);
+                string ruta = GestorSnapshots.Guardar(snapshot);
                 GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Acta de Decisión",
                     $"Proyecto N° {decidido.IdProyecto}: Acta de Decisión guardada en {ruta}.");
-                return new ResultadoSnapshot { Ruta = ruta, EnCarpetaAlternativa = alternativa };
+                return new ResultadoSnapshot { Ruta = ruta };
             }
             catch (Exception ex)
             {
