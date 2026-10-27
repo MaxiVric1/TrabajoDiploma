@@ -42,6 +42,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(btnRechazar, BE.NombreControl.FormDecisionDirectorio_btnRechazar));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnComisiones, BE.NombreControl.FormDecisionDirectorio_btnComisiones));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnInforme, BE.NombreControl.FormDecisionDirectorio_btnInforme));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnVerActas, BE.NombreControl.FormDecisionDirectorio_btnVerActas));
             _controlesTraducibles.AddRange(panelAnalisis.Traducibles());
             _grilla = new DataGridTraducible(dgvProyectos, "FormDecisionDirectorio.dgvProyectos")
                 .ConColumna("NroProyecto", BE.NombreControl.FormDecisionDirectorio_dgvProyectos_nroProyecto)
@@ -113,7 +114,7 @@ namespace TpIngSoft
         {
             ProyectoInversion p = Seleccionado();
             btnAprobar.Enabled = btnRechazar.Enabled = btnInforme.Enabled = false;
-            btnComisiones.Enabled = p != null;
+            btnComisiones.Enabled = btnVerActas.Enabled = p != null;
             if (p == null)
             {
                 panelAnalisis.Limpiar(dgvProyectos.Rows.Count == 0 ? "No hay proyectos con datos técnicos esperando la decisión del Directorio." : "-");
@@ -182,6 +183,16 @@ namespace TpIngSoft
             }
         }
 
+        // Historial de decisiones del inmueble del proyecto: Actas de Decisión de todos sus proyectos, incluidos los
+        // rechazos anteriores (un inmueble rechazado vuelve a evaluarse con un proyecto nuevo)
+        private void btnVerActas_Click(object sender, EventArgs e)
+        {
+            ProyectoInversion p = Seleccionado();
+            if (p == null) return;
+            using (FormVerSnapshot frm = new FormVerSnapshot(p.IdProyecto, p.ToString()))
+                frm.ShowDialog(this);
+        }
+
         // Informe interno del Directorio con el análisis que se está viendo (mismos datos de mercado)
         private void btnInforme_Click(object sender, EventArgs e)
         {
@@ -214,7 +225,8 @@ namespace TpIngSoft
             Decidir(() => proyectoBLL.RechazarProyecto(p.IdProyecto, motivo, analisis), $"Proyecto N° {p.IdProyecto} rechazado.");
         }
 
-        // La decisión guarda un snapshot JSON del análisis mostrado; si el archivo falla, la decisión igual queda registrada
+        // La decisión guarda el Acta de Decisión (snapshot JSON del análisis mostrado); si el archivo falla, la decisión
+        // igual queda registrada
         private void Decidir(Func<ResultadoSnapshot> decision, string exito)
         {
             try
@@ -222,12 +234,12 @@ namespace TpIngSoft
                 ResultadoSnapshot snapshot = decision();
                 if (snapshot == null || snapshot.Guardado)
                 {
-                    string detalle = snapshot == null ? "" : $"{Environment.NewLine}{Environment.NewLine}Snapshot del análisis guardado en:{Environment.NewLine}{snapshot.Ruta}" +
+                    string detalle = snapshot == null ? "" : $"{Environment.NewLine}{Environment.NewLine}Acta de Decisión guardada en:{Environment.NewLine}{snapshot.Ruta}" +
                         (snapshot.EnCarpetaAlternativa ? $"{Environment.NewLine}(Sin permiso de escritura en Program Files: se usó la carpeta de datos compartidos.)" : "");
                     MessageBox.Show(exito + detalle, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
-                    MessageBox.Show(exito + $"{Environment.NewLine}{Environment.NewLine}No se pudo guardar el snapshot del análisis: {snapshot.Error}",
+                    MessageBox.Show(exito + $"{Environment.NewLine}{Environment.NewLine}No se pudo guardar el Acta de Decisión: {snapshot.Error}",
                         "Decisión registrada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 CargarProyectos();
             }

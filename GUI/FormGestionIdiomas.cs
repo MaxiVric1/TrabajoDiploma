@@ -211,6 +211,7 @@ namespace TpIngSoft
                 ("FormDecisionDirectorio", "btnRechazar"),
                 ("FormDecisionDirectorio", "btnComisiones"),
                 ("FormDecisionDirectorio", "btnInforme"),
+                ("FormDecisionDirectorio", "btnVerActas"),
                 ("FormVerAnalisis", "btnCerrar"),
                 ("FormGestionFideicomiso", "grpTablero"),
                 ("FormGestionFideicomiso", "lblNecesario"),

@@ -263,7 +263,7 @@ namespace TpIngSoft
             this.btnVerSnapshot.Location = new System.Drawing.Point(458, 596);
             this.btnVerSnapshot.Name = "btnVerSnapshot";
             this.btnVerSnapshot.Size = new System.Drawing.Size(170, 36);
-            this.btnVerSnapshot.Text = "Ver snapshot";
+            this.btnVerSnapshot.Text = "Ver Actas de Decisión";
             this.btnVerSnapshot.UseVisualStyleBackColor = false;
             this.btnVerSnapshot.Click += new System.EventHandler(this.btnVerSnapshot_Click);
             //

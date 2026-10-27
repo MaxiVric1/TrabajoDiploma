@@ -33,7 +33,7 @@ namespace TpIngSoft
             this.lblSnapshots.Location = new System.Drawing.Point(12, 12);
             this.lblSnapshots.Name = "lblSnapshots";
             this.lblSnapshots.Size = new System.Drawing.Size(300, 20);
-            this.lblSnapshots.Text = "Decisiones guardadas:";
+            this.lblSnapshots.Text = "Actas de Decisión del inmueble:";
             this.lblSnapshots.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // lstSnapshots
@@ -43,6 +43,7 @@ namespace TpIngSoft
             this.lstSnapshots.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lstSnapshots.ForeColor = System.Drawing.Color.White;
             this.lstSnapshots.FormattingEnabled = true;
+            this.lstSnapshots.HorizontalScrollbar = true;
             this.lstSnapshots.IntegralHeight = false;
             this.lstSnapshots.Location = new System.Drawing.Point(12, 36);
             this.lstSnapshots.Name = "lstSnapshots";
@@ -154,7 +155,7 @@ namespace TpIngSoft
             this.MinimumSize = new System.Drawing.Size(1016, 635);
             this.Name = "FormVerSnapshot";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Snapshot del Análisis";
+            this.Text = "Actas de Decisión";
             this.Load += new System.EventHandler(this.FormVerSnapshot_Load);
             this.ResumeLayout(false);
 

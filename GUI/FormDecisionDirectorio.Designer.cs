@@ -21,6 +21,7 @@ namespace TpIngSoft
             this.btnRechazar = new System.Windows.Forms.Button();
             this.btnComisiones = new System.Windows.Forms.Button();
             this.btnInforme = new System.Windows.Forms.Button();
+            this.btnVerActas = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
             // dgvProyectos
@@ -43,7 +44,7 @@ namespace TpIngSoft
             this.lblEstado.BackColor = System.Drawing.Color.Transparent;
             this.lblEstado.Location = new System.Drawing.Point(12, 600);
             this.lblEstado.Name = "lblEstado";
-            this.lblEstado.Size = new System.Drawing.Size(320, 36);
+            this.lblEstado.Size = new System.Drawing.Size(166, 36);
             this.lblEstado.Text = "";
             this.lblEstado.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -95,6 +96,18 @@ namespace TpIngSoft
             this.btnInforme.UseVisualStyleBackColor = false;
             this.btnInforme.Click += new System.EventHandler(this.btnInforme_Click);
             //
+            // btnVerActas
+            //
+            this.btnVerActas.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnVerActas.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnVerActas.ForeColor = System.Drawing.Color.White;
+            this.btnVerActas.Location = new System.Drawing.Point(188, 600);
+            this.btnVerActas.Name = "btnVerActas";
+            this.btnVerActas.Size = new System.Drawing.Size(150, 36);
+            this.btnVerActas.Text = "Ver Actas de Decisión";
+            this.btnVerActas.UseVisualStyleBackColor = false;
+            this.btnVerActas.Click += new System.EventHandler(this.btnVerActas_Click);
+            //
             // FormDecisionDirectorio
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -109,6 +122,7 @@ namespace TpIngSoft
             this.Controls.Add(this.btnRechazar);
             this.Controls.Add(this.btnComisiones);
             this.Controls.Add(this.btnInforme);
+            this.Controls.Add(this.btnVerActas);
             this.ForeColor = System.Drawing.Color.White;
             this.MinimumSize = new System.Drawing.Size(1016, 687);
             this.Name = "FormDecisionDirectorio";
@@ -126,5 +140,6 @@ namespace TpIngSoft
         private System.Windows.Forms.Button btnRechazar;
         private System.Windows.Forms.Button btnComisiones;
         private System.Windows.Forms.Button btnInforme;
+        private System.Windows.Forms.Button btnVerActas;
     }
 }

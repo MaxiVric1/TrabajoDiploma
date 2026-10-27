@@ -53,7 +53,7 @@ namespace SERVICIOS
             }
             catch (SerializationException ex)
             {
-                throw new Exception("El archivo no es un snapshot válido: " + ex.Message, ex);
+                throw new Exception("El archivo no es un Acta de Decisión válida: " + ex.Message, ex);
             }
         }
 

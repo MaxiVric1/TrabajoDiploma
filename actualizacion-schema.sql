@@ -1017,11 +1017,12 @@ INSERT INTO @Nuevos VALUES
     ('dgvRanking.cantidad', 'FormRankingAgentes', 'Propiedades vendidas', 'Properties sold'),
     ('dgvRanking.totalUsd', 'FormRankingAgentes', 'Valor total (USD)', 'Total value (USD)'),
     ('(form)', 'FormRankingAgentes', 'Ranking de Agentes', 'Agent Ranking'),
-    ('btnVerSnapshot', 'FormGestionFideicomiso', 'Ver snapshot', 'View snapshot'),
-    ('lblSnapshots', 'FormVerSnapshot', 'Decisiones guardadas:', 'Saved decisions:'),
+    ('btnVerSnapshot', 'FormGestionFideicomiso', N'Ver Actas de Decisión', 'View Decision Records'),
+    ('btnVerActas', 'FormDecisionDirectorio', N'Ver Actas de Decisión', 'View Decision Records'),
+    ('lblSnapshots', 'FormVerSnapshot', N'Actas de Decisión del inmueble:', 'Decision records of the property:'),
     ('lblDetalle', 'FormVerSnapshot', N'Análisis al momento de la decisión:', 'Analysis at the time of the decision:'),
     ('btnCerrar', 'FormVerSnapshot', 'Cerrar', 'Close'),
-    ('(form)', 'FormVerSnapshot', N'Snapshot del Análisis', 'Analysis Snapshot');
+    ('(form)', 'FormVerSnapshot', N'Actas de Decisión', 'Decision Records');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
@@ -1041,6 +1042,13 @@ FROM @Nuevos n
 JOIN [dbo].[Control] c ON c.[nombre] = n.[nombre] AND c.[formulario] = n.[formulario]
 WHERE EXISTS (SELECT 1 FROM [dbo].[Idioma] WHERE [id] = 2)
   AND NOT EXISTS (SELECT 1 FROM [dbo].[Traducciones] t WHERE t.[idcontrol] = c.[id] AND t.[ididioma] = 2);
+
+-- "Snapshot" pasó a llamarse "Acta de Decisión": se corrigen los textos que ya estaban cargados con el nombre anterior
+UPDATE t SET t.[texto] = CASE t.[ididioma] WHEN 1 THEN n.[es] ELSE n.[en] END
+FROM [dbo].[Traducciones] t
+JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
+JOIN @Nuevos n ON n.[nombre] = c.[nombre] AND n.[formulario] = c.[formulario]
+WHERE t.[ididioma] IN (1, 2) AND (t.[texto] LIKE '%napshot%' OR t.[texto] IN ('Decisiones guardadas:', 'Saved decisions:'));
 GO
 
 -- Controles que se quitaron de los formularios: sus textos ya no se usan

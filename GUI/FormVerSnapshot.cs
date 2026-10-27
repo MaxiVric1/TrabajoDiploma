@@ -10,8 +10,9 @@ using TpIngSoft.Traduccion;
 
 namespace TpIngSoft
 {
-    // Snapshots JSON de las decisiones del Directorio sobre un proyecto: los lista, deserializa el elegido y muestra
-    // el análisis tal como estaba al momento de decidir (con la fecha y quién decidió bien a la vista)
+    // Actas de Decisión (snapshots JSON de las decisiones del Directorio) del inmueble del proyecto: las de todos sus
+    // proyectos, aprobados y rechazados. Deserializa la elegida y muestra el análisis tal como estaba al momento de
+    // decidir (con la fecha y quién decidió bien a la vista)
     public partial class FormVerSnapshot : Form, IObservador
     {
         private class ItemSnapshot
@@ -22,7 +23,7 @@ namespace TpIngSoft
 
             public override string ToString() => Snapshot == null
                 ? $"(no se pudo leer) {Path.GetFileName(Ruta)}"
-                : $"{Snapshot.FechaDecision:dd/MM/yyyy HH:mm:ss} - {Snapshot.Decision} - {Snapshot.Usuario?.NombreCompleto}";
+                : $"{Snapshot.FechaDecision:dd/MM/yyyy HH:mm:ss} - Proyecto N° {Snapshot.Proyecto?.Id} - {Snapshot.Decision} - {Snapshot.Usuario?.NombreCompleto}";
         }
 
         private readonly SnapshotBLL snapshotBLL = new SnapshotBLL();
@@ -58,7 +59,7 @@ namespace TpIngSoft
         {
             try
             {
-                foreach (string ruta in snapshotBLL.ListarArchivos(_idProyecto))
+                foreach (string ruta in snapshotBLL.ListarArchivosDelInmueble(_idProyecto))
                 {
                     ItemSnapshot item = new ItemSnapshot { Ruta = ruta };
                     try { item.Snapshot = snapshotBLL.Leer(ruta); }
@@ -68,11 +69,11 @@ namespace TpIngSoft
             }
             catch (Exception ex)
             {
-                Limpiar("No se pudieron leer los snapshots: " + ex.Message);
+                Limpiar("No se pudieron leer las Actas de Decisión: " + ex.Message);
                 return;
             }
             if (lstSnapshots.Items.Count == 0)
-                Limpiar($"No hay snapshots del Proyecto N° {_idProyecto} (se guardan cuando el Directorio aprueba o rechaza).");
+                Limpiar($"No hay Actas de Decisión del inmueble del Proyecto N° {_idProyecto} (se guardan cuando el Directorio aprueba o rechaza).");
             else
                 lstSnapshots.SelectedIndex = 0;
         }

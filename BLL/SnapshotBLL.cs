@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BE;
+using DAL;
 using SERVICIOS;
 
 namespace BLL
@@ -86,8 +87,8 @@ namespace BLL
             {
                 SnapshotDecision snapshot = Construir(a, decidido, SessionManager.Instance.UsuarioActual, new IccBLL().Ultimo());
                 string ruta = GestorSnapshots.Guardar(snapshot, out bool alternativa);
-                GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Snapshot Decisión",
-                    $"Proyecto N° {decidido.IdProyecto}: análisis guardado en {ruta}.");
+                GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Acta de Decisión",
+                    $"Proyecto N° {decidido.IdProyecto}: Acta de Decisión guardada en {ruta}.");
                 return new ResultadoSnapshot { Ruta = ruta, EnCarpetaAlternativa = alternativa };
             }
             catch (Exception ex)
@@ -102,13 +103,26 @@ namespace BLL
         {
             if (!SessionManager.Instance.EstaLogueado() ||
                 !(SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN3Inversiones) || SessionManager.Instance.TienePermiso(PermisosDefinidos.AccesoPN3Directorio)))
-                throw new UnauthorizedAccessException("Solo Inversiones o el Directorio pueden consultar los snapshots.");
+                throw new UnauthorizedAccessException("Solo Inversiones o el Directorio pueden consultar las Actas de Decisión.");
         }
 
         public List<string> ListarArchivos(int idProyecto)
         {
             ExigirPermisoLectura();
             return GestorSnapshots.Listar(idProyecto);
+        }
+
+        // Historial de decisiones del inmueble del proyecto: las actas de todos sus proyectos (un inmueble rechazado
+        // puede volver a evaluarse con un proyecto nuevo), de la más reciente a la más antigua
+        public List<string> ListarArchivosDelInmueble(int idProyecto)
+        {
+            ExigirPermisoLectura();
+            ProyectoInversionDAL dal = new ProyectoInversionDAL();
+            ProyectoInversion proyecto = dal.BuscarPorId(idProyecto);
+            IEnumerable<int> proyectos = proyecto == null ? new[] { idProyecto }
+                : dal.LeerTodos().Where(p => p.IdInmueble == proyecto.IdInmueble).Select(p => p.IdProyecto).Union(new[] { idProyecto });
+            return proyectos.SelectMany(GestorSnapshots.Listar).Distinct()
+                .OrderByDescending(System.IO.Path.GetFileName, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         public SnapshotDecision Leer(string ruta)

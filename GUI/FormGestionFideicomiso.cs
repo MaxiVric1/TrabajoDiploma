@@ -223,7 +223,7 @@ namespace TpIngSoft
             finally { _refresco.Start(); }
         }
 
-        // Análisis tal como estaba cuando el Directorio aprobó el proyecto (snapshots JSON de la decisión)
+        // Actas de Decisión del inmueble: el análisis tal como estaba cuando el Directorio decidió (snapshots JSON)
         private void btnVerSnapshot_Click(object sender, EventArgs e)
         {
             if (_resumen == null) return;

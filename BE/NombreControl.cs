@@ -508,6 +508,7 @@ namespace BE
         public const string FormDecisionDirectorio_btnRechazar = "FormDecisionDirectorio.btnRechazar";
         public const string FormDecisionDirectorio_btnComisiones = "FormDecisionDirectorio.btnComisiones";
         public const string FormDecisionDirectorio_btnInforme = "FormDecisionDirectorio.btnInforme";
+        public const string FormDecisionDirectorio_btnVerActas = "FormDecisionDirectorio.btnVerActas";
         public const string FormVerAnalisis_btnCerrar = "FormVerAnalisis.btnCerrar";
         public const string FormGestionFideicomiso_grpTablero = "FormGestionFideicomiso.grpTablero";
         public const string FormGestionFideicomiso_lblNecesario = "FormGestionFideicomiso.lblNecesario";
