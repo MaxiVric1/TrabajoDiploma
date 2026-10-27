@@ -312,11 +312,11 @@ namespace TpIngSoft
             }
         }
 
-        // Copia el archivo a %LOCALAPPDATA%\LandSmart\MaterialAudiovisual para que la ruta guardada no dependa del
-        // original. Es una carpeta del usuario de Windows: siempre se puede escribir, aunque la aplicación esté
-        // instalada en Program Files y se use sin permisos de administrador.
-        public static string CarpetaMaterial => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "LandSmart", CARPETA_MATERIAL);
+        // Copia el archivo a {app}\MaterialAudiovisual para que la ruta guardada no dependa del original. Es una
+        // carpeta compartida por todos los usuarios de Windows del equipo (como los backups de WardrobeFlow): el
+        // instalador le tiene que dar permiso de modificación a los usuarios (users-modify). En la base queda la ruta
+        // completa, así que el material cargado antes en otras carpetas (%LOCALAPPDATA%) se sigue leyendo de ahí.
+        public static string CarpetaMaterial => Path.Combine(Application.StartupPath, CARPETA_MATERIAL);
 
         private string CopiarArchivo(string origen, int idInmueble, int indice)
         {
