@@ -60,10 +60,15 @@ namespace BLL
             mapperBackup.RestaurarBackup(path);
         }
 
-        public void RestaurarDayZero(string scriptPath, string proceduresPath)
+        // Recrea la base desde los scripts de la carpeta (los mismos que ejecuta el instalador); devuelve los avisos
+        public List<string> RestaurarDayZero(string carpetaScripts)
         {
-            mapperBackup.RestaurarDayZero(scriptPath, proceduresPath);
+            return mapperBackup.RestaurarDayZero(carpetaScripts);
         }
+
+        public static string[] ScriptsDayZero => MapperBackup.ScriptsDayZero;
+
+        public static string CarpetaBackupsCompartida => MapperBackup.CarpetaBackupsCompartida;
 
         public List<string> ListarArchivosBackup()
         {

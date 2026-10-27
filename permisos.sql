@@ -10,6 +10,8 @@
 -- Si una versión anterior de este script los había agregado a db_owner, los quita (permiso excesivo).
 -- Si no se puede dar acceso al usuario individual (p. ej. cuenta de Azure AD o Microsoft) se avisa y se sigue:
 -- el script solo falla si no puede dar acceso al grupo de usuarios de la PC.
+-- Los logins que crea quedan anotados en la base (propiedades extendidas LandSmart.LoginCreado.N): al desinstalar,
+-- DbInstaller drop-database los borra si ninguna otra base los usa.
 -- No otorga sysadmin ni db_owner. Se puede ejecutar más de una vez.
 -- Uso (como administrador de SQL Server):
 --   sqlcmd -S INSTANCIA -E -b -v Usuario="DOMINIO\usuario" -i permisos.sql
@@ -59,6 +61,13 @@ BEGIN TRY
             SET @Sql = N'CREATE LOGIN ' + QUOTENAME(@Login) + N' FROM WINDOWS WITH DEFAULT_DATABASE = [TpIngSoft];';
             EXEC (@Sql);
             PRINT N'Login creado: ' + @Login;
+            -- Se anota en la base para que la desinstalación (DbInstaller drop-database) borre solo los logins que
+            -- creó este script, y solo si ninguna otra base los usa
+            SET @Sql = N'LandSmart.LoginCreado.' + CAST(@Orden AS NVARCHAR(10));
+            IF EXISTS (SELECT 1 FROM sys.extended_properties WHERE [class] = 0 AND [name] = @Sql)
+                EXEC sys.sp_updateextendedproperty @name = @Sql, @value = @Login;
+            ELSE
+                EXEC sys.sp_addextendedproperty @name = @Sql, @value = @Login;
         END
         ELSE
             PRINT N'El login ya existía: ' + @Login;

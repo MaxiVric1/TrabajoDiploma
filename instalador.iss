@@ -8,6 +8,7 @@
 ;   1. Verifica .NET Framework 4.7.2.
 ;   2. Página "Base de datos": lista las instancias de SQL Server del registro (con su versión y si ya tienen la base),
 ;      LocalDB (o la opción de instalarlo, incluido en el instalador) y "otro servidor" escrito a mano.
+;      Si no hay ningún SQL Server ofrece el tutorial de instalación, la página de descarga y la opción de cancelar.
 ;      Al continuar inicia el servicio si está detenido y prueba la conexión con permisos de administrador de SQL.
 ;   3. Antes de copiar archivos (PrepareToInstall) hace todo el trabajo de la base con DbInstaller.exe (sin sqlcmd):
 ;      vuelve a verificar el servicio, hace una copia previa si la base existe, ejecuta los scripts (schema-init.sql
@@ -15,12 +16,20 @@
 ;      y hace la verificación final conectándose como el usuario que va a usar la aplicación.
 ;      Si algo falla revierte la base (la borra si era nueva o restaura la copia previa) y no copia ningún archivo:
 ;      la PC queda como estaba y el log queda en Documentos (LandSmart_instalacion_fallida.log).
-;   4. Copia la aplicación y escribe el servidor elegido en TpIngSoft.exe.config y BackupCLI.exe.config.
-; Instalación desatendida: LandSmart-Setup-1.0.0.exe /VERYSILENT [/SERVIDOR=.\SQLEXPRESS]
+;   4. Copia la aplicación, escribe el servidor elegido en TpIngSoft.exe.config y BackupCLI.exe.config, protege las
+;      credenciales iniciales y muestra los avisos (AVISO:) que hayan dejado los scripts.
+;
+; Seguridad de DbInstaller: lo que se ejecuta como administrador (crear la base, los logins y los permisos) corre desde
+; una carpeta dentro de la carpeta temporal del instalador con permisos solo para administradores y SYSTEM, y cada
+; archivo se verifica contra su SHA-256 calculado al compilar. Lo que se ejecuta con la cuenta del usuario que abrió
+; el instalador (LocalDB y la verificación final) usa una copia en C:\ProgramData\LandSmart\Instalacion\<nombre al azar>:
+; los demás usuarios no pueden listar esa carpeta y por lo tanto no conocen ni pueden reemplazar esa copia.
+;
+; Instalación desatendida: LandSmart-Setup-1.1.0.exe /VERYSILENT [/SERVIDOR=.\SQLEXPRESS]
 ; ====================================================
 
 #define AppNombre "LandSmart"
-#define AppVersion "1.0.0"
+#define AppVersion "1.1.0"
 #define AppEditor "Maximiliano Vricciariello"
 #define AppExe "TpIngSoft.exe"
 ; Base de datos: debe coincidir con Initial Catalog de TpIngSoft.exe.config y BackupCLI.exe.config
@@ -32,6 +41,19 @@
   #define ConLocalDb "False"
 #endif
 
+; SHA-256 de lo que se ejecuta como administrador: se comprueba después de copiarlo a la carpeta protegida
+#define Sha(Archivo) GetSHA256OfFile(AddBackslash(SourcePath) + Archivo)
+#define ShaDbInstaller Sha("DbInstaller\bin\Release\DbInstaller.exe")
+#define ShaSchemaInit Sha("schema-init.sql")
+#define ShaActualizacion Sha("actualizacion-schema.sql")
+#define ShaProcedimientos Sha("stored-procedures.sql")
+#define ShaPermisos Sha("permisos.sql")
+#if ConLocalDb == "True"
+  #define ShaLocalDb Sha("Redist\SqlLocalDB.msi")
+#else
+  #define ShaLocalDb ""
+#endif
+
 [Setup]
 ; AppId identifica la aplicación para actualizaciones y desinstalación: no cambiarlo entre versiones
 AppId={{3BA235EB-E2A7-4614-A946-487629E30CD4}
@@ -39,6 +61,7 @@ AppName={#AppNombre}
 AppVersion={#AppVersion}
 AppVerName={#AppNombre} {#AppVersion}
 AppPublisher={#AppEditor}
+VersionInfoVersion={#AppVersion}
 DefaultDirName={commonpf}\{#AppNombre}
 DefaultGroupName={#AppNombre}
 UninstallDisplayIcon={app}\{#AppExe}
@@ -71,13 +94,18 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "escritorio"; Description: "Crear un acceso directo en el escritorio"; Flags: unchecked
 
 [Files]
+; Tutorial de instalación de SQL Server: se puede abrir desde la página Base de datos (antes de instalar nada)
+Source: "tutorial-sql-server.html"; DestDir: "{tmp}"; Flags: dontcopy
+Source: "tutorial-sql-server.html"; DestDir: "{app}\Ayuda"; Flags: ignoreversion
 ; Aplicación: exe, config y dlls (sin .pdb de depuración ni .xml de documentación)
 Source: "GUI\bin\x64\Release\*"; DestDir: "{app}"; Excludes: "*.pdb,*.xml"; Flags: ignoreversion
 ; Herramienta de backup y restore (usa las mismas BE/BLL/DAL/SERVICIOS que la aplicación)
 Source: "BackupCLI\bin\x64\Release\BackupCLI.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "BackupCLI\bin\x64\Release\BackupCLI.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Credenciales_Iniciales.txt"; DestDir: "{app}"; Flags: ignoreversion
-; Scripts y cliente SQL: se usan durante la instalación (extraídos a una carpeta temporal) y al desinstalar
+; Credenciales iniciales: fuera de {app}; al terminar se dejan legibles solo para administradores y el usuario que instaló
+Source: "Credenciales_Iniciales.txt"; DestDir: "{commonappdata}\{#AppNombre}"; Flags: ignoreversion
+; Scripts y cliente SQL: se usan durante la instalación (extraídos a una carpeta temporal), en el Day Zero de BackupCLI
+; y al desinstalar
 Source: "schema-init.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 Source: "actualizacion-schema.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
 Source: "stored-procedures.sql"; DestDir: "{app}\BaseDeDatos"; Flags: ignoreversion
@@ -88,18 +116,27 @@ Source: "DbInstaller\bin\Release\DbInstaller.exe"; DestDir: "{app}\BaseDeDatos";
 Source: "Redist\SqlLocalDB.msi"; DestDir: "{tmp}"; Flags: dontcopy
 #endif
 
+[InstallDelete]
+; La versión 1.0.0 dejaba las credenciales iniciales en {app}, legibles por todos los usuarios
+Type: files; Name: "{app}\Credenciales_Iniciales.txt"
+
 [Dirs]
-; Carpeta alternativa de backups de BackupCLI: los usuarios sin privilegios de administrador también la usan
-Name: "{commonappdata}\TpIngSoft_Backups"; Permissions: users-modify
+; Carpetas compartidas que la aplicación escribe con la cuenta de cada usuario (sin privilegios de administrador)
+Name: "{app}\MaterialAudiovisual"; Permissions: users-modify
+Name: "{commonappdata}\{#AppNombre}\Snapshots"; Permissions: users-modify
+; Carpeta alternativa de backups de BackupCLI (si SQL Server no informa la suya); el servicio de SQL Server recibe
+; permiso al terminar la instalación
+Name: "{commonappdata}\{#AppNombre}\Backups"; Permissions: users-modify
 
 [Icons]
 Name: "{group}\{#AppNombre}"; Filename: "{app}\{#AppExe}"
-Name: "{group}\Credenciales iniciales"; Filename: "{app}\Credenciales_Iniciales.txt"
+Name: "{group}\Credenciales iniciales"; Filename: "{commonappdata}\{#AppNombre}\Credenciales_Iniciales.txt"
+Name: "{group}\Cómo instalar SQL Server"; Filename: "{app}\Ayuda\tutorial-sql-server.html"
 Name: "{group}\Desinstalar {#AppNombre}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#AppNombre}"; Filename: "{app}\{#AppExe}"; Tasks: escritorio
 
 [Run]
-Filename: "{app}\Credenciales_Iniciales.txt"; Description: "Ver las credenciales iniciales"; Flags: postinstall shellexec skipifsilent unchecked runasoriginaluser
+Filename: "{commonappdata}\{#AppNombre}\Credenciales_Iniciales.txt"; Description: "Ver las credenciales iniciales"; Flags: postinstall shellexec skipifsilent unchecked runasoriginaluser
 Filename: "{app}\{#AppExe}"; Description: "Abrir {#AppNombre}"; Flags: postinstall nowait skipifsilent runasoriginaluser
 
 [UninstallDelete]
@@ -116,11 +153,17 @@ const
   INSTANCIA_POR_DEFECTO = 'MSSQLSERVER';
   SERVIDOR_LOCALDB = '(localdb)\MSSQLLocalDB';
   DESCARGA_SQL_EXPRESS = 'https://www.microsoft.com/sql-server/sql-server-downloads';
+  TUTORIAL = 'tutorial-sql-server.html';
+  // SIDs fijos (no dependen del idioma de Windows)
+  SID_SYSTEM = '*S-1-5-18';
+  SID_ADMINISTRADORES = '*S-1-5-32-544';
+  SID_USUARIOS = '*S-1-5-32-545';
   // Tipos de opción de la página Base de datos
   OP_INSTANCIA = 0;
   OP_LOCALDB = 1;
   OP_INSTALAR_LOCALDB = 2;
   OP_MANUAL = 3;
+  OP_CANCELAR = 4;
 
 var
   PaginaBase: TInputOptionWizardPage;
@@ -135,9 +178,16 @@ var
   Servidor: String;          // servidor elegido (Data Source)
   EsLocalDb: Boolean;        // LocalDB: es de cada usuario, se trabaja con el usuario que abrió el instalador
   InstalarLocalDb: Boolean;  // hay que instalar LocalDB antes de crear la base
-  CarpetaTrabajo: String;    // {commonappdata}\LandSmart\Instalacion: DbInstaller, scripts y log
-  ArchivoLog: String;
+  CarpetaAdmin: String;      // {tmp}\BaseDeDatos: solo administradores y SYSTEM; DbInstaller elevado, scripts y log
+  CarpetaSegura: Boolean;    // CarpetaAdmin quedó protegida y con los archivos verificados
+  CarpetaCompartida: String; // {commonappdata}\LandSmart\Instalacion: los usuarios no pueden listarla
+  CarpetaUsuario: String;    // CarpetaCompartida\<nombre al azar>: DbInstaller con la cuenta del usuario que instala
+  ArchivoLog: String;        // log principal (en CarpetaAdmin)
+  LogUsuario: String;        // log de lo que se ejecuta como usuario; se agrega al principal después de cada ejecución
   RutaBackup: String;        // copia previa de la base existente (para revertir)
+  Usuario: String;           // DOMINIO\usuario que abrió el instalador (UsuarioOriginal)
+  UsuarioLeido: Boolean;
+  CancelarSinConfirmar: Boolean;
 
 // ---------- .NET Framework ----------
 
@@ -180,54 +230,185 @@ begin
     Result := '...' + Copy(Result, Length(Result) - 900, 901);
 end;
 
-// Carpeta de trabajo en C:\ProgramData: la puede leer y escribir también el usuario que abrió el instalador
-// (la verificación final y LocalDB se ejecutan con su cuenta, no con la del administrador)
-procedure PrepararTrabajo();
+function Comillas(const Texto: String): String;
+begin
+  Result := '"' + Texto + '"';
+end;
+
+function Icacls(const Parametros: String): Boolean;
 var
   Codigo: Integer;
 begin
-  if CarpetaTrabajo <> '' then
+  Result := Exec(ExpandConstant('{sys}\icacls.exe'), Parametros, '', SW_HIDE, ewWaitUntilTerminated, Codigo) and (Codigo = 0);
+  if not Result then
+    Log('icacls ' + Parametros + ': código ' + IntToStr(Codigo));
+end;
+
+// SHA-256 calculado al compilar el instalador
+function ShaEsperado(const Nombre: String): String;
+begin
+  if Nombre = 'DbInstaller.exe' then Result := '{#ShaDbInstaller}'
+  else if Nombre = 'schema-init.sql' then Result := '{#ShaSchemaInit}'
+  else if Nombre = 'actualizacion-schema.sql' then Result := '{#ShaActualizacion}'
+  else if Nombre = 'stored-procedures.sql' then Result := '{#ShaProcedimientos}'
+  else if Nombre = 'permisos.sql' then Result := '{#ShaPermisos}'
+  else if Nombre = 'SqlLocalDB.msi' then Result := '{#ShaLocalDb}'
+  else Result := '';
+end;
+
+// Extrae un archivo del instalador, lo copia a Carpeta y comprueba que la copia sea la original
+function CopiarVerificado(const Nombre, Carpeta: String): Boolean;
+var
+  Destino, Sha: String;
+begin
+  Result := False;
+  Destino := Carpeta + '\' + Nombre;
+  try
+    ExtractTemporaryFile(Nombre);
+    if not CopyFile(ExpandConstant('{tmp}\') + Nombre, Destino, False) then
+      Exit;
+    Sha := GetSHA256OfFile(Destino);
+    Result := (ShaEsperado(Nombre) <> '') and (CompareText(Sha, ShaEsperado(Nombre)) = 0);
+  except
+    Log('No se pudo copiar ' + Nombre + ': ' + GetExceptionMessage());
+  end;
+  if not Result then
+    Log('ATENCIÓN: ' + Destino + ' no coincide con el archivo del instalador.');
+end;
+
+function CopiarArchivosBase(const Carpeta: String): Boolean;
+begin
+  Result := CopiarVerificado('DbInstaller.exe', Carpeta) and CopiarVerificado('schema-init.sql', Carpeta) and
+            CopiarVerificado('actualizacion-schema.sql', Carpeta) and CopiarVerificado('stored-procedures.sql', Carpeta) and
+            CopiarVerificado('permisos.sql', Carpeta);
+end;
+
+// Prepara las dos carpetas de trabajo (ver el encabezado: "Seguridad de DbInstaller")
+procedure PrepararTrabajo();
+var
+  Raiz: String;
+begin
+  if CarpetaAdmin <> '' then
     Exit;
-  CarpetaTrabajo := ExpandConstant('{commonappdata}\{#AppNombre}\Instalacion');
-  ForceDirectories(CarpetaTrabajo);
-  Exec(ExpandConstant('{sys}\icacls.exe'), '"' + CarpetaTrabajo + '" /grant *S-1-5-32-545:(OI)(CI)M',
-       '', SW_HIDE, ewWaitUntilTerminated, Codigo);
-  ArchivoLog := CarpetaTrabajo + '\instalacion.log';
+
+  // 1. Carpeta de los procesos elevados: dentro de {tmp} (que es de la cuenta administradora), sin herencia y solo
+  //    para administradores y SYSTEM. Después de proteger la carpeta se vacía (por si alguien dejó algo antes) y se
+  //    copian y verifican los archivos.
+  CarpetaAdmin := ExpandConstant('{tmp}\BaseDeDatos');
+  ForceDirectories(CarpetaAdmin);
+  CarpetaSegura := Icacls(Comillas(CarpetaAdmin) + ' /inheritance:r /grant:r ' + SID_SYSTEM + ':(OI)(CI)F ' +
+                          SID_ADMINISTRADORES + ':(OI)(CI)F');
+  if CarpetaSegura then
+  begin
+    DelTree(CarpetaAdmin + '\*', False, True, True);
+    CarpetaSegura := CopiarArchivosBase(CarpetaAdmin);
+  end;
+  ArchivoLog := CarpetaAdmin + '\instalacion.log';
   DeleteFile(ArchivoLog);
-  ExtractTemporaryFile('DbInstaller.exe');
-  ExtractTemporaryFile('schema-init.sql');
-  ExtractTemporaryFile('actualizacion-schema.sql');
-  ExtractTemporaryFile('stored-procedures.sql');
-  ExtractTemporaryFile('permisos.sql');
-  CopyFile(ExpandConstant('{tmp}\DbInstaller.exe'), CarpetaTrabajo + '\DbInstaller.exe', False);
-  CopyFile(ExpandConstant('{tmp}\schema-init.sql'), CarpetaTrabajo + '\schema-init.sql', False);
-  CopyFile(ExpandConstant('{tmp}\actualizacion-schema.sql'), CarpetaTrabajo + '\actualizacion-schema.sql', False);
-  CopyFile(ExpandConstant('{tmp}\stored-procedures.sql'), CarpetaTrabajo + '\stored-procedures.sql', False);
-  CopyFile(ExpandConstant('{tmp}\permisos.sql'), CarpetaTrabajo + '\permisos.sql', False);
   RegistrarLog('==== {#AppNombre} {#AppVersion} ====');
   RegistrarLog('Cuenta que ejecuta el instalador (elevada): ' + GetUserNameString());
+  if not CarpetaSegura then
+    RegistrarLog('ERROR: no se pudo preparar la carpeta protegida ' + CarpetaAdmin + ' para DbInstaller.');
+
+  // 2. Carpeta de los procesos con la cuenta del usuario. C:\ProgramData\LandSmart pasa a ser de los administradores
+  //    (por si un usuario la creó antes para controlarla) y Instalacion se recrea sin permisos para los usuarios: solo
+  //    pueden entrar a la subcarpeta, cuyo nombre al azar (el de {tmp}) no pueden ver.
+  Raiz := ExpandConstant('{commonappdata}\{#AppNombre}');
+  ForceDirectories(Raiz);
+  Icacls(Comillas(Raiz) + ' /setowner ' + SID_ADMINISTRADORES);
+  Icacls(Comillas(Raiz) + ' /reset');
+  CarpetaCompartida := Raiz + '\Instalacion';
+  DelTree(CarpetaCompartida, True, True, True);
+  ForceDirectories(CarpetaCompartida);
+  Icacls(Comillas(CarpetaCompartida) + ' /inheritance:r /grant:r ' + SID_SYSTEM + ':(OI)(CI)F ' +
+         SID_ADMINISTRADORES + ':(OI)(CI)F');
+  CarpetaUsuario := CarpetaCompartida + '\' + ChangeFileExt(ExtractFileName(RemoveBackslash(ExpandConstant('{tmp}'))), '');
+  ForceDirectories(CarpetaUsuario);
+  Icacls(Comillas(CarpetaUsuario) + ' /grant ' + SID_USUARIOS + ':(OI)(CI)M');
+  if not CopiarArchivosBase(CarpetaUsuario) then
+    RegistrarLog('ERROR: no se pudieron copiar los archivos de la base a ' + CarpetaUsuario + '.');
+  LogUsuario := CarpetaUsuario + '\usuario.log';
+end;
+
+// Carpeta de los archivos de salida y de los scripts según con qué cuenta se ejecuta DbInstaller
+function Carpeta(ComoUsuario: Boolean): String;
+begin
+  if ComoUsuario then
+    Result := CarpetaUsuario
+  else
+    Result := CarpetaAdmin;
+end;
+
+// Agrega el log de una ejecución como usuario al log principal
+procedure TraerLogUsuario();
+var
+  Contenido: AnsiString;
+begin
+  if LoadStringFromFile(LogUsuario, Contenido) then
+    SaveStringToFile(ArchivoLog, Contenido, True);
+  DeleteFile(LogUsuario);
 end;
 
 // Ejecuta DbInstaller.exe; ComoUsuario = con la cuenta que abrió el instalador (la que usa la aplicación)
 function Db(const Argumentos: String; ComoUsuario: Boolean): Boolean;
 var
-  Exe, Linea: String;
   Codigo: Integer;
 begin
-  Exe := CarpetaTrabajo + '\DbInstaller.exe';
-  Linea := Argumentos + ' --log "' + ArchivoLog + '"';
   if ComoUsuario then
-    Result := ExecAsOriginalUser(Exe, Linea, CarpetaTrabajo, SW_HIDE, ewWaitUntilTerminated, Codigo)
+  begin
+    Result := ExecAsOriginalUser(CarpetaUsuario + '\DbInstaller.exe', Argumentos + ' --log ' + Comillas(LogUsuario),
+                                 CarpetaUsuario, SW_HIDE, ewWaitUntilTerminated, Codigo);
+    TraerLogUsuario();
+  end
+  else if CarpetaSegura then
+    Result := Exec(CarpetaAdmin + '\DbInstaller.exe', Argumentos + ' --log ' + Comillas(ArchivoLog),
+                   CarpetaAdmin, SW_HIDE, ewWaitUntilTerminated, Codigo)
   else
-    Result := Exec(Exe, Linea, CarpetaTrabajo, SW_HIDE, ewWaitUntilTerminated, Codigo);
+  begin
+    RegistrarLog('No se ejecuta DbInstaller.exe como administrador: la carpeta protegida no está lista.');
+    Result := False;
+    Exit;
+  end;
   if not Result then
     RegistrarLog('No se pudo ejecutar DbInstaller.exe: ' + SysErrorMessage(Codigo));
   Result := Result and (Codigo = 0);
 end;
 
-function Comillas(const Texto: String): String;
+// Usuario de Windows que abrió el instalador (DOMINIO\usuario). El instalador corre elevado: si se elevó con
+// otra cuenta (p. ej. un administrador en una PC de laboratorio), SYSTEM_USER sería esa cuenta y no la que
+// usa la aplicación. Se obtiene con whoami ejecutado como el usuario original; '' si no se pudo.
+function UsuarioOriginal(): String;
+var
+  Archivo: String;
+  Codigo: Integer;
 begin
-  Result := '"' + Texto + '"';
+  if not UsuarioLeido then
+  begin
+    UsuarioLeido := True;
+    Archivo := CarpetaUsuario + '\usuario.txt';
+    DeleteFile(Archivo);
+    if ExecAsOriginalUser(ExpandConstant('{cmd}'), '/C whoami > ' + Comillas(Archivo), '', SW_HIDE,
+                          ewWaitUntilTerminated, Codigo) and (Codigo = 0) then
+      Usuario := LeerArchivo(Archivo);
+    DeleteFile(Archivo);
+  end;
+  Result := Usuario;
+end;
+
+// Líneas "AVISO:" del log (de los scripts SQL y del instalador), sin la fecha ni el origen
+function AvisosDelLog(): String;
+var
+  Lineas: TArrayOfString;
+  I, P: Integer;
+begin
+  Result := '';
+  if LoadStringsFromFile(ArchivoLog, Lineas) then
+    for I := 0 to GetArrayLength(Lineas) - 1 do
+    begin
+      P := Pos('AVISO:', Lineas[I]);
+      if P > 0 then
+        Result := Result + '- ' + Trim(Copy(Lineas[I], P + Length('AVISO:'), Length(Lineas[I]))) + #13#10;
+    end;
 end;
 
 // ---------- Detección de instancias ----------
@@ -323,8 +504,55 @@ begin
 end;
 
 function IndiceManual(): Integer;
+var
+  I: Integer;
 begin
-  Result := GetArrayLength(OpcionTipo) - 1;
+  Result := -1;
+  for I := 0 to GetArrayLength(OpcionTipo) - 1 do
+    if OpcionTipo[I] = OP_MANUAL then
+      Result := I;
+end;
+
+// ---------- Ayuda cuando no hay SQL Server ----------
+
+// El tutorial se abre con la cuenta del usuario (el navegador no debe correr como administrador), desde su carpeta
+procedure AbrirTutorial();
+var
+  Archivo: String;
+  Codigo: Integer;
+begin
+  PrepararTrabajo();
+  Codigo := 0;
+  Archivo := CarpetaUsuario + '\' + TUTORIAL;
+  ExtractTemporaryFile(TUTORIAL);
+  if not CopyFile(ExpandConstant('{tmp}\') + TUTORIAL, Archivo, False) or
+     not ShellExecAsOriginalUser('open', Archivo, '', '', SW_SHOWNORMAL, ewNoWait, Codigo) then
+    MsgBox('No se pudo abrir el tutorial. ' + SysErrorMessage(Codigo), mbError, MB_OK);
+end;
+
+procedure AbrirDescarga();
+var
+  Codigo: Integer;
+begin
+  if not ShellExecAsOriginalUser('open', DESCARGA_SQL_EXPRESS, '', '', SW_SHOWNORMAL, ewNoWait, Codigo) then
+    MsgBox('No se pudo abrir el navegador. Ingrese a ' + DESCARGA_SQL_EXPRESS, mbError, MB_OK);
+end;
+
+procedure BotonTutorialClick(Sender: TObject);
+begin
+  AbrirTutorial();
+end;
+
+procedure BotonDescargaClick(Sender: TObject);
+begin
+  AbrirDescarga();
+end;
+
+// Cierra el asistente sin la pregunta "¿Desea salir?" (el usuario ya eligió cancelar)
+procedure CancelButtonClick(CurPageID: Integer; var Cancel, Confirm: Boolean);
+begin
+  if CancelarSinConfirmar then
+    Confirm := False;
 end;
 
 // ---------- Página Base de datos ----------
@@ -335,10 +563,23 @@ begin
     PaginaBase.SelectedValueIndex := IndiceManual();
 end;
 
+function CrearBoton(const Texto: String; Izquierda, Arriba: Integer; Evento: TNotifyEvent): TNewButton;
+begin
+  Result := TNewButton.Create(PaginaBase);
+  Result.Parent := PaginaBase.Surface;
+  Result.Caption := Texto;
+  Result.Left := Izquierda;
+  Result.Top := Arriba;
+  Result.Width := ScaleX(170);
+  Result.Height := ScaleY(25);
+  Result.OnClick := Evento;
+end;
+
 procedure InitializeWizard();
 var
   I: Integer;
   Subtitulo: String;
+  Boton: TNewButton;
 begin
   AgregarInstancias(HKLM64);
   AgregarInstancias(HKLM32);
@@ -348,10 +589,12 @@ begin
   else if CON_LOCALDB then
     AgregarOpcion(OP_INSTALAR_LOCALDB, SERVIDOR_LOCALDB, 'Instalar SQL Server Express LocalDB (incluido en este instalador)');
   AgregarOpcion(OP_MANUAL, '', 'Otro servidor (con otro nombre o en otra PC): escríbalo abajo');
+  if CantidadInstancias = 0 then
+    AgregarOpcion(OP_CANCELAR, '', 'No tengo SQL Server instalado: cancelar la instalación');
 
   if CantidadInstancias = 0 then
     Subtitulo := 'No se encontró SQL Server en este equipo. Puede instalar SQL Server Express LocalDB, indicar un ' +
-                 'servidor existente o cancelar e instalar SQL Server Express (' + DESCARGA_SQL_EXPRESS + ').'
+                 'servidor existente o cancelar, instalar SQL Server Express (vea el tutorial) y volver a ejecutar este instalador.'
   else
     Subtitulo := 'Elija la instancia donde se creará la base {#SqlBase}. Si una instancia ya tiene la base, se ' +
                  'conservan sus datos (se pregunta antes de reemplazarla).';
@@ -359,7 +602,10 @@ begin
     Subtitulo, True, False);
   for I := 0 to GetArrayLength(OpcionTexto) - 1 do
     PaginaBase.Add(OpcionTexto[I]);
-  PaginaBase.CheckListBox.Height := ScaleY(125);
+  if CantidadInstancias = 0 then
+    PaginaBase.CheckListBox.Height := ScaleY(85)
+  else
+    PaginaBase.CheckListBox.Height := ScaleY(125);
 
   EditServidor := TNewEdit.Create(PaginaBase);
   EditServidor.Parent := PaginaBase.Surface;
@@ -375,6 +621,13 @@ begin
   TextoEstado.Width := PaginaBase.SurfaceWidth;
   TextoEstado.WordWrap := True;
   TextoEstado.Caption := '';
+
+  // Sin SQL Server: tutorial propio y página de descarga de Microsoft
+  if CantidadInstancias = 0 then
+  begin
+    Boton := CrearBoton('Ver tutorial', 0, TextoEstado.Top + ScaleY(22), @BotonTutorialClick);
+    CrearBoton('Abrir página de descarga', Boton.Left + Boton.Width + ScaleX(10), Boton.Top, @BotonDescargaClick);
+  end;
 end;
 
 // Selecciona la opción de un servidor; si no está en la lista lo escribe como "otro servidor"
@@ -409,7 +662,7 @@ begin
   begin
     TextoEstado.Caption := 'Buscando las instancias de SQL Server y la base {#SqlBase} (puede tardar unos segundos)...';
     WizardForm.NextButton.Enabled := False;
-    Archivo := CarpetaTrabajo + '\instancias.txt';
+    Archivo := CarpetaAdmin + '\instancias.txt';
     Db('probe --servers ' + Comillas(Lista) + ' --db {#SqlBase} --out ' + Comillas(Archivo), False);
     WizardForm.NextButton.Enabled := True;
     if LoadStringsFromFile(Archivo, Lineas) then
@@ -461,7 +714,7 @@ begin
   PaginaBase.SelectedValueIndex := Elegir;
 
   if CantidadInstancias = 0 then
-    TextoEstado.Caption := ''
+    TextoEstado.Caption := 'Para instalar SQL Server Express paso a paso, abra el tutorial:'
   else if ConBase >= 0 then
     TextoEstado.Caption := 'La base {#SqlBase} ya existe en ' + OpcionServidor[ConBase] + '.'
   else
@@ -526,6 +779,19 @@ begin
   // En modo silencioso no hay a quién mostrarle mensajes: se elige y verifica en PrepareToInstall
   if (CurPageID <> PaginaBase.ID) or WizardSilent() then
     Exit;
+
+  if OpcionTipo[PaginaBase.SelectedValueIndex] = OP_CANCELAR then
+  begin
+    if MsgBox('Se cancelará la instalación de {#AppNombre}: no se instaló nada.' + #13#10#13#10 +
+              'Instale SQL Server Express y vuelva a ejecutar este instalador.' + #13#10#13#10 +
+              '¿Desea abrir el tutorial de instalación de SQL Server?', mbConfirmation, MB_YESNO) = IDYES then
+      AbrirTutorial();
+    CancelarSinConfirmar := True;
+    WizardForm.Close();
+    Result := False;
+    Exit;
+  end;
+
   AsignarEleccion();
   if Servidor = '' then
   begin
@@ -551,18 +817,24 @@ end;
 
 // ---------- Instalación de LocalDB ----------
 
+// /passive: el usuario ve el progreso de Windows Installer (tarda varios minutos), sin preguntas
 function InstalarLocalDbMsi(var Error: String): Boolean;
 var
   Codigo: Integer;
   LogMsi: String;
 begin
+  Result := False;
   RegistrarLog('Instalando SQL Server Express LocalDB...');
-  WizardForm.PageDescriptionLabel.Caption := 'Instalando SQL Server Express LocalDB...';
-  ExtractTemporaryFile('SqlLocalDB.msi');
-  LogMsi := CarpetaTrabajo + '\localdb-msi.log';
-  Result := Exec(ExpandConstant('{sys}\msiexec.exe'), '/i ' + Comillas(ExpandConstant('{tmp}\SqlLocalDB.msi')) +
-                 ' /qn /norestart IACCEPTSQLLOCALDBLICENSETERMS=YES /l*v ' + Comillas(LogMsi),
-                 '', SW_HIDE, ewWaitUntilTerminated, Codigo)
+  WizardForm.PageDescriptionLabel.Caption := 'Instalando SQL Server Express LocalDB (puede tardar unos minutos)...';
+  if not CopiarVerificado('SqlLocalDB.msi', CarpetaAdmin) then
+  begin
+    Error := 'El instalador de SQL Server Express LocalDB no coincide con el original.';
+    Exit;
+  end;
+  LogMsi := CarpetaAdmin + '\localdb-msi.log';
+  Result := Exec(ExpandConstant('{sys}\msiexec.exe'), '/i ' + Comillas(CarpetaAdmin + '\SqlLocalDB.msi') +
+                 ' /passive /norestart IACCEPTSQLLOCALDBLICENSETERMS=YES /l*v ' + Comillas(LogMsi),
+                 '', SW_SHOWNORMAL, ewWaitUntilTerminated, Codigo)
             and ((Codigo = 0) or (Codigo = 3010));
   if Result then
     RegistrarLog('SQL Server Express LocalDB instalado (código ' + IntToStr(Codigo) + ').')
@@ -572,27 +844,10 @@ end;
 
 // ---------- Base de datos (antes de copiar archivos) ----------
 
-// Usuario de Windows que abrió el instalador (DOMINIO\usuario). El instalador corre elevado: si se elevó con
-// otra cuenta (p. ej. un administrador en una PC de laboratorio), SYSTEM_USER sería esa cuenta y no la que
-// usa la aplicación. Se obtiene con whoami ejecutado como el usuario original; '' si no se pudo.
-function UsuarioOriginal(): String;
-var
-  Archivo: String;
-  Codigo: Integer;
-begin
-  Result := '';
-  Archivo := CarpetaTrabajo + '\usuario.txt';
-  DeleteFile(Archivo);
-  if ExecAsOriginalUser(ExpandConstant('{cmd}'), '/C whoami > ' + Comillas(Archivo), '', SW_HIDE,
-                        ewWaitUntilTerminated, Codigo) and (Codigo = 0) then
-    Result := LeerArchivo(Archivo);
-  DeleteFile(Archivo);
-end;
-
 function EjecutarScript(const Script, Variables: String): Boolean;
 begin
   WizardForm.PageDescriptionLabel.Caption := 'Ejecutando ' + Script + '.sql en ' + Servidor + '...';
-  Result := Db('run-script --server ' + Comillas(Servidor) + ' --file ' + Comillas(CarpetaTrabajo + '\' + Script + '.sql') +
+  Result := Db('run-script --server ' + Comillas(Servidor) + ' --file ' + Comillas(Carpeta(EsLocalDb) + '\' + Script + '.sql') +
                ' ' + Variables, EsLocalDb);
 end;
 
@@ -620,20 +875,25 @@ begin
   RegistrarLog('INSTALACIÓN CANCELADA: ' + Mensaje);
   Destino := ExpandConstant('{userdocs}\{#AppNombre}_instalacion_fallida.log');
   CopyFile(ArchivoLog, Destino, False);
-  if FileExists(CarpetaTrabajo + '\localdb-msi.log') then
-    CopyFile(CarpetaTrabajo + '\localdb-msi.log', ExpandConstant('{userdocs}\{#AppNombre}_localdb-msi.log'), False);
+  if FileExists(CarpetaAdmin + '\localdb-msi.log') then
+    CopyFile(CarpetaAdmin + '\localdb-msi.log', ExpandConstant('{userdocs}\{#AppNombre}_localdb-msi.log'), False);
   Result :=Mensaje + #13#10#13#10 + 'No se instaló ningún archivo y la base de datos quedó como estaba.' + #13#10#13#10 +
             FinalDelLog() + #13#10#13#10 + 'Log completo: ' + Destino;
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
-  Error, Usuario, Archivo: String;
+  Error, Login, Archivo: String;
   Lineas: TArrayOfString;
   BaseExiste, Recrear: Boolean;
 begin
   Result := '';
   PrepararTrabajo();
+  if not CarpetaSegura then
+  begin
+    Result := Fallo('No se pudo preparar la carpeta protegida para el cliente SQL del instalador (DbInstaller.exe).');
+    Exit;
+  end;
 
   // Instalación desatendida (o sin pasar por la página): se elige igual que la preselección de la página
   if not Elegido then
@@ -665,7 +925,7 @@ begin
     Exit;
   end;
 
-  Archivo := CarpetaTrabajo + '\elegida.txt';
+  Archivo := Carpeta(EsLocalDb) + '\elegida.txt';
   if not Db('probe --servers ' + Comillas(Servidor) + ' --db {#SqlBase} --out ' + Comillas(Archivo), EsLocalDb)
      or not LoadStringsFromFile(Archivo, Lineas) or (GetArrayLength(Lineas) = 0) then
   begin
@@ -688,12 +948,12 @@ begin
 
     // Copia previa: sin ella no se puede revertir, así que no se sigue
     WizardForm.PageDescriptionLabel.Caption := 'Copia de seguridad previa de {#SqlBase}...';
-    if not Db('backup --server ' + Comillas(Servidor) + ' --db {#SqlBase} --out ' + Comillas(CarpetaTrabajo + '\backup.txt'), EsLocalDb) then
+    if not Db('backup --server ' + Comillas(Servidor) + ' --db {#SqlBase} --out ' + Comillas(Carpeta(EsLocalDb) + '\backup.txt'), EsLocalDb) then
     begin
       Result := Fallo('No se pudo hacer la copia de seguridad previa de la base existente.');
       Exit;
     end;
-    RutaBackup := LeerArchivo(CarpetaTrabajo + '\backup.txt');
+    RutaBackup := LeerArchivo(Carpeta(EsLocalDb) + '\backup.txt');
   end;
 
   if Recrear and not EjecutarScript('schema-init', '') then
@@ -719,11 +979,11 @@ begin
   // LocalDB es del usuario que instala (ya es el dueño); en una instancia compartida se da acceso a los usuarios de la PC
   if not EsLocalDb then
   begin
-    Usuario := UsuarioOriginal();
-    if Usuario = '' then
-      Usuario := 'SYSTEM_USER';
-    RegistrarLog('Usuario de Windows que abrió el instalador: ' + Usuario);
-    if not EjecutarScript('permisos', '--var ' + Comillas('Usuario=' + Usuario)) then
+    Login := UsuarioOriginal();
+    if Login = '' then
+      Login := 'SYSTEM_USER';
+    RegistrarLog('Usuario de Windows que abrió el instalador: ' + Login);
+    if not EjecutarScript('permisos', '--var ' + Comillas('Usuario=' + Login)) then
     begin
       RevertirBase(BaseExiste);
       Result := Fallo('No se pudieron otorgar los permisos a los usuarios de la PC (permisos.sql).');
@@ -754,10 +1014,27 @@ begin
     Result := 'MSSQL$' + Copy(Srv, 3, Length(Srv));
 end;
 
+// Credenciales iniciales: sin los permisos heredados de C:\ProgramData (que dejan leer a todos los usuarios); solo
+// administradores, SYSTEM y el usuario que instaló (con UAC, un administrador abre los archivos sin elevar: sin este
+// permiso no podría verlas desde el acceso directo).
+procedure ProtegerCredenciales();
+var
+  Archivo, Cuenta: String;
+begin
+  Archivo := ExpandConstant('{commonappdata}\{#AppNombre}\Credenciales_Iniciales.txt');
+  if not Icacls(Comillas(Archivo) + ' /inheritance:r /grant:r ' + SID_SYSTEM + ':F ' + SID_ADMINISTRADORES + ':F') then
+  begin
+    RegistrarLog('AVISO: no se pudieron restringir los permisos de ' + Archivo + '. Bórrelo después de cambiar las contraseñas iniciales.');
+    Exit;
+  end;
+  Cuenta := UsuarioOriginal();
+  if (Cuenta <> '') and not Icacls(Comillas(Archivo) + ' /grant ' + Comillas(Cuenta + ':R')) then
+    RegistrarLog('AVISO: las credenciales iniciales solo las pueden abrir los administradores (como administrador): ' + Archivo);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
-  Ini, Servicio: String;
-  Codigo: Integer;
+  Ini, Servicio, Avisos: String;
 begin
   if CurStep <> ssPostInstall then
     Exit;
@@ -780,11 +1057,21 @@ begin
   // El servicio de SQL Server escribe los .bak de BackupCLI en la carpeta alternativa
   Servicio := ServicioDe(Servidor);
   if Servicio <> '' then
-    Exec(ExpandConstant('{sys}\icacls.exe'), Comillas(ExpandConstant('{commonappdata}\TpIngSoft_Backups')) +
-         ' /grant ' + Comillas('NT SERVICE\' + Servicio + ':(OI)(CI)M'), '', SW_HIDE, ewWaitUntilTerminated, Codigo);
+    if not Icacls(Comillas(ExpandConstant('{commonappdata}\{#AppNombre}\Backups')) + ' /grant ' +
+                  Comillas('NT SERVICE\' + Servicio + ':(OI)(CI)M')) then
+      RegistrarLog('AVISO: el servicio de SQL Server no recibió permiso sobre ' +
+                   ExpandConstant('{commonappdata}\{#AppNombre}\Backups') + ' (BackupCLI usará la carpeta de backups de SQL Server).');
+
+  ProtegerCredenciales();
 
   RegistrarLog('Instalación terminada en ' + ExpandConstant('{app}') + '.');
   CopyFile(ArchivoLog, ExpandConstant('{app}\BaseDeDatos\instalacion.log'), False);
+
+  // Avisos de los scripts SQL (p. ej. permisos.sql no pudo dar acceso individual al usuario) y del instalador
+  Avisos := AvisosDelLog();
+  if Avisos <> '' then
+    SuppressibleMsgBox('La instalación terminó, con estos avisos:' + #13#10#13#10 + Avisos + #13#10 +
+                       'Detalle: ' + ExpandConstant('{app}\BaseDeDatos\instalacion.log'), mbInformation, MB_OK, IDOK);
 end;
 
 procedure RegisterPreviousData(PreviousDataKey: Integer);
@@ -792,11 +1079,12 @@ begin
   SetPreviousData(PreviousDataKey, 'Servidor', Servidor);
 end;
 
-// Borra la carpeta de trabajo (el log ya quedó en {app}\BaseDeDatos o en Documentos)
+// Borra la carpeta de los procesos del usuario ({tmp}, con la carpeta protegida, la borra Inno Setup; el log ya quedó
+// en {app}\BaseDeDatos o en Documentos)
 procedure DeinitializeSetup();
 begin
-  if CarpetaTrabajo <> '' then
-    DelTree(CarpetaTrabajo, True, True, True);
+  if CarpetaCompartida <> '' then
+    DelTree(CarpetaCompartida, True, True, True);
 end;
 
 // ---------- Desinstalación ----------
@@ -813,9 +1101,12 @@ begin
   if Srv = '' then
     Exit;
   if SuppressibleMsgBox('¿Desea borrar también la base de datos {#SqlBase} de ' + Srv + '?' + #13#10#13#10 +
-       'Se perderán todos los datos. Elija "No" para conservarla (por ejemplo, para reinstalar).',
+       'Se perderán todos los datos. También se borrarán los logins de Windows que creó la instalación en SQL Server, ' +
+       'si ninguna otra base los usa.' + #13#10#13#10 +
+       'Elija "No" para conservarla (por ejemplo, para reinstalar).',
        mbConfirmation, MB_YESNO or MB_DEFBUTTON2, IDNO) <> IDYES then
     Exit;
+  // DbInstaller corre desde {app}\BaseDeDatos (Program Files: solo los administradores pueden modificarlo)
   LogDesinstalacion := ExpandConstant('{userdocs}\{#AppNombre}_desinstalacion.log');
   if not Exec(ExpandConstant('{app}\BaseDeDatos\DbInstaller.exe'),
               'drop-database --server ' + Comillas(Srv) + ' --db {#SqlBase} --log ' + Comillas(LogDesinstalacion),

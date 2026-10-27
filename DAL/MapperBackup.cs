@@ -27,6 +27,10 @@ namespace DAL
             masterConnectionString = cadena.ConnectionString;
         }
 
+        // C:\ProgramData\LandSmart\Backups
+        public static string CarpetaBackupsCompartida =>
+            System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "LandSmart", "Backups");
+
         public string ObtenerDirectorioDefaultBackup()
         {
             using (SqlConnection conn = new SqlConnection(masterConnectionString))
@@ -71,8 +75,9 @@ namespace DAL
                 }
             }
 
-            // Absolute fallback: local folder in CommonApplicationData
-            string fallbackPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TpIngSoft_Backups");
+            // Absolute fallback: carpeta compartida de LandSmart (el instalador le da permiso de modificación a los usuarios
+            // y al servicio de SQL Server)
+            string fallbackPath = CarpetaBackupsCompartida;
             if (!System.IO.Directory.Exists(fallbackPath))
             {
                 System.IO.Directory.CreateDirectory(fallbackPath);
@@ -128,41 +133,71 @@ namespace DAL
             }
         }
 
-        public void RestaurarDayZero(string scriptPath, string proceduresPath)
+        // Scripts de Day Zero, en el mismo orden que el instalador
+        public static readonly string[] ScriptsDayZero = { "schema-init.sql", "actualizacion-schema.sql", "stored-procedures.sql", "permisos.sql" };
+
+        // Borra la base y la recrea como una instalación nueva: tablas y datos iniciales, actualización del esquema,
+        // stored procedures y permisos (rol LandSmartApp para el usuario que ejecuta y los usuarios de la PC).
+        // En LocalDB no se ejecuta permisos.sql (la instancia es del usuario, igual que en el instalador).
+        // Devuelve los mensajes "AVISO:" de los scripts.
+        public System.Collections.Generic.List<string> RestaurarDayZero(string carpetaScripts)
         {
+            foreach (string script in ScriptsDayZero)
+                if (!System.IO.File.Exists(System.IO.Path.Combine(carpetaScripts, script)))
+                    throw new System.IO.FileNotFoundException("No se encontró el script " + script + " en " + carpetaScripts);
+
+            var avisos = new System.Collections.Generic.List<string>();
+            bool esLocalDb = new SqlConnectionStringBuilder(masterConnectionString).DataSource.Trim()
+                .StartsWith("(localdb)", StringComparison.OrdinalIgnoreCase);
             using (SqlConnection conn = new SqlConnection(masterConnectionString))
             {
+                conn.InfoMessage += (s, e) =>
+                {
+                    foreach (SqlError m in e.Errors)
+                        if (m.Message.StartsWith("AVISO", StringComparison.OrdinalIgnoreCase)) avisos.Add(m.Message);
+                };
                 conn.Open();
 
                 // Terminate connections if db exists
-                string checkDbQuery = $"IF EXISTS (SELECT * FROM sys.databases WHERE name = '{dbName}') BEGIN ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [{dbName}]; END";
+                string checkDbQuery = $"IF EXISTS (SELECT * FROM sys.databases WHERE name = @db) BEGIN ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [{dbName}]; END";
                 using (SqlCommand cmd = new SqlCommand(checkDbQuery, conn))
                 {
+                    cmd.Parameters.AddWithValue("@db", dbName);
                     cmd.ExecuteNonQuery();
                 }
 
-                // Read and split script by GO to execute batch-by-batch
-                EjecutarSqlScript(scriptPath, conn);
-                EjecutarSqlScript(proceduresPath, conn);
+                foreach (string script in ScriptsDayZero)
+                {
+                    if (script == "permisos.sql" && esLocalDb) continue;
+                    EjecutarSqlScript(System.IO.Path.Combine(carpetaScripts, script), conn);
+                }
             }
+            return avisos;
         }
 
+        private static readonly System.Text.RegularExpressions.Regex LineaGo = new System.Text.RegularExpressions.Regex(
+            @"^[ \t]*GO[ \t]*(?:--.*)?\r?$",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+        // Igual que sqlcmd/DbInstaller: lotes separados por líneas GO, en la misma conexión. La variable $(Usuario)
+        // de permisos.sql se reemplaza por SYSTEM_USER (el usuario de Windows que ejecuta BackupCLI).
         private void EjecutarSqlScript(string filePath, SqlConnection conn)
         {
-            if (!System.IO.File.Exists(filePath))
-                throw new System.IO.FileNotFoundException("Script not found: " + filePath);
-
-            string scriptContent = System.IO.File.ReadAllText(filePath);
-            
-            // Normalize line endings and split by GO
-            string[] commands = scriptContent.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n", "\r\ngo", "\ngo", "go\r\n", "go\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var cmdText in commands)
+            string scriptContent = System.IO.File.ReadAllText(filePath, System.Text.Encoding.UTF8).Replace("$(Usuario)", "SYSTEM_USER");
+            string[] lotes = LineaGo.Split(scriptContent);
+            for (int i = 0; i < lotes.Length; i++)
             {
-                if (string.IsNullOrWhiteSpace(cmdText)) continue;
-                using (SqlCommand cmd = new SqlCommand(cmdText, conn))
+                if (string.IsNullOrWhiteSpace(lotes[i])) continue;
+                using (SqlCommand cmd = new SqlCommand(lotes[i], conn) { CommandTimeout = 300 })
                 {
-                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"{System.IO.Path.GetFileName(filePath)}, lote {i + 1}: {ex.Message}", ex);
+                    }
                 }
             }
         }

@@ -326,11 +326,92 @@ namespace DbInstaller
         {
             using (SqlConnection conexion = Abrir(servidor, "master"))
             {
+                List<string> logins = LoginsCreados(conexion, baseDatos);
                 Ejecutar(conexion,
                     $"IF DB_ID(@Base) IS NOT NULL BEGIN " +
                     $"ALTER DATABASE {Corchetes(baseDatos)} SET SINGLE_USER WITH ROLLBACK IMMEDIATE; " +
                     $"DROP DATABASE {Corchetes(baseDatos)}; END", "@Base", baseDatos);
                 Log($"Base {baseDatos} borrada de {servidor}.");
+                foreach (string login in logins)
+                    BorrarLoginSinUso(conexion, login);
+            }
+        }
+
+        // Logins que creó permisos.sql (anotados en la base como propiedades extendidas LandSmart.LoginCreado.N)
+        private static List<string> LoginsCreados(SqlConnection conexion, string baseDatos)
+        {
+            var logins = new List<string>();
+            using (var comando = new SqlCommand("SELECT DB_ID(@Base)", conexion))
+            {
+                comando.Parameters.AddWithValue("@Base", baseDatos);
+                if (comando.ExecuteScalar() is DBNull) return logins;
+            }
+            using (var comando = new SqlCommand(
+                $"SELECT CAST([value] AS NVARCHAR(128)) FROM {Corchetes(baseDatos)}.sys.extended_properties " +
+                "WHERE [class] = 0 AND [name] LIKE N'LandSmart.LoginCreado.%'", conexion))
+            using (SqlDataReader lector = comando.ExecuteReader())
+                while (lector.Read())
+                    if (!lector.IsDBNull(0)) logins.Add(lector.GetString(0));
+            Log(logins.Count == 0
+                ? "La base no tiene logins anotados por permisos.sql (no se borra ningún login)."
+                : "Logins creados por permisos.sql: " + string.Join(", ", logins));
+            return logins;
+        }
+
+        // Borra el login si ninguna otra base lo usa, no es el login actual, no es dueño de ninguna base, no tiene roles
+        // de servidor ni permisos de servidor además de CONNECT SQL (es decir, si solo existía para esta aplicación)
+        private static void BorrarLoginSinUso(SqlConnection conexion, string login)
+        {
+            const string sql = @"
+DECLARE @Sid VARBINARY(85) = SUSER_SID(@Login), @Motivo NVARCHAR(400) = NULL, @Sql NVARCHAR(MAX) = N'', @Base SYSNAME;
+IF @Sid IS NULL
+    SET @Motivo = N'ya no existe';
+ELSE IF @Sid = SUSER_SID()
+    SET @Motivo = N'es el login con el que se está desinstalando';
+ELSE IF EXISTS (SELECT 1 FROM sys.databases WHERE owner_sid = @Sid)
+    SET @Motivo = N'es dueño de una base de datos';
+ELSE IF EXISTS (SELECT 1 FROM sys.server_role_members rm JOIN sys.server_principals p ON p.principal_id = rm.member_principal_id
+                WHERE p.[sid] = @Sid)
+    SET @Motivo = N'pertenece a un rol de servidor';
+ELSE IF EXISTS (SELECT 1 FROM sys.server_permissions sp JOIN sys.server_principals p ON p.principal_id = sp.grantee_principal_id
+                WHERE p.[sid] = @Sid AND sp.[permission_name] <> N'CONNECT SQL')
+    SET @Motivo = N'tiene permisos de servidor';
+ELSE
+BEGIN
+    DECLARE @Usos TABLE ([base] SYSNAME);
+    DECLARE bases CURSOR LOCAL FAST_FORWARD FOR
+        SELECT [name] FROM sys.databases WHERE state_desc = N'ONLINE' AND HAS_DBACCESS([name]) = 1;
+    OPEN bases;
+    FETCH NEXT FROM bases INTO @Base;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @Sql = N'SELECT @B FROM ' + QUOTENAME(@Base) + N'.sys.database_principals WHERE [sid] = @S';
+        INSERT INTO @Usos EXEC sp_executesql @Sql, N'@B SYSNAME, @S VARBINARY(85)', @Base, @Sid;
+        FETCH NEXT FROM bases INTO @Base;
+    END
+    CLOSE bases;
+    DEALLOCATE bases;
+    SELECT @Motivo = N'lo usa la base ' + MIN([base]) FROM @Usos HAVING COUNT(*) > 0;
+END
+IF @Motivo IS NULL
+BEGIN
+    SET @Sql = N'DROP LOGIN ' + QUOTENAME(@Login);
+    EXEC (@Sql);
+END
+SELECT @Motivo;";
+            try
+            {
+                using (var comando = new SqlCommand(sql, conexion) { CommandTimeout = SEGUNDOS_LOTE })
+                {
+                    comando.Parameters.AddWithValue("@Login", login);
+                    object motivo = comando.ExecuteScalar();
+                    Log(motivo is string texto ? $"Login {login}: se conserva ({texto})." : $"Login {login}: borrado.");
+                }
+            }
+            catch (SqlException ex)
+            {
+                // La base ya se borró: un login que no se pudo borrar no es un error de la desinstalación
+                Log($"AVISO: no se pudo borrar el login {login}: {Detalle(ex)}");
             }
         }
 

@@ -18,7 +18,8 @@ namespace BackupCLI
             }
             catch (Exception ex)
             {
-                backupFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+                // Carpeta compartida (C:\ProgramData\LandSmart\Backups): {app} está en Program Files y un usuario común no puede escribir ahí
+                backupFolder = BackupBLL.CarpetaBackupsCompartida;
             }
 
             if (!Directory.Exists(backupFolder))
@@ -260,29 +261,32 @@ namespace BackupCLI
 
             if (Console.ReadLine()?.ToUpper() == "DAYZERO")
             {
-                // Resolve script paths
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string docsDir = FindDocsDirectory(baseDir);
+                string carpetaScripts = BuscarCarpetaScripts(AppDomain.CurrentDomain.BaseDirectory);
 
-                if (docsDir == null)
+                if (carpetaScripts == null)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\nNo se pudo encontrar la carpeta 'docs' que contiene los scripts schema-init.sql y stored-procedures.sql.");
-                    Console.Write("Ingrese la ruta absoluta a la carpeta 'docs' del repositorio: ");
-                    docsDir = Console.ReadLine();
+                    Console.WriteLine("\nNo se encontró la carpeta con los scripts de la base (" + string.Join(", ", BackupBLL.ScriptsDayZero) + ").");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("Ingrese la ruta absoluta a esa carpeta (en la PC instalada: <carpeta de LandSmart>\\BaseDeDatos): ");
+                    carpetaScripts = Console.ReadLine()?.Trim().Trim('"');
                 }
 
-                if (!string.IsNullOrEmpty(docsDir) && Directory.Exists(docsDir))
+                if (!string.IsNullOrEmpty(carpetaScripts) && Directory.Exists(carpetaScripts))
                 {
-                    string schemaPath = Path.Combine(docsDir, "schema-init.sql");
-                    string spPath = Path.Combine(docsDir, "stored-procedures.sql");
-
                     try
                     {
-                        Console.WriteLine("\nEjecutando scripts de inicialización... (Esto puede tomar unos segundos)...");
-                        backupBLL.RestaurarDayZero(schemaPath, spPath);
+                        Console.WriteLine("\nScripts: " + carpetaScripts);
+                        Console.WriteLine("Ejecutando " + string.Join(", ", BackupBLL.ScriptsDayZero) + "... (Esto puede tomar unos segundos)...");
+                        var avisos = backupBLL.RestaurarDayZero(carpetaScripts);
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("\n[ÉXITO] Base de datos re-creada y semilla de datos (Day Zero) aplicada correctamente.");
+                        if (avisos.Count > 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            foreach (string aviso in avisos)
+                                Console.WriteLine(aviso);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -303,41 +307,31 @@ namespace BackupCLI
             PressAnyKey();
         }
 
-        static string FindDocsDirectory(string startDir)
+        // Carpeta con los scripts de Day Zero:
+        //   1. Instalado: {app}\BaseDeDatos (el instalador copia ahí los scripts).
+        //   2. Desarrollo: la carpeta del repositorio (se sube desde bin\x64\Release hasta encontrar schema-init.sql).
+        static string BuscarCarpetaScripts(string startDir)
         {
-            // 1. Hardcoded developer default path
-            string defaultPath = @"C:\Users\ignac\Repos\tp-ing-soft\docs";
-            if (Directory.Exists(defaultPath) && File.Exists(Path.Combine(defaultPath, "schema-init.sql")))
-            {
-                return defaultPath;
-            }
+            string instalada = Path.Combine(startDir, "BaseDeDatos");
+            if (TieneScripts(instalada))
+                return instalada;
 
-            // 2. Relative path fallback (4 levels up from bin/Debug)
-            try
-            {
-                string relativePath = Path.GetFullPath(Path.Combine(startDir, @"..\..\..\..\docs"));
-                if (Directory.Exists(relativePath) && File.Exists(Path.Combine(relativePath, "schema-init.sql")))
-                {
-                    return relativePath;
-                }
-            }
-            catch { }
-
-            // 3. Search up levels
             string current = startDir;
             while (!string.IsNullOrEmpty(current))
             {
-                string candidate = Path.Combine(current, "docs");
-                if (Directory.Exists(candidate) && File.Exists(Path.Combine(candidate, "schema-init.sql")))
-                {
-                    return candidate;
-                }
+                if (TieneScripts(current))
+                    return current;
                 var parent = Directory.GetParent(current);
                 if (parent == null || parent.FullName == current) break;
                 current = parent.FullName;
             }
 
             return null;
+        }
+
+        static bool TieneScripts(string carpeta)
+        {
+            return Directory.Exists(carpeta) && BackupBLL.ScriptsDayZero.All(script => File.Exists(Path.Combine(carpeta, script)));
         }
 
         static void PressAnyKey()
