@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BE;
 using DAL;
 using SERVICIOS;
@@ -13,6 +14,29 @@ namespace BLL
 
         public string UltimoError { get; private set; }
 
+        // Últimas búsquedas (también las no encontradas): la validación en tiempo real de Registrar Captación y el
+        // guardado de la captación consultan la misma dirección, y Nominatim pide no repetir consultas
+        private const int MAXIMO_RECORDADAS = 200;
+        private static readonly object _bloqueo = new object();
+        private static readonly Dictionary<string, ClienteNominatim.Resultado> _recordadas =
+            new Dictionary<string, ClienteNominatim.Resultado>(StringComparer.OrdinalIgnoreCase);
+
+        // Ubicación de una dirección + localidad; null si Nominatim no la encuentra. Si no hay conexión lanza la excepción.
+        public ClienteNominatim.Resultado Buscar(string direccion, string localidad)
+        {
+            string clave = (direccion ?? "").Trim() + "|" + (localidad ?? "").Trim();
+            lock (_bloqueo)
+                if (_recordadas.TryGetValue(clave, out ClienteNominatim.Resultado recordada)) return recordada;
+
+            ClienteNominatim.Resultado r = nominatim.Geocodificar(direccion.Trim(), localidad.Trim());
+            lock (_bloqueo)
+            {
+                if (_recordadas.Count >= MAXIMO_RECORDADAS) _recordadas.Clear();
+                _recordadas[clave] = r;
+            }
+            return r;
+        }
+
         // Busca y guarda las coordenadas del inmueble. false si no se encontró la dirección o no hubo conexión
         // (UltimoError dice cuál); el inmueble queda sin coordenadas y se puede volver a intentar.
         public bool Geocodificar(Inmueble inmueble)
@@ -25,7 +49,7 @@ namespace BLL
             }
             try
             {
-                ClienteNominatim.Resultado r = nominatim.Geocodificar(inmueble.Direccion, inmueble.Localidad);
+                ClienteNominatim.Resultado r = Buscar(inmueble.Direccion, inmueble.Localidad);
                 if (r == null)
                 {
                     UltimoError = $"No se encontró \"{inmueble.Direccion}, {inmueble.Localidad}\" en el mapa.";

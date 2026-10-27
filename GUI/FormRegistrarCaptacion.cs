@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BE;
 using BLL;
@@ -15,11 +17,22 @@ namespace TpIngSoft
 
         private Cliente _clienteEncontrado; // cliente existente cargado con "Buscar"
 
+        // Validación de la dirección en el mapa mientras se escribe (Nominatim): se consulta 1 segundo después del
+        // último cambio de la dirección o la localidad, en segundo plano. Es solo un aviso: se puede guardar igual.
+        private enum EstadoUbicacion { Ninguno, Buscando, Encontrada, NoEncontrada, SinConexion }
+        private readonly GeocodificacionBLL geocodificacionBLL = new GeocodificacionBLL();
+        private readonly Timer _esperaUbicacion = new Timer { Interval = 1000 };
+        private EstadoUbicacion _estadoUbicacion = EstadoUbicacion.Ninguno;
+        private int _consultaUbicacion; // número de la última consulta: las respuestas de las anteriores se descartan
+
         public FormRegistrarCaptacion()
         {
             InitializeComponent();
             RegistrarControlesTraducibles();
             GestorIdioma.Instancia.Adjuntar(this);
+            _esperaUbicacion.Tick += EsperaUbicacion_Tick;
+            txtDireccion.TextChanged += DatosUbicacion_TextChanged;
+            txtLocalidad.TextChanged += DatosUbicacion_TextChanged;
         }
 
         private void RegistrarControlesTraducibles()
@@ -55,6 +68,7 @@ namespace TpIngSoft
                 control.Traducir(traducciones);
             }
             ActualizarTextoAutorizacion(traducciones);
+            MostrarUbicacion(_estadoUbicacion, traducciones);
         }
 
         private TipoPublicacion TipoPublicacionSeleccionado()
@@ -82,7 +96,79 @@ namespace TpIngSoft
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             GestorIdioma.Instancia.Separar(this);
+            _esperaUbicacion.Dispose();
+            _consultaUbicacion++; // una consulta en curso ya no actualiza nada
             base.OnFormClosed(e);
+        }
+
+        // ---------- Ubicación en el mapa mientras se escribe ----------
+
+        // Cada cambio reinicia la espera de 1 segundo; mientras tanto no se muestra el resultado anterior
+        private void DatosUbicacion_TextChanged(object sender, EventArgs e)
+        {
+            _esperaUbicacion.Stop();
+            _consultaUbicacion++;
+            MostrarUbicacion(EstadoUbicacion.Ninguno);
+            if (txtDireccion.Text.Trim().Length > 0 && txtLocalidad.Text.Trim().Length > 0)
+                _esperaUbicacion.Start();
+        }
+
+        private void EsperaUbicacion_Tick(object sender, EventArgs e)
+        {
+            _esperaUbicacion.Stop();
+            string direccion = txtDireccion.Text.Trim(), localidad = txtLocalidad.Text.Trim();
+            if (direccion.Length == 0 || localidad.Length == 0) return;
+
+            int consulta = ++_consultaUbicacion;
+            MostrarUbicacion(EstadoUbicacion.Buscando);
+            Task.Run(() => geocodificacionBLL.Buscar(direccion, localidad)).ContinueWith(t =>
+            {
+                if (IsDisposed || consulta != _consultaUbicacion) return; // se cerró o ya se escribió otra cosa
+                MostrarUbicacion(t.IsFaulted ? EstadoUbicacion.SinConexion
+                    : t.Result != null ? EstadoUbicacion.Encontrada : EstadoUbicacion.NoEncontrada);
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        // Indicador debajo de la dirección; los textos se traducen (con el español por defecto si falta la traducción)
+        private void MostrarUbicacion(EstadoUbicacion estado, Dictionary<string, string> traducciones = null)
+        {
+            _estadoUbicacion = estado;
+            if (estado == EstadoUbicacion.Ninguno)
+            {
+                lblUbicacion.Visible = false;
+                return;
+            }
+            string clave, texto;
+            Color color;
+            switch (estado)
+            {
+                case EstadoUbicacion.Buscando:
+                    clave = BE.NombreControl.FormRegistrarCaptacion_lblUbicacion_buscando;
+                    texto = "Buscando ubicación...";
+                    color = Color.FromArgb(200, 196, 214);
+                    break;
+                case EstadoUbicacion.Encontrada:
+                    clave = BE.NombreControl.FormRegistrarCaptacion_lblUbicacion_encontrada;
+                    texto = "✓ Dirección encontrada en el mapa";
+                    color = Color.FromArgb(130, 220, 150);
+                    break;
+                case EstadoUbicacion.NoEncontrada:
+                    clave = BE.NombreControl.FormRegistrarCaptacion_lblUbicacion_noEncontrada;
+                    texto = "⚠ Dirección no encontrada, verificá que sea correcta";
+                    color = Color.FromArgb(255, 180, 90);
+                    break;
+                default:
+                    clave = BE.NombreControl.FormRegistrarCaptacion_lblUbicacion_sinConexion;
+                    texto = "No se pudo verificar la dirección (sin conexión)";
+                    color = Color.FromArgb(200, 196, 214);
+                    break;
+            }
+            traducciones = traducciones ?? GestorIdioma.Instancia.ObtenerTraduccionesActuales();
+            if (traducciones != null && traducciones.TryGetValue(clave, out string traducido) && !string.IsNullOrWhiteSpace(traducido))
+                texto = traducido;
+            lblUbicacion.Text = texto;
+            lblUbicacion.ForeColor = color;
+            lblUbicacion.Visible = true;
         }
 
         private void FormRegistrarCaptacion_Load(object sender, EventArgs e)

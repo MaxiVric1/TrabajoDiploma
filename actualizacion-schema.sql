@@ -1267,7 +1267,12 @@ INSERT INTO @Nuevos VALUES
     ('lblSnapshots', 'FormVerSnapshot', N'Actas de Decisión del inmueble:', 'Decision records of the property:'),
     ('lblDetalle', 'FormVerSnapshot', N'Análisis al momento de la decisión:', 'Analysis at the time of the decision:'),
     ('btnCerrar', 'FormVerSnapshot', 'Cerrar', 'Close'),
-    ('(form)', 'FormVerSnapshot', N'Actas de Decisión', 'Decision Records');
+    ('(form)', 'FormVerSnapshot', N'Actas de Decisión', 'Decision Records'),
+    -- Registrar Captación: validación de la dirección en el mapa mientras se escribe
+    ('lblUbicacion.buscando', 'FormRegistrarCaptacion', N'Buscando ubicación...', N'Looking up the location...'),
+    ('lblUbicacion.encontrada', 'FormRegistrarCaptacion', N'✓ Dirección encontrada en el mapa', N'✓ Address found on the map'),
+    ('lblUbicacion.noEncontrada', 'FormRegistrarCaptacion', N'⚠ Dirección no encontrada, verificá que sea correcta', N'⚠ Address not found, please check that it is correct'),
+    ('lblUbicacion.sinConexion', 'FormRegistrarCaptacion', N'No se pudo verificar la dirección (sin conexión)', N'Could not check the address (no connection)');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

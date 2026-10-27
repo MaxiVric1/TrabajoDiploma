@@ -44,6 +44,8 @@ namespace SERVICIOS
         private StringBuilder _actual;
         private float _y;
         private readonly string _pie;
+        // Imagen a la derecha (ImagenDerecha): ancho que ocupa y altura hasta la que los textos se achican
+        private float _reservaAncho, _reservaHasta;
 
         // pie: texto que se repite al pie de cada página, junto al número de página
         public DocumentoPdf(string pie = null)
@@ -103,11 +105,11 @@ namespace SERVICIOS
 
         public void Parrafo(string texto, float tamano = 10, bool negrita = false, bool centrado = false)
         {
-            float anchoUtil = ANCHO - 2 * MARGEN;
+            float anchoUtil = AnchoUtil();
             foreach (string renglon in Ajustar(texto ?? "", tamano, negrita, anchoUtil))
             {
                 AsegurarLugar(tamano * 1.4f);
-                float x = centrado ? (ANCHO - AnchoTexto(renglon, tamano, negrita)) / 2 : MARGEN;
+                float x = centrado ? MARGEN + (anchoUtil - AnchoTexto(renglon, tamano, negrita)) / 2 : MARGEN;
                 Escribir(renglon, x, _y, tamano, negrita);
                 _y -= tamano * 1.4f;
             }
@@ -117,7 +119,7 @@ namespace SERVICIOS
         public void Campo(string campo, string valor, float tamano = 10)
         {
             const float columna = 170f;
-            List<string> renglones = Ajustar(string.IsNullOrWhiteSpace(valor) ? "-" : valor, tamano, false, ANCHO - 2 * MARGEN - columna);
+            List<string> renglones = Ajustar(string.IsNullOrWhiteSpace(valor) ? "-" : valor, tamano, false, AnchoUtil() - columna);
             AsegurarLugar(tamano * 1.4f);
             Escribir(campo + ":", MARGEN, _y, tamano, true);
             foreach (string renglon in renglones)
@@ -136,13 +138,57 @@ namespace SERVICIOS
         public void Linea()
         {
             AsegurarLugar(6);
-            _actual.AppendFormat(CultureInfo.InvariantCulture, "0.5 w {0:0.##} {1:0.##} m {2:0.##} {1:0.##} l S\n", MARGEN, _y + 3, ANCHO - MARGEN);
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "0.5 w {0:0.##} {1:0.##} m {2:0.##} {1:0.##} l S\n", MARGEN, _y + 3, MARGEN + AnchoUtil());
             _y -= 4;
+        }
+
+        // Imagen (p. ej. un mapa) arriba a la derecha desde el renglón actual, con borde fino y una leyenda chica
+        // debajo; los campos, párrafos y líneas que siguen usan el ancho que queda a la izquierda hasta pasar el borde
+        // inferior de la imagen. Las tablas, recuadros, imágenes y firmas empiezan debajo (TerminarImagenDerecha).
+        public void ImagenDerecha(byte[] png, float ancho, string leyenda = null)
+        {
+            if (png == null) return;
+            TerminarImagenDerecha();
+            ImagenPdf imagen;
+            using (MemoryStream ms = new MemoryStream(png))
+            using (Bitmap original = new Bitmap(ms))
+            using (Bitmap rgb = SobreBlanco(original))
+                imagen = new ImagenPdf { Ancho = rgb.Width, Alto = rgb.Height, Datos = Zlib(Rgb(rgb)) };
+            float alto = ancho * imagen.Alto / imagen.Ancho;
+            float altoLeyenda = string.IsNullOrEmpty(leyenda) ? 0 : 10;
+            AsegurarLugar(alto + altoLeyenda + 4);
+            float arriba = _y + 9; // _y es la línea base del renglón siguiente: la imagen arranca a la altura de su texto
+            float x = ANCHO - MARGEN - ancho;
+            _imagenes.Add(imagen);
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q {0:0.##} 0 0 {1:0.##} {2:0.##} {3:0.##} cm /Im{4} Do Q\n",
+                ancho, alto, x, arriba - alto, _imagenes.Count);
+            _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.6 0.6 0.6 RG 0.5 w {0:0.##} {1:0.##} {2:0.##} {3:0.##} re S Q\n",
+                x, arriba - alto, ancho, alto);
+            if (altoLeyenda > 0)
+                Escribir(leyenda, ANCHO - MARGEN - AnchoTexto(leyenda, 6.5f, false), arriba - alto - 8, 6.5f, false);
+            _reservaAncho = ancho + 14;
+            _reservaHasta = arriba - alto - altoLeyenda;
+        }
+
+        // Sigue debajo de la imagen de ImagenDerecha (si todavía se está a su lado)
+        public void TerminarImagenDerecha()
+        {
+            if (_reservaAncho > 0 && _y > _reservaHasta - 6)
+                _y = _reservaHasta - 6;
+            _reservaAncho = 0;
+        }
+
+        // Ancho para el texto: todo el de la hoja, o lo que deja libre la imagen de ImagenDerecha mientras se está a su lado
+        private float AnchoUtil()
+        {
+            float total = ANCHO - 2 * MARGEN;
+            return _reservaAncho > 0 && _y > _reservaHasta ? total - _reservaAncho : total;
         }
 
         // Línea de firma con la aclaración debajo; firmaTipeada se escribe sobre la línea en letra inclinada
         public void Firma(string aclaracion, string firmaTipeada = null)
         {
+            TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             Espacio(30);
             AsegurarLugar(60);
             if (!string.IsNullOrWhiteSpace(firmaTipeada))
@@ -160,6 +206,7 @@ namespace SERVICIOS
         // espacio en blanco para firmar a mano), la línea y la aclaración debajo
         public void Firmas(params (string Rotulo, string FirmaTipeada, string Aclaracion)[] firmas)
         {
+            TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             const float separacion = 18f;
             float ancho = (ANCHO - 2 * MARGEN - separacion * (firmas.Length - 1)) / firmas.Length;
             AsegurarLugar(95);
@@ -190,6 +237,7 @@ namespace SERVICIOS
         // de puntos para que se vea nítida al imprimir.
         public void Imagen(byte[] png, float ancho)
         {
+            TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             if (png == null) return;
             ImagenPdf imagen;
             using (MemoryStream ms = new MemoryStream(png))
@@ -209,6 +257,7 @@ namespace SERVICIOS
         // la derecha (montos). anchos: proporciones de cada columna sobre el ancho útil. negritaUltima: fila de totales.
         public void Tabla(float[] anchos, string[] encabezado, IEnumerable<string[]> filas, bool negritaUltima = false, float tamano = 9, int columnasTexto = 1)
         {
+            TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             float total = 0;
             foreach (float a in anchos) total += a;
             float anchoUtil = ANCHO - 2 * MARGEN;
@@ -260,6 +309,7 @@ namespace SERVICIOS
         // Recuadro destacado (fondo de color y borde) con un título en negrita y el texto debajo
         public void Recuadro(string titulo, string texto, float tamano = 10)
         {
+            TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             const float relleno = 8f;
             float anchoUtil = ANCHO - 2 * MARGEN - 2 * relleno;
             List<string> lineasTitulo = string.IsNullOrEmpty(titulo) ? new List<string>() : Ajustar(titulo, tamano + 1.5f, true, anchoUtil);
@@ -287,6 +337,7 @@ namespace SERVICIOS
         // Barra de progreso de ancho completo: la parte cumplida en verde y el porcentaje escrito a la derecha
         public void BarraProgreso(decimal porcentaje, string rotulo = null)
         {
+            TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             const float alto = 18f, anchoTexto = 60f;
             float ancho = ANCHO - 2 * MARGEN - anchoTexto;
             if (!string.IsNullOrEmpty(rotulo)) Parrafo(rotulo, 10, true);
@@ -497,6 +548,7 @@ namespace SERVICIOS
             _actual = new StringBuilder();
             _paginas.Add(_actual);
             _y = ALTO - MARGEN;
+            _reservaAncho = 0;
         }
 
         private void AsegurarLugar(float alto)

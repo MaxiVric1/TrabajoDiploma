@@ -32,6 +32,7 @@ namespace TpIngSoft
             this.cmbTipo = new System.Windows.Forms.ComboBox();
             this.lblDireccion = new System.Windows.Forms.Label();
             this.txtDireccion = new System.Windows.Forms.TextBox();
+            this.lblUbicacion = new System.Windows.Forms.Label();
             this.lblMetros = new System.Windows.Forms.Label();
             this.nudMetros = new System.Windows.Forms.NumericUpDown();
             this.lblAmbientes = new System.Windows.Forms.Label();
@@ -200,6 +201,7 @@ namespace TpIngSoft
             this.grpInmueble.Controls.Add(this.cmbTipo);
             this.grpInmueble.Controls.Add(this.lblDireccion);
             this.grpInmueble.Controls.Add(this.txtDireccion);
+            this.grpInmueble.Controls.Add(this.lblUbicacion);
             this.grpInmueble.Controls.Add(this.lblMetros);
             this.grpInmueble.Controls.Add(this.nudMetros);
             this.grpInmueble.Controls.Add(this.lblAmbientes);
@@ -256,6 +258,17 @@ namespace TpIngSoft
             this.txtDireccion.Name = "txtDireccion";
             this.txtDireccion.Size = new System.Drawing.Size(200, 20);
             this.txtDireccion.TabIndex = 3;
+            //
+            // lblUbicacion
+            //
+            this.lblUbicacion.BackColor = System.Drawing.Color.Transparent;
+            this.lblUbicacion.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblUbicacion.Location = new System.Drawing.Point(296, 45);
+            this.lblUbicacion.Name = "lblUbicacion";
+            this.lblUbicacion.Size = new System.Drawing.Size(306, 14);
+            this.lblUbicacion.TabIndex = 13;
+            this.lblUbicacion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblUbicacion.Visible = false;
             //
             // lblMetros
             //
@@ -486,6 +499,7 @@ namespace TpIngSoft
         private System.Windows.Forms.ComboBox cmbTipo;
         private System.Windows.Forms.Label lblDireccion;
         private System.Windows.Forms.TextBox txtDireccion;
+        private System.Windows.Forms.Label lblUbicacion;
         private System.Windows.Forms.Label lblMetros;
         private System.Windows.Forms.NumericUpDown nudMetros;
         private System.Windows.Forms.Label lblAmbientes;

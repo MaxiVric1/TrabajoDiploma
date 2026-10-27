@@ -13,12 +13,15 @@ namespace SERVICIOS
     public static class MapaOSM
     {
         public const string URL_TESELAS = "https://tile.openstreetmap.org/{0}/{1}/{2}.png";
+        public const string ATRIBUCION = "© OpenStreetMap contributors";
         private const int TESELA = 256;
         private static readonly string _carpeta = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "LandSmart", "Teselas");
         private static readonly object _bloqueo = new object();
 
-        public static Bitmap Generar(double latitud, double longitud, int ancho, int alto, int zoom = 16)
+        // atribucion: false solo si quien usa el mapa escribe "© OpenStreetMap contributors" junto a él (p. ej. el PDF,
+        // donde la imagen se imprime achicada y el texto dentro del mapa no se leería)
+        public static Bitmap Generar(double latitud, double longitud, int ancho, int alto, int zoom = 16, bool atribucion = true)
         {
             if (ancho <= 0 || alto <= 0) throw new ArgumentException("Tamaño de mapa inválido.");
             int n = 1 << zoom;
@@ -59,14 +62,14 @@ namespace SERVICIOS
                 g.FillEllipse(Brushes.White, cx - 4, cy - 25, 8, 8);
 
                 // Atribución obligatoria de OpenStreetMap
-                const string atribucion = "© OpenStreetMap contributors";
-                using (Font fuente = new Font("Segoe UI", 7.5f))
-                {
-                    SizeF tam = g.MeasureString(atribucion, fuente);
-                    using (SolidBrush fondo = new SolidBrush(Color.FromArgb(190, Color.White)))
-                        g.FillRectangle(fondo, ancho - tam.Width - 4, alto - tam.Height - 2, tam.Width + 4, tam.Height + 2);
-                    g.DrawString(atribucion, fuente, Brushes.Black, ancho - tam.Width - 2, alto - tam.Height - 1);
-                }
+                if (atribucion)
+                    using (Font fuente = new Font("Segoe UI", 7.5f))
+                    {
+                        SizeF tam = g.MeasureString(ATRIBUCION, fuente);
+                        using (SolidBrush fondo = new SolidBrush(Color.FromArgb(190, Color.White)))
+                            g.FillRectangle(fondo, ancho - tam.Width - 4, alto - tam.Height - 2, tam.Width + 4, tam.Height + 2);
+                        g.DrawString(ATRIBUCION, fuente, Brushes.Black, ancho - tam.Width - 2, alto - tam.Height - 1);
+                    }
             }
             return mapa;
         }

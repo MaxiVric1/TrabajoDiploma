@@ -84,6 +84,7 @@ namespace BLL
             pdf.Parrafo($"Estado: {ProyectoInversionBLL.Texto(p.Estado)} - creado el {p.FechaCreacion:dd/MM/yyyy}. Informe para el Directorio.", 9);
 
             pdf.Subtitulo("Inmueble");
+            pdf.ImagenDerecha(Mapa(p), ANCHO_MAPA, MapaOSM.ATRIBUCION);
             pdf.Campo("Dirección", $"{p.Direccion}" + (string.IsNullOrEmpty(p.Localidad) ? "" : $", {p.Localidad}"));
             pdf.Campo("Tipo y operación", $"{p.TipoInmueble} en {(venta ? "venta" : "alquiler")}");
             if (inmueble != null)
@@ -92,6 +93,7 @@ namespace BLL
                       $" (USD {a.ValorTasadoPesos / a.DolarMep:N2} al MEP)");
             if (p.Latitud.HasValue && p.Longitud.HasValue)
                 pdf.Campo("Coordenadas", $"{p.Latitud:0.000000}, {p.Longitud:0.000000}");
+            pdf.TerminarImagenDerecha();
 
             pdf.Subtitulo("Propietario");
             pdf.Campo("Nombre", propietario != null ? $"{propietario.Nombre} {propietario.Apellido}" : "-");
@@ -201,6 +203,7 @@ namespace BLL
             // ----- Página 1: el proyecto -----
             pdf.Encabezado(ContratoBLL.Logo(), "PROPUESTA DE INVERSIÓN", $"Proyecto N° {p.IdProyecto}", $"{DateTime.Now:dd/MM/yyyy}");
             pdf.Subtitulo("El proyecto");
+            pdf.ImagenDerecha(Mapa(p), ANCHO_MAPA, MapaOSM.ATRIBUCION);
             pdf.Campo("Ubicación", $"{p.Direccion}" + (string.IsNullOrEmpty(p.Localidad) ? "" : $", {p.Localidad}"));
             pdf.Campo("Lote", $"{p.SuperficieLote:N2} m²");
             pdf.Campo("Edificabilidad", $"{p.Pisos} pisos (altura máxima {p.AlturaMaxima:0.##} m) de {p.SuperficieEdificablePlanta:N2} m² por planta");
@@ -209,6 +212,7 @@ namespace BLL
             pdf.Campo("Valor de las unidades", $"USD {p.ValorVentaM2Unidades:N2} por m² - USD {p.ValorTotalUnidades:N2} en total");
             pdf.Campo("Plazo estimado de obra", $"{c.PlazoObraMeses} meses");
             pdf.Campo("Aprobado por el Directorio", p.FechaDecision.HasValue ? p.FechaDecision.Value.ToString("dd/MM/yyyy") : "-");
+            pdf.TerminarImagenDerecha();
 
             pdf.Subtitulo("Resumen ejecutivo del fideicomiso");
             pdf.Parrafo($"El propietario aporta el lote de {p.Direccion} a un fideicomiso inmobiliario administrado por LandSmart, a cambio del " +
@@ -273,5 +277,30 @@ namespace BLL
         }
 
         private static string Usd(decimal valor) => $"USD {valor:N2}";
+
+        // Mapa de la página 1, a la derecha de los datos del inmueble: ancho en puntos y píxeles por punto (el doble
+        // dejaría las calles de las teselas demasiado chicas al imprimir; con 1,6 se ven nítidas y legibles)
+        private const float ANCHO_MAPA = 165f, ALTO_MAPA = 124f, PIXELES_POR_PUNTO = 1.6f;
+
+        // Mapa de OpenStreetMap centrado en el inmueble (PNG, sin la atribución: el PDF la escribe debajo); null si el
+        // inmueble no tiene coordenadas o no se pudieron bajar las teselas (el informe sale igual, sin mapa)
+        private static byte[] Mapa(ProyectoInversion p)
+        {
+            if (!p.Latitud.HasValue || !p.Longitud.HasValue) return null;
+            try
+            {
+                using (System.Drawing.Bitmap mapa = MapaOSM.Generar((double)p.Latitud.Value, (double)p.Longitud.Value,
+                           (int)(ANCHO_MAPA * PIXELES_POR_PUNTO), (int)(ALTO_MAPA * PIXELES_POR_PUNTO), atribucion: false))
+                using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
+                {
+                    mapa.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    return ms.ToArray();
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
     }
 }
