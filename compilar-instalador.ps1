@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Genera Output\LandSmart-Setup-<versión>.exe: compila, descarga LocalDB, compila el instalador y lo firma.
+    Genera Output\Instalar-LandSmart.exe: compila, descarga LocalDB, compila el instalador y lo firma.
 
 .DESCRIPTION
     1. Compila la solución (Release x64) y DbInstaller (Release) con el MSBuild de Visual Studio.
@@ -19,7 +19,7 @@ $iss = Join-Path $raiz 'instalador.iss'
 
 $version = ([regex]::Match((Get-Content $iss -Raw), '#define AppVersion "([^"]+)"')).Groups[1].Value
 if (-not $version) { throw 'No se encontró AppVersion en instalador.iss.' }
-$exe = Join-Path $raiz "Output\LandSmart-Setup-$version.exe"
+$exe = Join-Path $raiz 'Output\Instalar-LandSmart.exe'
 
 # 1. Compilación
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -76,4 +76,4 @@ if (-not $firma -or -not $firma.SignerCertificate) {
 if (-not $firma.SignerCertificate) { throw "Falló la firma: $($firma.StatusMessage)" }
 # Autofirmado: el estado es UnknownError (la raíz no es de confianza), pero la firma queda aplicada
 Write-Host ("Firmado por {0} | Estado: {1}" -f $firma.SignerCertificate.Subject, $firma.Status) -ForegroundColor Green
-Write-Host $exe -ForegroundColor Green
+Write-Host "$exe (versión $version)" -ForegroundColor Green

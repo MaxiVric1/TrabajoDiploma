@@ -8,7 +8,7 @@
 ;   1. Verifica .NET Framework 4.7.2.
 ;   2. Página "Base de datos": lista las instancias de SQL Server del registro (con su versión y si ya tienen la base),
 ;      LocalDB (o la opción de instalarlo, incluido en el instalador) y "otro servidor" escrito a mano.
-;      Si no hay ningún SQL Server ofrece el tutorial de instalación, la página de descarga y la opción de cancelar.
+;      Si no hay ningún SQL Server ofrece la guía de instalación, la página de descarga y la opción de cancelar.
 ;      Al continuar inicia el servicio si está detenido y prueba la conexión con permisos de administrador de SQL.
 ;   3. Antes de copiar archivos (PrepareToInstall) hace todo el trabajo de la base con DbInstaller.exe (sin sqlcmd):
 ;      vuelve a verificar el servicio, hace una copia previa si la base existe, ejecuta los scripts (schema-init.sql
@@ -25,7 +25,7 @@
 ; el instalador (LocalDB y la verificación final) usa una copia en C:\ProgramData\LandSmart\Instalacion\<nombre al azar>:
 ; los demás usuarios no pueden listar esa carpeta y por lo tanto no conocen ni pueden reemplazar esa copia.
 ;
-; Instalación desatendida: LandSmart-Setup-1.1.0.exe /VERYSILENT [/SERVIDOR=.\SQLEXPRESS]
+; Instalación desatendida: Instalar-LandSmart.exe /VERYSILENT [/SERVIDOR=.\SQLEXPRESS]
 ; ====================================================
 
 #define AppNombre "LandSmart"
@@ -34,6 +34,8 @@
 #define AppExe "TpIngSoft.exe"
 ; Base de datos: debe coincidir con Initial Catalog de TpIngSoft.exe.config y BackupCLI.exe.config
 #define SqlBase "TpIngSoft"
+; Guía de instalación (HTML propio): se instala en {app}\Ayuda y se abre desde la página Base de datos
+#define Guia "Guia-Instalacion-LandSmart.html"
 ; SQL Server Express LocalDB se incluye solo si compilar-instalador.ps1 lo descargó
 #ifexist "Redist\SqlLocalDB.msi"
   #define ConLocalDb "True"
@@ -71,6 +73,11 @@ DisableDirPage=no
 DisableProgramGroupPage=yes
 DisableReadyPage=no
 WizardStyle=modern
+; Logo de LandSmart (RecursosInstalador\generar-imagenes.ps1): ícono del instalador, banner lateral de la bienvenida y
+; el final, e imagen chica de las demás páginas; una imagen por escala de Windows (100, 125, 150, 175 y 200 %)
+SetupIconFile=RecursosInstalador\landsmart.ico
+WizardImageFile=RecursosInstalador\wizard-grande-100.bmp,RecursosInstalador\wizard-grande-125.bmp,RecursosInstalador\wizard-grande-150.bmp,RecursosInstalador\wizard-grande-175.bmp,RecursosInstalador\wizard-grande-200.bmp
+WizardSmallImageFile=RecursosInstalador\wizard-chico-100.bmp,RecursosInstalador\wizard-chico-125.bmp,RecursosInstalador\wizard-chico-150.bmp,RecursosInstalador\wizard-chico-175.bmp,RecursosInstalador\wizard-chico-200.bmp
 ; x64: instala en "Program Files" (no en "Program Files (x86)") y ve el registro de SQL Server de 64 bits
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -80,7 +87,7 @@ PrivilegesRequired=admin
 CloseApplications=yes
 RestartApplications=no
 OutputDir=Output
-OutputBaseFilename={#AppNombre}-Setup-{#AppVersion}
+OutputBaseFilename=Instalar-{#AppNombre}
 Compression=lzma2
 SolidCompression=yes
 ; Log de Inno Setup siempre activo (%TEMP%\Setup Log aaaa-mm-dd #nnn.txt); el de la base de datos queda en
@@ -94,9 +101,9 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "escritorio"; Description: "Crear un acceso directo en el escritorio"; Flags: unchecked
 
 [Files]
-; Tutorial de instalación de SQL Server: se puede abrir desde la página Base de datos (antes de instalar nada)
-Source: "tutorial-sql-server.html"; DestDir: "{tmp}"; Flags: dontcopy
-Source: "tutorial-sql-server.html"; DestDir: "{app}\Ayuda"; Flags: ignoreversion
+; Guía de instalación (requisitos, pasos y SQL Server): se puede abrir desde la página Base de datos (antes de instalar nada)
+Source: "{#Guia}"; DestDir: "{tmp}"; Flags: dontcopy
+Source: "{#Guia}"; DestDir: "{app}\Ayuda"; Flags: ignoreversion
 ; Aplicación: exe, config y dlls (sin .pdb de depuración ni .xml de documentación)
 Source: "GUI\bin\x64\Release\*"; DestDir: "{app}"; Excludes: "*.pdb,*.xml"; Flags: ignoreversion
 ; Herramienta de backup y restore (usa las mismas BE/BLL/DAL/SERVICIOS que la aplicación)
@@ -131,7 +138,7 @@ Name: "{commonappdata}\{#AppNombre}\Backups"; Permissions: users-modify
 [Icons]
 Name: "{group}\{#AppNombre}"; Filename: "{app}\{#AppExe}"
 Name: "{group}\Credenciales iniciales"; Filename: "{commonappdata}\{#AppNombre}\Credenciales_Iniciales.txt"
-Name: "{group}\Cómo instalar SQL Server"; Filename: "{app}\Ayuda\tutorial-sql-server.html"
+Name: "{group}\Guía de instalación"; Filename: "{app}\Ayuda\{#Guia}"
 Name: "{group}\Desinstalar {#AppNombre}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#AppNombre}"; Filename: "{app}\{#AppExe}"; Tasks: escritorio
 
@@ -153,7 +160,7 @@ const
   INSTANCIA_POR_DEFECTO = 'MSSQLSERVER';
   SERVIDOR_LOCALDB = '(localdb)\MSSQLLocalDB';
   DESCARGA_SQL_EXPRESS = 'https://www.microsoft.com/sql-server/sql-server-downloads';
-  TUTORIAL = 'tutorial-sql-server.html';
+  TUTORIAL = '{#Guia}';
   // SIDs fijos (no dependen del idioma de Windows)
   SID_SYSTEM = '*S-1-5-18';
   SID_ADMINISTRADORES = '*S-1-5-32-544';
@@ -515,7 +522,7 @@ end;
 
 // ---------- Ayuda cuando no hay SQL Server ----------
 
-// El tutorial se abre con la cuenta del usuario (el navegador no debe correr como administrador), desde su carpeta
+// La guía se abre con la cuenta del usuario (el navegador no debe correr como administrador), desde su carpeta
 procedure AbrirTutorial();
 var
   Archivo: String;
@@ -527,7 +534,7 @@ begin
   ExtractTemporaryFile(TUTORIAL);
   if not CopyFile(ExpandConstant('{tmp}\') + TUTORIAL, Archivo, False) or
      not ShellExecAsOriginalUser('open', Archivo, '', '', SW_SHOWNORMAL, ewNoWait, Codigo) then
-    MsgBox('No se pudo abrir el tutorial. ' + SysErrorMessage(Codigo), mbError, MB_OK);
+    MsgBox('No se pudo abrir la guía de instalación. ' + SysErrorMessage(Codigo), mbError, MB_OK);
 end;
 
 procedure AbrirDescarga();
@@ -594,7 +601,7 @@ begin
 
   if CantidadInstancias = 0 then
     Subtitulo := 'No se encontró SQL Server en este equipo. Puede instalar SQL Server Express LocalDB, indicar un ' +
-                 'servidor existente o cancelar, instalar SQL Server Express (vea el tutorial) y volver a ejecutar este instalador.'
+                 'servidor existente o cancelar, instalar SQL Server Express (vea la guía) y volver a ejecutar este instalador.'
   else
     Subtitulo := 'Elija la instancia donde se creará la base {#SqlBase}. Si una instancia ya tiene la base, se ' +
                  'conservan sus datos (se pregunta antes de reemplazarla).';
@@ -622,7 +629,7 @@ begin
   TextoEstado.WordWrap := True;
   TextoEstado.Caption := '';
 
-  // Sin SQL Server: tutorial propio y página de descarga de Microsoft
+  // Sin SQL Server: guía propia y página de descarga de Microsoft
   if CantidadInstancias = 0 then
   begin
     Boton := CrearBoton('Ver tutorial', 0, TextoEstado.Top + ScaleY(22), @BotonTutorialClick);
@@ -784,7 +791,7 @@ begin
   begin
     if MsgBox('Se cancelará la instalación de {#AppNombre}: no se instaló nada.' + #13#10#13#10 +
               'Instale SQL Server Express y vuelva a ejecutar este instalador.' + #13#10#13#10 +
-              '¿Desea abrir el tutorial de instalación de SQL Server?', mbConfirmation, MB_YESNO) = IDYES then
+              '¿Desea abrir la guía de instalación (incluye cómo instalar SQL Server)?', mbConfirmation, MB_YESNO) = IDYES then
       AbrirTutorial();
     CancelarSinConfirmar := True;
     WizardForm.Close();
