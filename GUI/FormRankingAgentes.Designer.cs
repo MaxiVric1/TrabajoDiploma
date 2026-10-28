@@ -24,6 +24,7 @@ namespace TpIngSoft
             this.lblOrden = new System.Windows.Forms.Label();
             this.cmbOrden = new System.Windows.Forms.ComboBox();
             this.lblVista = new System.Windows.Forms.Label();
+            this.rbTodos = new System.Windows.Forms.RadioButton();
             this.rbMasVendieron = new System.Windows.Forms.RadioButton();
             this.rbMenosVendieron = new System.Windows.Forms.RadioButton();
             this.dgvRanking = new System.Windows.Forms.DataGridView();
@@ -44,6 +45,7 @@ namespace TpIngSoft
             this.grpFiltros.Controls.Add(this.lblOrden);
             this.grpFiltros.Controls.Add(this.cmbOrden);
             this.grpFiltros.Controls.Add(this.lblVista);
+            this.grpFiltros.Controls.Add(this.rbTodos);
             this.grpFiltros.Controls.Add(this.rbMasVendieron);
             this.grpFiltros.Controls.Add(this.rbMenosVendieron);
             this.grpFiltros.ForeColor = System.Drawing.Color.White;
@@ -135,14 +137,30 @@ namespace TpIngSoft
             this.lblVista.Text = "Vista:";
             this.lblVista.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
+            // rbTodos
+            //
+            this.rbTodos.Appearance = System.Windows.Forms.Appearance.Button;
+            this.rbTodos.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.rbTodos.Checked = true;
+            this.rbTodos.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.rbTodos.ForeColor = System.Drawing.Color.White;
+            this.rbTodos.Location = new System.Drawing.Point(92, 58);
+            this.rbTodos.Name = "rbTodos";
+            this.rbTodos.Size = new System.Drawing.Size(200, 28);
+            this.rbTodos.TabStop = true;
+            this.rbTodos.Text = "Todos los agentes";
+            this.rbTodos.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.rbTodos.UseVisualStyleBackColor = false;
+            this.rbTodos.CheckedChanged += new System.EventHandler(this.Vista_CheckedChanged);
+            //
             // rbMasVendieron
             //
             this.rbMasVendieron.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbMasVendieron.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
-            this.rbMasVendieron.Checked = true;
+            this.rbMasVendieron.Checked = false;
             this.rbMasVendieron.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rbMasVendieron.ForeColor = System.Drawing.Color.White;
-            this.rbMasVendieron.Location = new System.Drawing.Point(92, 58);
+            this.rbMasVendieron.Location = new System.Drawing.Point(300, 58);
             this.rbMasVendieron.Name = "rbMasVendieron";
             this.rbMasVendieron.Size = new System.Drawing.Size(240, 28);
             this.rbMasVendieron.TabStop = true;
@@ -158,7 +176,7 @@ namespace TpIngSoft
             this.rbMenosVendieron.Checked = false;
             this.rbMenosVendieron.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rbMenosVendieron.ForeColor = System.Drawing.Color.White;
-            this.rbMenosVendieron.Location = new System.Drawing.Point(340, 58);
+            this.rbMenosVendieron.Location = new System.Drawing.Point(548, 58);
             this.rbMenosVendieron.Name = "rbMenosVendieron";
             this.rbMenosVendieron.Size = new System.Drawing.Size(240, 28);
             this.rbMenosVendieron.TabStop = true;
@@ -231,6 +249,7 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblOrden;
         private System.Windows.Forms.ComboBox cmbOrden;
         private System.Windows.Forms.Label lblVista;
+        private System.Windows.Forms.RadioButton rbTodos;
         private System.Windows.Forms.RadioButton rbMasVendieron;
         private System.Windows.Forms.RadioButton rbMenosVendieron;
         private System.Windows.Forms.DataGridView dgvRanking;

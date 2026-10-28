@@ -595,6 +595,7 @@ namespace BE
         public const string FormRankingAgentes_lblHasta = "FormRankingAgentes.lblHasta";
         public const string FormRankingAgentes_lblOrden = "FormRankingAgentes.lblOrden";
         public const string FormRankingAgentes_lblVista = "FormRankingAgentes.lblVista";
+        public const string FormRankingAgentes_rbTodos = "FormRankingAgentes.rbTodos";
         public const string FormRankingAgentes_rbMasVendieron = "FormRankingAgentes.rbMasVendieron";
         public const string FormRankingAgentes_rbMenosVendieron = "FormRankingAgentes.rbMenosVendieron";
         public const string FormRankingAgentes_btnExportarPdf = "FormRankingAgentes.btnExportarPdf";

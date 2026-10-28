@@ -91,10 +91,12 @@ namespace BLL
             }
         }
 
-        // Los TOP agentes que más (o menos) vendieron en el período, por cantidad de propiedades o por valor total.
-        // Entran todos los agentes comerciales activos, aunque no hayan vendido (así aparecen en "menos vendieron").
-        public ResultadoRanking ObtenerRanking(PeriodoRanking periodo, DateTime? desde, DateTime? hasta, OrdenRanking orden, bool masVendieron)
+        // Ranking del período por cantidad de propiedades o por valor total: todos los agentes de mayor a menor, o
+        // filtrado a los TOP que más (o menos) vendieron. Entran todos los agentes comerciales activos, aunque no hayan
+        // vendido (así aparecen en "menos vendieron").
+        public ResultadoRanking ObtenerRanking(PeriodoRanking periodo, DateTime? desde, DateTime? hasta, OrdenRanking orden, VistaRanking vista)
         {
+            bool masVendieron = vista != VistaRanking.MenosVendieron;
             ExigirPermisoRanking();
             if (periodo != PeriodoRanking.Personalizado)
                 (desde, hasta) = Rango(periodo, DateTime.Today);
@@ -109,7 +111,8 @@ namespace BLL
             IOrderedEnumerable<RankingAgente> ordenados = masVendieron
                 ? todos.OrderByDescending(principal).ThenByDescending(secundario)
                 : todos.OrderBy(principal).ThenBy(secundario);
-            List<RankingAgente> filas = ordenados.ThenBy(r => r.Apellido).ThenBy(r => r.NombrePersona).Take(TOP).ToList();
+            IEnumerable<RankingAgente> enOrden = ordenados.ThenBy(r => r.Apellido).ThenBy(r => r.NombrePersona);
+            List<RankingAgente> filas = (vista == VistaRanking.Todos ? enOrden : enOrden.Take(TOP)).ToList();
             for (int i = 0; i < filas.Count; i++) filas[i].Posicion = i + 1;
 
             return new ResultadoRanking
@@ -118,7 +121,7 @@ namespace BLL
                 Hasta = hasta?.Date,
                 Periodo = Texto(periodo),
                 Orden = orden,
-                MasVendieron = masVendieron,
+                Vista = vista,
                 TotalAgentes = todos.Count,
                 VentasDelPeriodo = todos.Sum(r => r.Cantidad),
                 TotalUsdDelPeriodo = todos.Sum(r => r.TotalUsd),
@@ -138,10 +141,11 @@ namespace BLL
             if (r == null) throw new ArgumentNullException(nameof(r));
             if (string.IsNullOrWhiteSpace(ruta)) throw new ArgumentException("Indique dónde guardar el PDF.");
 
-            string vista = r.MasVendieron ? $"Top {TOP}: los que más vendieron" : $"Top {TOP}: los que menos vendieron";
+            string vista = TextoVista(r.Vista);
             string criterio = r.Orden == OrdenRanking.Cantidad ? "cantidad de propiedades vendidas" : "valor total vendido (USD)";
             DocumentoPdf pdf = new DocumentoPdf("LandSmart - Ranking de agentes comerciales");
-            pdf.Encabezado(ContratoBLL.Logo(), "RANKING DE AGENTES", r.MasVendieron ? "Más vendieron" : "Menos vendieron", $"Generado el {DateTime.Now:dd/MM/yyyy HH:mm}");
+            pdf.Encabezado(ContratoBLL.Logo(), "RANKING DE AGENTES",
+                r.Vista == VistaRanking.Todos ? "Todos los agentes" : r.MasVendieron ? "Más vendieron" : "Menos vendieron", $"Generado el {DateTime.Now:dd/MM/yyyy HH:mm}");
 
             pdf.Subtitulo("Criterios");
             pdf.Campo("Período", TextoPeriodo(r));
@@ -166,7 +170,17 @@ namespace BLL
 
             pdf.Guardar(ruta);
             GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "Informe Ranking Agentes",
-                $"Ranking de agentes ({TextoPeriodo(r)}, {criterio}, {(r.MasVendieron ? "más" : "menos")} vendieron) exportado a PDF.");
+                $"Ranking de agentes ({TextoPeriodo(r)}, {criterio}, {vista.ToLower()}) exportado a PDF.");
+        }
+
+        public static string TextoVista(VistaRanking vista)
+        {
+            switch (vista)
+            {
+                case VistaRanking.MasVendieron: return $"Top {TOP}: los que más vendieron";
+                case VistaRanking.MenosVendieron: return $"Top {TOP}: los que menos vendieron";
+                default: return "Todos los agentes, de mayor a menor";
+            }
         }
     }
 }

@@ -83,6 +83,9 @@ namespace BLL
                     throw new ArgumentException($"Ya existe un inquilino con DNI {inquilinoNuevo.Dni}: búsquelo para usar sus datos.");
             }
 
+            // El depósito es siempre MESES_DEPOSITO meses del monto inicial: lo fija la regla de negocio, no la pantalla
+            if (contrato != null)
+                contrato.DepositoGarantia = CalcularDeposito(contrato.MontoMensual);
             Validar(contrato, validarInquilino: inquilinoNuevo == null, validarInmueble: false);
             Inmueble inmueble = ValidarInmuebleParaAlquilar(idInmueble);
             ValidarGarantes(contrato, inquilinoNuevo != null ? inquilinoNuevo.Dni : inquilinoDAL.BuscarPorId(contrato.IdInquilino)?.Dni);
@@ -312,16 +315,18 @@ namespace BLL
             // El monto inicial es el anterior a la primera actualización por IPC (si ya hubo alguna)
             List<ActualizacionContrato> actualizaciones = new ActualizacionContratoDAL().LeerPorContrato(idContrato);
             decimal montoInicial = actualizaciones.Count > 0 ? actualizaciones[0].MontoAnterior : contrato.MontoMensual;
-            string nombrePropietario = propietario != null ? $"{propietario.Nombre} {propietario.Apellido}" : "-";
+            // Los alquileres cargados antes del vínculo con el PN1 no tienen inmueble ni propietario: el locador firma a mano
+            string nombrePropietario = propietario != null ? $"{propietario.Nombre} {propietario.Apellido}" : "Firma y aclaración";
             string nombreInquilino = $"{inquilino.Nombre} {inquilino.Apellido}";
 
             DocumentoPdf pdf = new DocumentoPdf($"LandSmart - Contrato de locación N° {idContrato}");
             pdf.Encabezado(Logo(), "CONTRATO DE LOCACIÓN", $"Contrato N° {idContrato}", $"Generado el {DateTime.Now:dd/MM/yyyy HH:mm}");
 
             pdf.Subtitulo("1. Las partes");
-            pdf.Campo("Locador (propietario)", propietario != null ? $"{nombrePropietario}, DNI {propietario.Dni}" : "-");
+            pdf.Campo("Locador (propietario)", propietario != null ? $"{nombrePropietario}, DNI {propietario.Dni}"
+                : "No registrado: el inmueble no está vinculado a una captación del sistema");
             pdf.Campo("Locatario (inquilino)", $"{nombreInquilino}, DNI {inquilino.Dni}");
-            pdf.Campo("Domicilio del locatario", inquilino.Domicilio);
+            pdf.Campo("Domicilio del locatario", string.IsNullOrWhiteSpace(inquilino.Domicilio) ? "No informado" : inquilino.Domicilio);
             foreach (Garante g in garantes)
             {
                 pdf.Campo("Garante", $"{g.Nombre} {g.Apellido}, DNI {g.Dni}");

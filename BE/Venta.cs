@@ -31,6 +31,14 @@ namespace BE
             ? Usuario : $"{NombrePersona} {Apellido}".Trim();
     }
 
+    // Todos: todos los agentes de mayor a menor; los Top filtran a los 5 primeros o a los 5 últimos
+    public enum VistaRanking
+    {
+        Todos,
+        MasVendieron,
+        MenosVendieron
+    }
+
     public enum OrdenRanking
     {
         Cantidad,
@@ -54,7 +62,8 @@ namespace BE
         public DateTime? Hasta { get; set; }
         public string Periodo { get; set; }          // "Este mes", "Personalizado"...
         public OrdenRanking Orden { get; set; }
-        public bool MasVendieron { get; set; }        // true: los 5 que más vendieron; false: los 5 que menos
+        public VistaRanking Vista { get; set; }       // todos los agentes, o los 5 que más / menos vendieron
+        public bool MasVendieron => Vista != VistaRanking.MenosVendieron; // orden de mayor a menor
         public int TotalAgentes { get; set; }
         public int VentasDelPeriodo { get; set; }
         public decimal TotalUsdDelPeriodo { get; set; }

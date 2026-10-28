@@ -8,8 +8,9 @@ using TpIngSoft.Traduccion;
 
 namespace TpIngSoft
 {
-    // Ranking de agentes comerciales (Admin y Directorio): los 5 que más o menos vendieron en un período, por
-    // cantidad de propiedades o por valor total en USD, con exportación a PDF
+    // Ranking de agentes comerciales (Admin y Directorio): todos los agentes de mayor a menor en un período, o
+    // filtrado a los 5 que más o menos vendieron, por cantidad de propiedades o por valor total en USD, con
+    // exportación a PDF de la vista actual
     public partial class FormRankingAgentes : Form, IObservador
     {
         private class FilaRanking
@@ -55,6 +56,7 @@ namespace TpIngSoft
                 (lblHasta, BE.NombreControl.FormRankingAgentes_lblHasta),
                 (lblOrden, BE.NombreControl.FormRankingAgentes_lblOrden),
                 (lblVista, BE.NombreControl.FormRankingAgentes_lblVista),
+                (rbTodos, BE.NombreControl.FormRankingAgentes_rbTodos),
                 (rbMasVendieron, BE.NombreControl.FormRankingAgentes_rbMasVendieron),
                 (rbMenosVendieron, BE.NombreControl.FormRankingAgentes_rbMenosVendieron),
                 (btnExportarPdf, BE.NombreControl.FormRankingAgentes_btnExportarPdf) })
@@ -151,7 +153,7 @@ namespace TpIngSoft
             CargarRanking();
         }
 
-        // Los dos botones de la vista funcionan como un interruptor: el elegido queda resaltado
+        // Los botones de la vista funcionan como un interruptor: el elegido queda resaltado
         private void Vista_CheckedChanged(object sender, EventArgs e)
         {
             PintarVista();
@@ -160,7 +162,7 @@ namespace TpIngSoft
 
         private void PintarVista()
         {
-            foreach (RadioButton rb in new[] { rbMasVendieron, rbMenosVendieron })
+            foreach (RadioButton rb in new[] { rbTodos, rbMasVendieron, rbMenosVendieron })
             {
                 rb.BackColor = rb.Checked ? PN3Comun.BOTON : PN3Comun.CAMPO;
                 rb.FlatAppearance.BorderColor = rb.Checked ? PN3Comun.VERDE : PN3Comun.CAMPO;
@@ -168,11 +170,14 @@ namespace TpIngSoft
             }
         }
 
+        private VistaRanking Vista => rbMasVendieron.Checked ? VistaRanking.MasVendieron
+                                    : rbMenosVendieron.Checked ? VistaRanking.MenosVendieron : VistaRanking.Todos;
+
         private void CargarRanking()
         {
             try
             {
-                _resultado = ventaBLL.ObtenerRanking(Periodo, dtpDesde.Value.Date, dtpHasta.Value.Date, Orden, rbMasVendieron.Checked);
+                _resultado = ventaBLL.ObtenerRanking(Periodo, dtpDesde.Value.Date, dtpHasta.Value.Date, Orden, Vista);
                 dgvRanking.DataSource = _resultado.Filas.Select(f => new FilaRanking
                 {
                     Posicion = f.Posicion,

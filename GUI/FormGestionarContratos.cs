@@ -416,6 +416,17 @@ namespace TpIngSoft
             Contrato contrato = ContratoSeleccionado();
             if (contrato == null) return;
 
+            // El domicilio del locatario va en el contrato: si falta (inquilinos anteriores al campo), se ofrece completarlo
+            if (btnCompletarDomicilio.Visible &&
+                MessageBox.Show($"{lblNombreValor.Text} {lblApellidoValor.Text} no tiene domicilio cargado y el contrato lo incluye.\n\n" +
+                                "¿Desea completarlo antes de generar el PDF? (Si elige No, figura como \"No informado\".)",
+                                "Domicilio del inquilino", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                btnCompletarDomicilio_Click(sender, e);
+                contrato = ContratoSeleccionado();
+                if (contrato == null) return;
+            }
+
             using (SaveFileDialog dialogo = new SaveFileDialog
             {
                 Filter = "Documento PDF (*.pdf)|*.pdf",

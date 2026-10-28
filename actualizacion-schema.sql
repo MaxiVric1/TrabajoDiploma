@@ -296,6 +296,18 @@ BEGIN
 END
 GO
 
+-- Depósito de garantía = 1 mes de alquiler. Los contratos que ya existían cuando se agregó la columna quedaron con
+-- $0: se completa con el monto del primer mes (el anterior a la primera actualización por IPC, igual que el
+-- contrato en PDF). No se tocan los depósitos ya liquidados al finalizar el contrato.
+UPDATE c SET [deposito_garantia] = ISNULL(
+        (SELECT TOP 1 a.[monto_anterior] FROM [dbo].[ActualizacionContrato] a
+         WHERE a.[id_contrato] = c.[id_contrato] ORDER BY a.[fecha_actualizacion], a.[id_actualizacion]),
+        c.[monto_mensual])
+FROM [dbo].[Contrato] c
+WHERE c.[deposito_garantia] = 0 AND c.[monto_descuento_deposito] IS NULL AND c.[monto_devolucion_deposito] IS NULL;
+IF @@ROWCOUNT > 0 PRINT N'Contratos: depósito de garantía completado con el primer mes de alquiler.';
+GO
+
 -- Valores de las series del BCRA ya consultados (27 = inflación mensual, 1197 = TIM art. 768 CCC): evitan
 -- consultar la API de nuevo y permiten trabajar sin conexión con lo ya descargado
 IF OBJECT_ID('[dbo].[IndiceBCRA]', 'U') IS NULL
@@ -1050,6 +1062,40 @@ BEGIN
 END
 GO
 
+-- Nombres de los clientes de ejemplo: los bloques anteriores los crean como "Cliente Ejemplo N" (DNI 41000001...,
+-- 43000001... y 44000001...). Se reemplazan por nombres y apellidos inventados, en orden de DNI; también en las
+-- bases que ya los tenían. Solo los que siguen con el nombre genérico (si alguien lo editó, se respeta).
+DECLARE @Nombres TABLE ([orden] INT IDENTITY(1,1), [nombre] NVARCHAR(100), [apellido] NVARCHAR(100));
+INSERT INTO @Nombres ([nombre], [apellido]) VALUES
+    (N'Sofía', N'Álvarez'), (N'Matías', N'Domínguez'), (N'Julieta', N'Castro'), (N'Nicolás', N'Pereyra'),
+    (N'Florencia', N'Suárez'), (N'Joaquín', N'Medina'), (N'Micaela', N'Ríos'), (N'Tomás', N'Aguirre'),
+    (N'Camila', N'Benítez'), (N'Facundo', N'Ojeda'), (N'Victoria', N'Molina'), (N'Ignacio', N'Paz'),
+    (N'Rocío', N'Vega'), (N'Bruno', N'Correa'), (N'Daniela', N'Figueroa'), (N'Leandro', N'Godoy'),
+    (N'Antonella', N'Ibarra'), (N'Gonzalo', N'Navarro'), (N'Milagros', N'Ortiz'), (N'Federico', N'Ponce'),
+    (N'Belén', N'Cardozo'), (N'Hernán', N'Luna'), (N'Carla', N'Bustos'), (N'Emiliano', N'Sánchez'),
+    (N'Lucía', N'Moreno'), (N'Ezequiel', N'Ruiz'), (N'Agustina', N'Peralta'), (N'Marcos', N'Ferreyra'),
+    (N'Natalia', N'Arias'), (N'Rodrigo', N'Vera'), (N'Paula', N'Coronel'), (N'Sebastián', N'Juárez'),
+    (N'Valeria', N'Maldonado'), (N'Franco', N'Lencina'), (N'Lorena', N'Villegas'), (N'Damián', N'Escobar'),
+    (N'Gabriela', N'Toledo'), (N'Maximiliano', N'Ramos'), (N'Celeste', N'Miranda'), (N'Pablo', N'Rojas'),
+    (N'Romina', N'Galván'), (N'Cristian', N'Quinteros'), (N'Jimena', N'Carrizo'), (N'Lautaro', N'Méndez'),
+    (N'Mariana', N'Ayala'), (N'Diego', N'Herrero'), (N'Silvina', N'Blanco'), (N'Alejandro', N'Funes'),
+    (N'Verónica', N'Lucero'), (N'Andrés', N'Campos'), (N'Carolina', N'Vázquez'), (N'Santino', N'Roldán'),
+    (N'Melina', N'Sequeira'), (N'Germán', N'Olmedo'), (N'Analía', N'Barrios'), (N'Fernando', N'Cáceres'),
+    (N'Ailén', N'Moyano'), (N'Ramiro', N'Gutiérrez'), (N'Noelia', N'Prieto'), (N'Esteban', N'Montenegro');
+
+WITH Genericos AS (
+    SELECT c.[id_cliente], ROW_NUMBER() OVER (ORDER BY c.[dni]) AS [orden]
+    FROM [dbo].[Cliente] c
+    WHERE c.[nombre] = N'Cliente' AND c.[apellido] LIKE N'Ejemplo %'
+      AND (c.[dni] LIKE '41______' OR c.[dni] LIKE '43______' OR c.[dni] LIKE '44______')
+)
+UPDATE c SET [nombre] = n.[nombre], [apellido] = n.[apellido]
+FROM [dbo].[Cliente] c
+JOIN Genericos g ON g.[id_cliente] = c.[id_cliente]
+JOIN @Nombres n ON n.[orden] = g.[orden];
+IF @@ROWCOUNT > 0 PRINT N'Clientes de ejemplo: nombres y apellidos asignados.';
+GO
+
 -- ====================================================
 -- 4e. PN3: proyectos de inversión de ejemplo
 -- ====================================================
@@ -1339,6 +1385,7 @@ INSERT INTO @Nuevos VALUES
     ('lblHasta', 'FormRankingAgentes', 'Hasta:', 'To:'),
     ('lblOrden', 'FormRankingAgentes', 'Ordenar por:', 'Sort by:'),
     ('lblVista', 'FormRankingAgentes', 'Vista:', 'View:'),
+    ('rbTodos', 'FormRankingAgentes', 'Todos los agentes', 'All agents'),
     ('rbMasVendieron', 'FormRankingAgentes', N'Top 5 más vendieron', 'Top 5 best sellers'),
     ('rbMenosVendieron', 'FormRankingAgentes', 'Top 5 menos vendieron', 'Top 5 lowest sellers'),
     ('btnExportarPdf', 'FormRankingAgentes', 'Exportar PDF', 'Export PDF'),

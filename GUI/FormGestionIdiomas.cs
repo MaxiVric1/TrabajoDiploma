@@ -291,6 +291,7 @@ namespace TpIngSoft
                 ("FormRankingAgentes", "lblHasta"),
                 ("FormRankingAgentes", "lblOrden"),
                 ("FormRankingAgentes", "lblVista"),
+                ("FormRankingAgentes", "rbTodos"),
                 ("FormRankingAgentes", "rbMasVendieron"),
                 ("FormRankingAgentes", "rbMenosVendieron"),
                 ("FormRankingAgentes", "btnExportarPdf"),
