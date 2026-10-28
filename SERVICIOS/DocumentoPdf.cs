@@ -115,17 +115,32 @@ namespace SERVICIOS
             }
         }
 
-        // "Campo: valor", con el valor ajustado a la derecha de una columna fija
-        public void Campo(string campo, string valor, float tamano = 10)
+        // "Campo: valor", con el valor ajustado a la derecha de una columna fija. destacado: texto en negrita a
+        // continuación del valor (p. ej. un monto total); si no entra en el último renglón, sigue en uno propio
+        public void Campo(string campo, string valor, float tamano = 10, string destacado = null)
         {
             const float columna = 170f;
-            List<string> renglones = Ajustar(string.IsNullOrWhiteSpace(valor) ? "-" : valor, tamano, false, AnchoUtil() - columna);
+            float anchoValor = AnchoUtil() - columna;
+            List<string> renglones = Ajustar(string.IsNullOrWhiteSpace(valor) && destacado == null ? "-" : valor ?? "", tamano, false, anchoValor);
             AsegurarLugar(tamano * 1.4f);
             Escribir(campo + ":", MARGEN, _y, tamano, true);
-            foreach (string renglon in renglones)
+            for (int i = 0; i < renglones.Count; i++)
             {
                 AsegurarLugar(tamano * 1.4f);
-                Escribir(renglon, MARGEN + columna, _y, tamano, false);
+                Escribir(renglones[i], MARGEN + columna, _y, tamano, false);
+                if (i == renglones.Count - 1 && !string.IsNullOrEmpty(destacado))
+                {
+                    float x = MARGEN + columna + AnchoTexto(renglones[i], tamano, false);
+                    if (renglones[i].Length > 0 && x + AnchoTexto(" " + destacado, tamano, true) > MARGEN + columna + anchoValor)
+                    {
+                        _y -= tamano * 1.4f;
+                        AsegurarLugar(tamano * 1.4f);
+                        x = MARGEN + columna;
+                    }
+                    else if (renglones[i].Length > 0)
+                        x += AnchoTexto(" ", tamano, false);
+                    Escribir(destacado, x, _y, tamano, true);
+                }
                 _y -= tamano * 1.4f;
             }
         }
@@ -255,7 +270,9 @@ namespace SERVICIOS
 
         // Tabla con encabezado sombreado: las primeras 'columnasTexto' columnas alineadas a la izquierda y las demás a
         // la derecha (montos). anchos: proporciones de cada columna sobre el ancho útil. negritaUltima: fila de totales.
-        public void Tabla(float[] anchos, string[] encabezado, IEnumerable<string[]> filas, bool negritaUltima = false, float tamano = 9, int columnasTexto = 1)
+        // filaDestacada: índice de una fila (sin contar el encabezado) en negrita y con fondo verde claro, o -1.
+        public void Tabla(float[] anchos, string[] encabezado, IEnumerable<string[]> filas, bool negritaUltima = false, float tamano = 9, int columnasTexto = 1,
+                          int filaDestacada = -1)
         {
             TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             float total = 0;
@@ -266,14 +283,19 @@ namespace SERVICIOS
 
             List<string[]> lista = new List<string[]>(filas);
             _y += 4; // _y es la línea base del renglón siguiente: la tabla empieza apenas arriba
-            FilaTabla(columnas, encabezado, tamano, true, true, columnasTexto);
+            FilaTabla(columnas, encabezado, tamano, true, FONDO_ENCABEZADO, columnasTexto);
             for (int i = 0; i < lista.Count; i++)
-                FilaTabla(columnas, lista[i], tamano, negritaUltima && i == lista.Count - 1, false, columnasTexto);
+                FilaTabla(columnas, lista[i], tamano, (negritaUltima && i == lista.Count - 1) || i == filaDestacada,
+                          i == filaDestacada ? FONDO_DESTACADO : null, columnasTexto);
             Espacio(14);
         }
 
-        private void FilaTabla(float[] columnas, string[] celdas, float tamano, bool negrita, bool sombreada, int columnasTexto)
+        // Colores de fondo de las filas (RGB de PDF): el encabezado violeta claro y la fila destacada verde claro
+        private const string FONDO_ENCABEZADO = "0.89 0.87 0.95", FONDO_DESTACADO = "0.84 0.94 0.86";
+
+        private void FilaTabla(float[] columnas, string[] celdas, float tamano, bool negrita, string fondo, int columnasTexto)
         {
+            bool sombreada = fondo != null;
             const float relleno = 4f;
             List<List<string>> renglones = new List<List<string>>();
             int maximo = 1;
@@ -288,7 +310,7 @@ namespace SERVICIOS
             AsegurarLugar(alto);
             float arriba = _y;
             _actual.AppendFormat(CultureInfo.InvariantCulture, "q {0} {1:0.##} {2:0.##} {3:0.##} {4:0.##} re {5} Q\n",
-                sombreada ? "0.89 0.87 0.95 rg 0.6 0.6 0.6 RG 0.5 w" : "0.6 0.6 0.6 RG 0.5 w",
+                sombreada ? fondo + " rg 0.6 0.6 0.6 RG 0.5 w" : "0.6 0.6 0.6 RG 0.5 w",
                 MARGEN, arriba - alto, ANCHO - 2 * MARGEN, alto, sombreada ? "B" : "S");
             float x = MARGEN;
             for (int i = 0; i < columnas.Length; i++)
@@ -306,16 +328,18 @@ namespace SERVICIOS
             _y = arriba - alto;
         }
 
-        // Recuadro destacado (fondo de color y borde) con un título en negrita y el texto debajo
-        public void Recuadro(string titulo, string texto, float tamano = 10)
+        // Recuadro destacado (fondo de color y borde) con un título en negrita y el texto debajo. destacado: texto en
+        // negrita entre el título y el texto (lo primero que se quiere leer)
+        public void Recuadro(string titulo, string texto, float tamano = 10, string destacado = null)
         {
             TerminarImagenDerecha(); // ocupan todo el ancho: van debajo de la imagen de la derecha
             const float relleno = 8f;
             float anchoUtil = ANCHO - 2 * MARGEN - 2 * relleno;
             List<string> lineasTitulo = string.IsNullOrEmpty(titulo) ? new List<string>() : Ajustar(titulo, tamano + 1.5f, true, anchoUtil);
+            List<string> lineasDestacadas = string.IsNullOrEmpty(destacado) ? new List<string>() : Ajustar(destacado, tamano, true, anchoUtil);
             List<string> lineas = string.IsNullOrEmpty(texto) ? new List<string>() : Ajustar(texto, tamano, false, anchoUtil);
             float altoTitulo = lineasTitulo.Count * (tamano + 1.5f) * 1.35f;
-            float alto = 2 * relleno + altoTitulo + lineas.Count * tamano * 1.35f;
+            float alto = 2 * relleno + altoTitulo + (lineasDestacadas.Count + lineas.Count) * tamano * 1.35f;
             AsegurarLugar(alto + 4);
             float arriba = _y + 4;
             _actual.AppendFormat(CultureInfo.InvariantCulture, "q 0.93 0.91 0.98 rg 0.35 0.29 0.63 RG 1.2 w {0:0.##} {1:0.##} {2:0.##} {3:0.##} re B Q\n",
@@ -325,6 +349,11 @@ namespace SERVICIOS
             {
                 Escribir(l, MARGEN + relleno, y, tamano + 1.5f, true);
                 y -= (tamano + 1.5f) * 1.35f;
+            }
+            foreach (string l in lineasDestacadas)
+            {
+                Escribir(l, MARGEN + relleno, y, tamano, true);
+                y -= tamano * 1.35f;
             }
             foreach (string l in lineas)
             {

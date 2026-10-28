@@ -107,7 +107,7 @@ namespace BLL
             pdf.Campo("M² construibles", $"{p.MetrosConstruibles:N2} m² ({p.Pisos} pisos x {p.SuperficieEdificablePlanta:N2} m²)");
             pdf.Campo("SMP / distrito", p.Smp == null && p.DistritoUrbanistico == null ? "Carga manual (sin consulta a catastro)"
                 : $"{p.Smp ?? "-"} / {p.DistritoUrbanistico ?? "-"} (Código Urbanístico de CABA, EPOK)");
-            pdf.Campo("Costo de obra", $"USD {p.CostoObraM2:N2} por m² - total USD {p.CostoTotalObra:N2}");
+            pdf.Campo("Capital del fideicomiso", $"USD {p.CostoObraM2:N2} por m² - total", destacado: $"USD {p.CostoTotalObra:N2}");
             pdf.Campo("Proyectado con el ICC", $"USD {a.CostoObraProyectadoUSD:N2} (obra de {a.Parametros.PlazoObraMeses} meses)");
             pdf.Campo("Valor de las unidades", $"USD {p.ValorVentaM2Unidades:N2} por m² - total USD {a.ValorUnidadesUSD:N2}");
             pdf.Campo("Canje del propietario", $"{p.PorcentajeCanje:0.##}% de las unidades (USD {a.UnidadesPropietarioUSD:N2})");
@@ -135,7 +135,7 @@ namespace BLL
                     new[] { "Inversores ganan", "-", Usd(a.MargenInversoresUSD) + $" ({a.RentabilidadInversoresPorcentaje:0.##}%)" },
                     new[] { "LandSmart gana", Usd(a.ComisionTradicionalUSD), Usd(g.TotalUSD) },
                     new[] { "Diferencia para el propietario", "", (a.DiferenciaUSD >= 0 ? "+" : "") + Usd(a.DiferenciaUSD) }
-                }, negritaUltima: true);
+                }, filaDestacada: 3);
             pdf.Parrafo("Detalle A: " + string.Join("; ", a.Tradicional.Detalle) + ".", 8.5f);
             pdf.Espacio(3);
             pdf.Parrafo("Detalle B: " + string.Join("; ", a.Fideicomiso.Detalle) + ".", 8.5f);
@@ -146,8 +146,9 @@ namespace BLL
                 (a.ConvieneFideicomiso
                     ? $"El propietario obtiene USD {a.DiferenciaUSD:N2} más con el fideicomiso que con {a.Tradicional.Nombre.ToLower()}"
                     : $"El propietario obtiene USD {-a.DiferenciaUSD:N2} más con {a.Tradicional.Nombre.ToLower()} que con el fideicomiso") +
-                $"; los inversores ganan USD {a.MargenInversoresUSD:N2} ({a.RentabilidadInversoresPorcentaje:0.##}% sobre la obra) y LandSmart USD {g.TotalUSD:N2}." +
-                (a.MargenInversoresUSD <= 0 ? " ATENCIÓN: el margen de los inversores no es positivo: el fideicomiso no conseguiría fondeo." : ""));
+                $"; los inversores ganan USD {a.MargenInversoresUSD:N2} ({a.RentabilidadInversoresPorcentaje:0.##}% sobre la obra)." +
+                (a.MargenInversoresUSD <= 0 ? " ATENCIÓN: el margen de los inversores no es positivo: el fideicomiso no conseguiría fondeo." : ""),
+                destacado: $"LandSmart gana {Usd(g.TotalUSD)} con el fideicomiso y {Usd(a.ComisionTradicionalUSD)} con {a.Tradicional.Nombre.ToLower()}.");
             foreach (string advertencia in a.Advertencias)
                 pdf.Parrafo("Atención: " + advertencia, 8.5f);
 
@@ -208,7 +209,7 @@ namespace BLL
             pdf.Campo("Lote", $"{p.SuperficieLote:N2} m²");
             pdf.Campo("Edificabilidad", $"{p.Pisos} pisos (altura máxima {p.AlturaMaxima:0.##} m) de {p.SuperficieEdificablePlanta:N2} m² por planta");
             pdf.Campo("Superficie a construir", $"{p.MetrosConstruibles:N2} m²");
-            pdf.Campo("Costo de obra", $"USD {p.CostoObraM2:N2} por m² - USD {p.CostoTotalObra:N2} en total");
+            pdf.Campo("Capital del fideicomiso", $"USD {p.CostoObraM2:N2} por m² - total", destacado: $"USD {p.CostoTotalObra:N2}");
             pdf.Campo("Valor de las unidades", $"USD {p.ValorVentaM2Unidades:N2} por m² - USD {p.ValorTotalUnidades:N2} en total");
             pdf.Campo("Plazo estimado de obra", $"{c.PlazoObraMeses} meses");
             pdf.Campo("Aprobado por el Directorio", p.FechaDecision.HasValue ? p.FechaDecision.Value.ToString("dd/MM/yyyy") : "-");
