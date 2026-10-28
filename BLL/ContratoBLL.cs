@@ -273,14 +273,37 @@ namespace BLL
         // tipeados en el formulario y debe coincidir con los del inquilino.
         public void GenerarPdf(int idContrato, string firmaInquilino, string ruta)
         {
-            if (string.IsNullOrWhiteSpace(ruta))
-                throw new ArgumentException("Indique dónde guardar el PDF.");
             Contrato contrato = contratoDAL.BuscarPorId(idContrato);
             if (contrato == null)
                 throw new Exception("El contrato no existe.");
             Inquilino inquilino = inquilinoDAL.BuscarPorId(contrato.IdInquilino);
             if (!FirmaCoincide(firmaInquilino, inquilino))
                 throw new ArgumentException($"La firma debe ser el nombre y apellido del inquilino ({inquilino?.Nombre} {inquilino?.Apellido}).");
+            EscribirPdf(contrato, inquilino, firmaInquilino, ruta);
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "PDF Contrato",
+                $"Contrato N° {idContrato}: PDF generado y firmado por el inquilino.");
+        }
+
+        // Vuelve a generar el PDF de un contrato ya registrado (Gestionar Contratos) con los datos actuales de la base.
+        // La firma del locatario es su nombre y apellido, igual que la que se validó al registrarlo.
+        public void RegenerarPdf(int idContrato, string ruta)
+        {
+            Contrato contrato = contratoDAL.BuscarPorId(idContrato);
+            if (contrato == null)
+                throw new Exception("El contrato no existe.");
+            Inquilino inquilino = inquilinoDAL.BuscarPorId(contrato.IdInquilino);
+            if (inquilino == null)
+                throw new Exception("No se encontró el inquilino del contrato.");
+            EscribirPdf(contrato, inquilino, $"{inquilino.Nombre} {inquilino.Apellido}", ruta);
+            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "PDF Contrato",
+                $"Contrato N° {idContrato}: PDF descargado desde Gestionar Contratos.");
+        }
+
+        private void EscribirPdf(Contrato contrato, Inquilino inquilino, string firmaInquilino, string ruta)
+        {
+            if (string.IsNullOrWhiteSpace(ruta))
+                throw new ArgumentException("Indique dónde guardar el PDF.");
+            int idContrato = contrato.IdContrato;
 
             InmuebleAlquiler alquiler = inmuebleDAL.BuscarPorId(contrato.IdInmuebleAlquiler);
             Inmueble inmueble = alquiler?.IdInmueble != null ? inmueblePN1DAL.BuscarPorId(alquiler.IdInmueble.Value) : null;
@@ -317,6 +340,8 @@ namespace BLL
 
             pdf.Subtitulo("3. Condiciones económicas");
             pdf.Campo("Monto mensual inicial", $"${montoInicial:N2}, pagadero del 1 al {PagoAlquilerBLL.DIA_VENCIMIENTO} de cada mes");
+            if (actualizaciones.Count > 0 || contrato.MontoMensual != montoInicial)
+                pdf.Campo("Monto mensual vigente", $"${contrato.MontoMensual:N2} al {DateTime.Now:dd/MM/yyyy} ({actualizaciones.Count} actualización(es) por {contrato.IndiceActualizacion})");
             pdf.Campo("Depósito de garantía", $"${contrato.DepositoGarantia:N2} ({MESES_DEPOSITO} mes de alquiler)");
             pdf.Campo("Comisión inmobiliaria", $"{contrato.ComisionInmobiliaria:0.##}% mensual, retenido de cada pago " +
                 $"(${CalcularComision(montoInicial, contrato.ComisionInmobiliaria):N2} sobre ${montoInicial:N2})");
@@ -350,8 +375,6 @@ namespace BLL
                 ("Por LandSmart:", null, "Firma y aclaración"));
 
             pdf.Guardar(ruta);
-            GestorBitacora.Instance.RegistrarEvento(SessionManager.Instance.UsuarioActual, "PDF Contrato",
-                $"Contrato N° {idContrato}: PDF generado y firmado por el inquilino.");
         }
 
         // Logo de LandSmart incrustado en BLL.dll (GUI\Resources\logo-landsmart.png); null si no estuviera

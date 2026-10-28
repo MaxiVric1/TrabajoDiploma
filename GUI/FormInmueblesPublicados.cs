@@ -53,6 +53,7 @@ namespace TpIngSoft
             _grillasTraducibles.Add(new DataGridTraducible(dgvInmuebles, "FormInmueblesPublicados.dgvInmuebles")
                 .ConColumna("NroCaptacion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_nro)
                 .ConColumna("Cliente", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_cliente)
+                .ConColumna("Agente", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_agente)
                 .ConColumna("Direccion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_direccion)
                 .ConColumna("TipoInmueble", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_tipo)
                 .ConColumna("TipoPublicacion", BE.NombreControl.FormInmueblesPublicados_dgvInmuebles_tipoPublicacion)
@@ -116,7 +117,7 @@ namespace TpIngSoft
                 dgvInmuebles.DataSource = null;
                 dgvInmuebles.DataSource = captacionBLL.LeerPublicados();
 
-                string[] visibles = { "NroCaptacion", "Cliente", "Direccion", "TipoInmueble", "TipoPublicacion", "ValorFinal",
+                string[] visibles = { "NroCaptacion", "Cliente", "Agente", "Direccion", "TipoInmueble", "TipoPublicacion", "ValorFinal",
                                       "EstadoPublicacion", "FechaPublicacion", "FechaDespublicacion" };
                 foreach (DataGridViewColumn col in dgvInmuebles.Columns)
                 {
@@ -125,7 +126,7 @@ namespace TpIngSoft
                 // Proporción del ancho (la grilla reparte todo el ancho): más para la dirección, menos para los datos cortos
                 var proporciones = new Dictionary<string, float>
                 {
-                    { "NroCaptacion", 70 }, { "Cliente", 100 }, { "Direccion", 175 }, { "TipoInmueble", 85 },
+                    { "NroCaptacion", 70 }, { "Cliente", 100 }, { "Agente", 100 }, { "Direccion", 175 }, { "TipoInmueble", 85 },
                     { "TipoPublicacion", 70 }, { "ValorFinal", 105 }, { "EstadoPublicacion", 85 },
                     { "FechaPublicacion", 100 }, { "FechaDespublicacion", 100 }
                 };

@@ -163,6 +163,7 @@ namespace BLL
         {
             Dictionary<int, Inmueble> inmuebles = inmuebleDAL.LeerTodos().ToDictionary(i => i.IdInmueble);
             Dictionary<int, Cliente> clientes = clienteDAL.LeerTodos().ToDictionary(c => c.IdCliente);
+            Dictionary<int, Usuario> agentes = new MapperUsuario().LeerTodos().ToDictionary(u => u.Id);
             // Último dictamen de cada captación (mismo criterio que TasacionBLL.ObtenerUltimoDictamen)
             Dictionary<int, Tasacion> ultimosDictamenes = tasacionDAL.LeerTodos()
                 .GroupBy(t => t.IdCaptacion)
@@ -178,12 +179,14 @@ namespace BLL
                 if (estado.HasValue && inmueble.EstadoActual != estado.Value) continue;
                 clientes.TryGetValue(inmueble.IdCliente, out Cliente cliente);
                 ultimosDictamenes.TryGetValue(c.NroCaptacion, out Tasacion dictamen);
+                agentes.TryGetValue(c.IdUsuarioAgente, out Usuario agente);
 
                 lista.Add(new CaptacionResumen
                 {
                     NroCaptacion = c.NroCaptacion,
                     FechaRegistro = c.FechaRegistro,
                     Cliente = cliente != null ? $"{cliente.Nombre} {cliente.Apellido}" : "Desconocido",
+                    Agente = NombreAgente(agente),
                     Direccion = inmueble.Direccion,
                     TipoInmueble = inmueble.TipoInmueble,
                     TipoPublicacion = inmueble.TipoPublicacion,
@@ -201,6 +204,14 @@ namespace BLL
                 });
             }
             return lista;
+        }
+
+        // Nombre y apellido del agente; el usuario de login si no tiene cargados nombre y apellido
+        private static string NombreAgente(Usuario agente)
+        {
+            if (agente == null) return "-";
+            string nombre = $"{agente.NombrePersona} {agente.Apellido}".Trim();
+            return nombre.Length > 0 ? nombre : agente.Nombre;
         }
 
         public const string PUBLICACION_PUBLICADO = "Publicado";

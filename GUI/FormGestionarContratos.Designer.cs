@@ -20,6 +20,7 @@ namespace TpIngSoft
             this.lblFiltroEstado = new System.Windows.Forms.Label();
             this.cmbFiltroEstado = new System.Windows.Forms.ComboBox();
             this.btnActualizar = new System.Windows.Forms.Button();
+            this.btnDescargarPdf = new System.Windows.Forms.Button();
             this.lblActualizacion = new System.Windows.Forms.Label();
             this.dgvContratos = new System.Windows.Forms.DataGridView();
             this.grpInquilino = new System.Windows.Forms.GroupBox();
@@ -132,6 +133,20 @@ namespace TpIngSoft
             this.btnActualizar.UseVisualStyleBackColor = false;
             this.btnActualizar.Click += new System.EventHandler(this.btnActualizar_Click);
             //
+            // btnDescargarPdf
+            //
+            this.btnDescargarPdf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
+            this.btnDescargarPdf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnDescargarPdf.ForeColor = System.Drawing.Color.White;
+            this.btnDescargarPdf.Location = new System.Drawing.Point(346, 10);
+            this.btnDescargarPdf.Name = "btnDescargarPdf";
+            this.btnDescargarPdf.Size = new System.Drawing.Size(170, 28);
+            this.btnDescargarPdf.TabIndex = 3;
+            this.btnDescargarPdf.Text = "Descargar contrato PDF";
+            this.btnDescargarPdf.UseVisualStyleBackColor = false;
+            this.btnDescargarPdf.Enabled = false;
+            this.btnDescargarPdf.Click += new System.EventHandler(this.btnDescargarPdf_Click);
+            //
             // lblActualizacion
             //
             this.lblActualizacion.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -139,9 +154,9 @@ namespace TpIngSoft
             this.lblActualizacion.AutoEllipsis = true;
             this.lblActualizacion.BackColor = System.Drawing.Color.Transparent;
             this.lblActualizacion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(195)))), ((int)(((byte)(220)))));
-            this.lblActualizacion.Location = new System.Drawing.Point(350, 14);
+            this.lblActualizacion.Location = new System.Drawing.Point(526, 14);
             this.lblActualizacion.Name = "lblActualizacion";
-            this.lblActualizacion.Size = new System.Drawing.Size(638, 21);
+            this.lblActualizacion.Size = new System.Drawing.Size(462, 21);
             this.lblActualizacion.TabIndex = 3;
             this.lblActualizacion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -672,6 +687,7 @@ namespace TpIngSoft
             this.Controls.Add(this.lblFiltroEstado);
             this.Controls.Add(this.cmbFiltroEstado);
             this.Controls.Add(this.btnActualizar);
+            this.Controls.Add(this.btnDescargarPdf);
             this.Controls.Add(this.lblActualizacion);
             this.Controls.Add(this.dgvContratos);
             this.Controls.Add(this.grpInquilino);
@@ -700,6 +716,7 @@ namespace TpIngSoft
         private System.Windows.Forms.Label lblFiltroEstado;
         private System.Windows.Forms.ComboBox cmbFiltroEstado;
         private System.Windows.Forms.Button btnActualizar;
+        private System.Windows.Forms.Button btnDescargarPdf;
         private System.Windows.Forms.Label lblActualizacion;
         private System.Windows.Forms.DataGridView dgvContratos;
         private System.Windows.Forms.GroupBox grpInquilino;

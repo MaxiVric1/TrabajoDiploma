@@ -61,6 +61,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(this, "FormGestionarContratos"));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblFiltroEstado, BE.NombreControl.FormGestionarContratos_lblFiltroEstado));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnActualizar, BE.NombreControl.FormGestionarContratos_btnActualizar));
+            _controlesTraducibles.Add(new EtiquetaTraducible(btnDescargarPdf, BE.NombreControl.FormGestionarContratos_btnDescargarPdf));
             _controlesTraducibles.Add(new EtiquetaTraducible(grpInquilino, BE.NombreControl.FormGestionarContratos_grpInquilino));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblNombre, BE.NombreControl.FormGestionarContratos_lblNombre));
             _controlesTraducibles.Add(new EtiquetaTraducible(lblApellido, BE.NombreControl.FormGestionarContratos_lblApellido));
@@ -262,6 +263,7 @@ namespace TpIngSoft
 
             // Renovar y rescindir solo para contratos Activo o Por Vencer
             grpRenovacion.Enabled = grpRescision.Enabled = contrato != null && contrato.Vigente;
+            btnDescargarPdf.Enabled = contrato != null;
             if (contrato == null)
             {
                 lblNuevoVencimientoValor.Text = "-";
@@ -406,6 +408,37 @@ namespace TpIngSoft
                 MessageBox.Show("Error al rescindir el contrato: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             CargarContratos(contrato.IdContrato);
+        }
+
+        // Vuelve a generar el PDF del contrato seleccionado con los datos que tiene hoy en la base
+        private void btnDescargarPdf_Click(object sender, EventArgs e)
+        {
+            Contrato contrato = ContratoSeleccionado();
+            if (contrato == null) return;
+
+            using (SaveFileDialog dialogo = new SaveFileDialog
+            {
+                Filter = "Documento PDF (*.pdf)|*.pdf",
+                FileName = $"Contrato_{contrato.IdContrato}.pdf",
+                Title = "Guardar contrato en PDF"
+            })
+            {
+                if (dialogo.ShowDialog(this) != DialogResult.OK) return;
+                try
+                {
+                    contratoBLL.RegenerarPdf(contrato.IdContrato, dialogo.FileName);
+                    if (MessageBox.Show("PDF generado con éxito. ¿Desea abrirlo?", "Éxito", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                        System.Diagnostics.Process.Start(dialogo.FileName);
+                }
+                catch (ArgumentException ex)
+                {
+                    MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al generar el PDF: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void btnCompletarDomicilio_Click(object sender, EventArgs e)

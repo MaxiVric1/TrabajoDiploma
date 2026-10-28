@@ -8,6 +8,7 @@ namespace BE
         public int NroCaptacion { get; set; }
         public DateTime FechaRegistro { get; set; }
         public string Cliente { get; set; }
+        public string Agente { get; set; } // nombre y apellido del agente comercial que registró la captación
         public string Direccion { get; set; }
         public string TipoInmueble { get; set; }
         public TipoPublicacion TipoPublicacion { get; set; } // Venta / Alquiler

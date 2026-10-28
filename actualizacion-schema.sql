@@ -1051,6 +1051,99 @@ END
 GO
 
 -- ====================================================
+-- 4e. PN3: proyectos de inversión de ejemplo
+-- ====================================================
+
+-- Solo si todavía no hay ningún proyecto. Usa las casas Publicadas que cargaron los bloques de ejemplo del ranking
+-- (se buscan por dirección; si alguna no está, ese proyecto no se crea): dos Aprobados con inversores y aportes, uno
+-- En Análisis con los datos técnicos ya cargados (listo para el Directorio) y uno Rechazado. Fechas relativas al día
+-- de la instalación. Las coordenadas (OpenStreetMap) se completan si faltan, para el mapa de los informes.
+IF NOT EXISTS (SELECT 1 FROM [dbo].[ProyectoInversion])
+BEGIN
+    DECLARE @Proyectos TABLE ([orden] INT, [direccion] NVARCHAR(200), [latitud] DECIMAL(9,6), [longitud] DECIMAL(9,6),
+                              [lote] DECIMAL(10,2), [planta] DECIMAL(10,2), [altura] DECIMAL(6,2), [costo_m2] DECIMAL(18,2),
+                              [venta_m2] DECIMAL(18,2), [canje] DECIMAL(5,2), [estado] VARCHAR(20), [dias_creacion] INT,
+                              [dias_decision] INT, [observaciones] NVARCHAR(1000), [id_inmueble] INT NULL, [id_proyecto] INT NULL);
+    INSERT INTO @Proyectos ([orden], [direccion], [latitud], [longitud], [lote], [planta], [altura], [costo_m2], [venta_m2], [canje],
+                            [estado], [dias_creacion], [dias_decision], [observaciones]) VALUES
+        (1, N'Moldes 3100',       -34.555043, -58.467124, 280, 196, 15, 1150, 2900, 30, 'Aprobado',   150, 120,
+            N'Aprobado: buena relación entre lo construible y el valor de venta de la zona.'),
+        (2, N'Pedro Morán 3900',  -34.600957, -58.509272, 250, 175, 12, 1100, 2500, 32, 'Aprobado',   80,  45,
+            N'Aprobado con el canje del 32% acordado con el propietario.'),
+        (3, N'Morón 3200',        -34.625280, -58.476285, 200, 140, 9,  1050, 2300, 35, 'EnAnalisis', 20,  NULL, NULL),
+        (4, N'Av. Santa Fe 1800', NULL,       NULL,       420, 250, 9,  1200, 2000, 30, 'Rechazado',  200, 170,
+            N'Rechazado: con el valor de venta de la zona el margen para los inversores no justifica el riesgo.');
+
+    UPDATE p SET [id_inmueble] = (SELECT TOP 1 i.[id_inmueble] FROM [dbo].[Inmueble] i
+                                  WHERE i.[direccion] = p.[direccion] AND i.[tipo_inmueble] = 'Casa' AND i.[estado_actual] = 'Publicado'
+                                  ORDER BY i.[id_inmueble])
+    FROM @Proyectos p;
+    DELETE FROM @Proyectos WHERE [id_inmueble] IS NULL;
+
+    UPDATE i SET [latitud] = p.[latitud], [longitud] = p.[longitud]
+    FROM [dbo].[Inmueble] i JOIN @Proyectos p ON p.[id_inmueble] = i.[id_inmueble]
+    WHERE p.[latitud] IS NOT NULL AND i.[latitud] IS NULL AND i.[longitud] IS NULL;
+
+    DECLARE @Arquitectura INT = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'Arquitectura');
+    DECLARE @Directorio INT = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'Directorio');
+    IF @Arquitectura IS NULL SET @Arquitectura = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'admin');
+    IF @Directorio IS NULL SET @Directorio = (SELECT [id] FROM [dbo].[Usuario] WHERE [nombre] = 'admin');
+
+    DECLARE @Orden INT, @IdProyecto INT;
+    DECLARE proy CURSOR LOCAL FAST_FORWARD FOR SELECT [orden] FROM @Proyectos ORDER BY [orden];
+    OPEN proy;
+    FETCH NEXT FROM proy INTO @Orden;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        INSERT INTO [dbo].[ProyectoInversion] ([id_inmueble], [superficie_lote], [superficie_edificable_planta], [altura_maxima],
+                                               [costo_obra_m2], [valor_venta_m2_unidades], [porcentaje_canje], [estado],
+                                               [id_usuario_arquitectura], [id_usuario_directorio], [fecha_creacion], [fecha_decision], [observaciones])
+        SELECT p.[id_inmueble], p.[lote], p.[planta], p.[altura], p.[costo_m2], p.[venta_m2], p.[canje], p.[estado],
+               @Arquitectura, CASE WHEN p.[estado] = 'EnAnalisis' THEN NULL ELSE @Directorio END,
+               DATEADD(DAY, -p.[dias_creacion], GETDATE()),
+               CASE WHEN p.[dias_decision] IS NULL THEN NULL ELSE DATEADD(DAY, -p.[dias_decision], GETDATE()) END,
+               p.[observaciones]
+        FROM @Proyectos p WHERE p.[orden] = @Orden;
+        SET @IdProyecto = SCOPE_IDENTITY();
+        UPDATE @Proyectos SET [id_proyecto] = @IdProyecto WHERE [orden] = @Orden;
+        FETCH NEXT FROM proy INTO @Orden;
+    END
+    CLOSE proy;
+    DEALLOCATE proy;
+
+    -- Inversores (CUIT con dígito verificador válido) y sus aportes a los fideicomisos aprobados: el de Moldes queda
+    -- fondeado en parte y el de Pedro Morán completo (capital = m² construibles x costo de obra por m²)
+    DECLARE @Inversores TABLE ([cuit] VARCHAR(13), [nombre] NVARCHAR(100), [apellido] NVARCHAR(100), [email] VARCHAR(100), [telefono] VARCHAR(30));
+    INSERT INTO @Inversores VALUES
+        ('20-28456123-7', N'Gabriel',  N'Fernández', 'gfernandez@mail.com', '11-5123-4567'),
+        ('27-31567890-6', N'Lucía',    N'Martínez',  'lmartinez@mail.com',  '11-5234-5678'),
+        ('20-25789456-9', N'Diego',    N'Romero',    'dromero@mail.com',    NULL),
+        ('27-33124578-5', N'Carolina', N'Acosta',    'cacosta@mail.com',    '11-5456-7890'),
+        ('20-30987654-8', N'Martín',   N'Giménez',   NULL,                  '11-5567-8901');
+    INSERT INTO [dbo].[Inversor] ([nombre], [apellido], [cuit], [email], [telefono])
+    SELECT v.[nombre], v.[apellido], v.[cuit], v.[email], v.[telefono]
+    FROM @Inversores v
+    WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Inversor] i WHERE i.[cuit] = v.[cuit]);
+
+    DECLARE @Aportes TABLE ([orden] INT, [cuit] VARCHAR(13), [monto] DECIMAL(18,2), [unidades] INT, [dias] INT);
+    INSERT INTO @Aportes VALUES
+        (1, '20-28456123-7', 450000, 4, 110),
+        (1, '27-31567890-6', 300000, 3, 95),
+        (1, '20-25789456-9', 200000, 2, 60),
+        (2, '27-33124578-5', 400000, 4, 40),
+        (2, '20-30987654-8', 370000, 3, 30);
+    INSERT INTO [dbo].[SuscripcionFideicomiso] ([id_proyecto], [id_inversor], [monto_aportado], [unidades_asignadas], [fecha_suscripcion])
+    SELECT p.[id_proyecto], i.[id_inversor], a.[monto], a.[unidades], DATEADD(DAY, -a.[dias], GETDATE())
+    FROM @Aportes a
+    JOIN @Proyectos p ON p.[orden] = a.[orden] AND p.[estado] = 'Aprobado'
+    JOIN [dbo].[Inversor] i ON i.[cuit] = a.[cuit];
+
+    DECLARE @Creados INT = (SELECT COUNT(*) FROM @Proyectos);
+    PRINT N'PN3: ' + CAST(@Creados AS NVARCHAR(10)) + N' proyectos de inversión de ejemplo creados, con inversores y aportes.';
+END
+GO
+
+-- ====================================================
 -- 5. Traducciones de los controles nuevos (español e inglés)
 --    Van acá y no en schema-init.sql para que también las reciban las bases existentes.
 --    Solo se agregan las que faltan: no pisa textos editados desde Gestión de Idiomas.
@@ -1272,7 +1365,11 @@ INSERT INTO @Nuevos VALUES
     ('lblUbicacion.buscando', 'FormRegistrarCaptacion', N'Buscando ubicación...', N'Looking up the location...'),
     ('lblUbicacion.encontrada', 'FormRegistrarCaptacion', N'✓ Dirección encontrada en el mapa', N'✓ Address found on the map'),
     ('lblUbicacion.noEncontrada', 'FormRegistrarCaptacion', N'⚠ Dirección no encontrada, verificá que sea correcta', N'⚠ Address not found, please check that it is correct'),
-    ('lblUbicacion.sinConexion', 'FormRegistrarCaptacion', N'No se pudo verificar la dirección (sin conexión)', N'Could not check the address (no connection)');
+    ('lblUbicacion.sinConexion', 'FormRegistrarCaptacion', N'No se pudo verificar la dirección (sin conexión)', N'Could not check the address (no connection)'),
+    -- Columna Agente en las grillas del PN1 y descarga del PDF de un contrato existente
+    ('dgvCaptaciones.agente', 'FormGestionarCaptaciones', 'Agente', 'Agent'),
+    ('dgvInmuebles.agente', 'FormInmueblesPublicados', 'Agente', 'Agent'),
+    ('btnDescargarPdf', 'FormGestionarContratos', 'Descargar contrato PDF', 'Download contract PDF');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

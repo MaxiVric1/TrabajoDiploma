@@ -42,6 +42,7 @@ namespace TpIngSoft
                 .ConColumna("NroCaptacion", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_nro)
                 .ConColumna("FechaRegistro", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_fecha)
                 .ConColumna("Cliente", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_cliente)
+                .ConColumna("Agente", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_agente)
                 .ConColumna("Direccion", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_direccion)
                 .ConColumna("TipoInmueble", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_tipo)
                 .ConColumna("TipoPublicacion", BE.NombreControl.FormGestionarCaptaciones_dgvCaptaciones_tipoPublicacion)

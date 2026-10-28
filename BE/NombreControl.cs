@@ -77,6 +77,7 @@ namespace BE
         public const string FormGestionarCaptaciones_dgvCaptaciones_nro = "FormGestionarCaptaciones.dgvCaptaciones.nro";
         public const string FormGestionarCaptaciones_dgvCaptaciones_fecha = "FormGestionarCaptaciones.dgvCaptaciones.fecha";
         public const string FormGestionarCaptaciones_dgvCaptaciones_cliente = "FormGestionarCaptaciones.dgvCaptaciones.cliente";
+        public const string FormGestionarCaptaciones_dgvCaptaciones_agente = "FormGestionarCaptaciones.dgvCaptaciones.agente";
         public const string FormGestionarCaptaciones_dgvCaptaciones_direccion = "FormGestionarCaptaciones.dgvCaptaciones.direccion";
         public const string FormGestionarCaptaciones_dgvCaptaciones_tipo = "FormGestionarCaptaciones.dgvCaptaciones.tipo";
         public const string FormGestionarCaptaciones_dgvCaptaciones_tipoPublicacion = "FormGestionarCaptaciones.dgvCaptaciones.tipoPublicacion";
@@ -164,6 +165,7 @@ namespace BE
         public const string FormInmueblesPublicados_btnRepublicar = "FormInmueblesPublicados.btnRepublicar";
         public const string FormInmueblesPublicados_dgvInmuebles_nro = "FormInmueblesPublicados.dgvInmuebles.nro";
         public const string FormInmueblesPublicados_dgvInmuebles_cliente = "FormInmueblesPublicados.dgvInmuebles.cliente";
+        public const string FormInmueblesPublicados_dgvInmuebles_agente = "FormInmueblesPublicados.dgvInmuebles.agente";
         public const string FormInmueblesPublicados_dgvInmuebles_direccion = "FormInmueblesPublicados.dgvInmuebles.direccion";
         public const string FormInmueblesPublicados_dgvInmuebles_tipo = "FormInmueblesPublicados.dgvInmuebles.tipo";
         public const string FormInmueblesPublicados_dgvInmuebles_tipoPublicacion = "FormInmueblesPublicados.dgvInmuebles.tipoPublicacion";
@@ -227,6 +229,7 @@ namespace BE
         // FormGestionarContratos
         public const string FormGestionarContratos_lblFiltroEstado = "FormGestionarContratos.lblFiltroEstado";
         public const string FormGestionarContratos_btnActualizar = "FormGestionarContratos.btnActualizar";
+        public const string FormGestionarContratos_btnDescargarPdf = "FormGestionarContratos.btnDescargarPdf";
         public const string FormGestionarContratos_grpInquilino = "FormGestionarContratos.grpInquilino";
         public const string FormGestionarContratos_lblNombre = "FormGestionarContratos.lblNombre";
         public const string FormGestionarContratos_lblApellido = "FormGestionarContratos.lblApellido";
