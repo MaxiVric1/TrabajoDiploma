@@ -498,6 +498,7 @@ namespace BE
         public const string FormEvaluacionArquitectonica_grpDatosTecnicos = "FormEvaluacionArquitectonica.grpDatosTecnicos";
         public const string FormEvaluacionArquitectonica_lblLote = "FormEvaluacionArquitectonica.lblLote";
         public const string FormEvaluacionArquitectonica_lblSupEdificable = "FormEvaluacionArquitectonica.lblSupEdificable";
+        public const string FormEvaluacionArquitectonica_lblConstruiblesTotales = "FormEvaluacionArquitectonica.lblConstruiblesTotales";
         public const string FormEvaluacionArquitectonica_lblAltura = "FormEvaluacionArquitectonica.lblAltura";
         public const string FormEvaluacionArquitectonica_btnConsultarCaba = "FormEvaluacionArquitectonica.btnConsultarCaba";
         public const string FormEvaluacionArquitectonica_lblCostoM2 = "FormEvaluacionArquitectonica.lblCostoM2";

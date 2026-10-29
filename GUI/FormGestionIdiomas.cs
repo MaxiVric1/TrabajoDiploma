@@ -194,6 +194,7 @@ namespace TpIngSoft
                 ("FormEvaluacionArquitectonica", "grpDatosTecnicos"),
                 ("FormEvaluacionArquitectonica", "lblLote"),
                 ("FormEvaluacionArquitectonica", "lblSupEdificable"),
+                ("FormEvaluacionArquitectonica", "lblConstruiblesTotales"),
                 ("FormEvaluacionArquitectonica", "lblAltura"),
                 ("FormEvaluacionArquitectonica", "btnConsultarCaba"),
                 ("FormEvaluacionArquitectonica", "lblCostoM2"),

@@ -124,9 +124,11 @@ namespace SERVICIOS
 
             // 3. Edificabilidad
             EdificabilidadEpok e = Leer<EdificabilidadEpok>(string.Format(URL_EDIFICABILIDAD, Uri.EscapeDataString(parcela.Smp)), "EPOK (edificabilidad)");
-            if (e == null || !e.SuperficieEdificablePlanta.HasValue || e.AlturaMaxima == null || e.AlturaMaxima.Count == 0)
+            // Sin superficie edificable en planta se sigue (la estima ProyectoInversionBLL con el lote); sin altura, no
+            if (e == null || e.AlturaMaxima == null || e.AlturaMaxima.Count == 0)
                 throw new Exception($"EPOK no tiene datos de edificabilidad para la parcela {parcela.Smp}.");
-            resultado.SuperficieEdificablePlanta = Math.Round(e.SuperficieEdificablePlanta.Value, 2);
+            if (e.SuperficieEdificablePlanta > 0)
+                resultado.SuperficieEdificablePlanta = Math.Round(e.SuperficieEdificablePlanta.Value, 2);
             resultado.AlturaMaxima = Math.Round(e.AlturaMaxima.Max(), 2);
             if (e.SuperficieParcela > 0) resultado.SuperficieParcela = e.SuperficieParcela;
             string especial = e.DistritoEspecial?.Select(d => d.Especifico).FirstOrDefault(d => !string.IsNullOrWhiteSpace(d));

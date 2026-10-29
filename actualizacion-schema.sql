@@ -1280,7 +1280,7 @@ INSERT INTO @Nuevos VALUES
     ('lblEmail', 'FormEvaluacionArquitectonica', 'Email:', 'Email:'),
     ('grpDatosTecnicos', 'FormEvaluacionArquitectonica', N'Datos técnicos', 'Technical data'),
     ('lblLote', 'FormEvaluacionArquitectonica', N'Superficie lote (m²):', N'Lot area (m²):'),
-    ('lblSupEdificable', 'FormEvaluacionArquitectonica', N'Sup. edificable (m²):', N'Buildable area (m²):'),
+    ('lblSupEdificable', 'FormEvaluacionArquitectonica', N'Sup. edificable por planta (m²):', N'Buildable area per floor (m²):'),
     ('lblAltura', 'FormEvaluacionArquitectonica', N'Altura máxima (m):', 'Maximum height (m):'),
     ('btnConsultarCaba', 'FormEvaluacionArquitectonica', 'Consultar CABA', 'Query CABA'),
     ('lblCostoM2', 'FormEvaluacionArquitectonica', N'Costo obra / m² (USD):', N'Build cost / m² (USD):'),
@@ -1423,7 +1423,9 @@ INSERT INTO @Nuevos VALUES
     ('cmbFiltroEstado.sinProyecto', 'FormIdentificarOportunidades', N'Sin proyecto', N'No project'),
     ('cmbFiltroEstado.enAnalisis', 'FormIdentificarOportunidades', N'En Análisis', N'Under Analysis'),
     ('cmbFiltroEstado.aprobado', 'FormIdentificarOportunidades', N'Aprobado', N'Approved'),
-    ('cmbFiltroEstado.rechazado', 'FormIdentificarOportunidades', N'Rechazado', N'Rejected');
+    ('cmbFiltroEstado.rechazado', 'FormIdentificarOportunidades', N'Rechazado', N'Rejected'),
+    -- Evaluación Arquitectónica: total construible debajo de la superficie edificable por planta ({0} m², {1} pisos, {2} m² por planta)
+    ('lblConstruiblesTotales', 'FormEvaluacionArquitectonica', N'M² construibles totales: {0} m² ({1} pisos de {2} m²)', N'Total buildable m²: {0} m² ({1} floors of {2} m²)');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]
@@ -1458,6 +1460,13 @@ FROM [dbo].[Traducciones] t
 JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
 WHERE c.[nombre] = 'label1' AND c.[formulario] = 'FormLogin'
   AND ((t.[ididioma] = 1 AND t.[texto] = N'Bienvenido') OR (t.[ididioma] = 2 AND t.[texto] = N'Welcome'));
+
+-- Evaluación Arquitectónica: la superficie edificable es por planta (solo si conserva el texto original)
+UPDATE t SET t.[texto] = CASE t.[ididioma] WHEN 1 THEN N'Sup. edificable por planta (m²):' ELSE N'Buildable area per floor (m²):' END
+FROM [dbo].[Traducciones] t
+JOIN [dbo].[Control] c ON c.[id] = t.[idcontrol]
+WHERE c.[nombre] = 'lblSupEdificable' AND c.[formulario] = 'FormEvaluacionArquitectonica'
+  AND ((t.[ididioma] = 1 AND t.[texto] = N'Sup. edificable (m²):') OR (t.[ididioma] = 2 AND t.[texto] = N'Buildable area (m²):'));
 GO
 
 -- Controles que se quitaron de los formularios: sus textos ya no se usan

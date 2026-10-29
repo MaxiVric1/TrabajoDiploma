@@ -80,6 +80,7 @@ namespace TpIngSoft
         public void Actualizar(Dictionary<string, string> traducciones)
         {
             foreach (var control in _controlesTraducibles) control.Traducir(traducciones);
+            MostrarConstruiblesTotales();
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -244,9 +245,13 @@ namespace TpIngSoft
                 _cargando = false;
                 _smp = parcela.Smp;
                 _distrito = parcela.Distrito;
-                lblParcela.ForeColor = PN3Comun.VERDE;
+                lblParcela.ForeColor = parcela.SuperficieEdificableEstimada ? PN3Comun.AMARILLO : PN3Comun.VERDE;
                 lblParcela.Text = $"SMP {parcela.Smp} - distrito {parcela.Distrito} - parcela {parcela.SuperficieParcela:N2} m² " +
-                                  $"(catastro: {parcela.DireccionCatastral}; {parcela.Busqueda}). Puede corregir los valores antes de guardar.";
+                                  $"(catastro: {parcela.DireccionCatastral}; {parcela.Busqueda}). " +
+                                  (parcela.SuperficieEdificableEstimada
+                                      ? $"EPOK no informa la superficie edificable: se estimó en el {ParcelaCaba.FACTOR_EDIFICABLE_ESTIMADO:P0} del lote. "
+                                      : "") +
+                                  "Puede corregir los valores antes de guardar.";
                 DatosTecnicos_Changed(this, EventArgs.Empty);
             }
             catch (Exception ex)
@@ -278,6 +283,26 @@ namespace TpIngSoft
             lblValorTotalValor.Text = $"{PN3Comun.Usd(valor)} ({metros:N2} m² x USD {nudValorM2.Value:N2})";
             lblMargenValor.Text = $"{PN3Comun.Usd(valor - costo)} (valor de las unidades menos la obra)";
             lblMargenValor.ForeColor = valor - costo >= 0 ? System.Drawing.Color.White : PN3Comun.ROJO;
+            MostrarConstruiblesTotales();
+        }
+
+        // Debajo de la superficie edificable por planta: el total que resulta con los pisos que permite la altura
+        private void MostrarConstruiblesTotales()
+        {
+            int pisos = (int)Math.Floor(nudAltura.Value / ParcelaCaba.ALTURA_POR_PISO);
+            string formato = "M² construibles totales: {0} m² ({1} pisos de {2} m²)";
+            var traducciones = GestorIdioma.Instancia.ObtenerTraduccionesActuales();
+            if (traducciones != null && traducciones.TryGetValue(BE.NombreControl.FormEvaluacionArquitectonica_lblConstruiblesTotales, out string traducido)
+                && !string.IsNullOrWhiteSpace(traducido))
+                formato = traducido;
+            try
+            {
+                lblConstruiblesTotales.Text = string.Format(formato, (pisos * nudSupEdificable.Value).ToString("N2"), pisos, nudSupEdificable.Value.ToString("N2"));
+            }
+            catch (FormatException)
+            {
+                lblConstruiblesTotales.Text = $"{pisos * nudSupEdificable.Value:N2} m² ({pisos} x {nudSupEdificable.Value:N2} m²)";
+            }
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)

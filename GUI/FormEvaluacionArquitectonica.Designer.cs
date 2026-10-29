@@ -39,6 +39,7 @@ namespace TpIngSoft
             this.lblLote = new System.Windows.Forms.Label();
             this.nudLote = new System.Windows.Forms.NumericUpDown();
             this.lblSupEdificable = new System.Windows.Forms.Label();
+            this.lblConstruiblesTotales = new System.Windows.Forms.Label();
             this.nudSupEdificable = new System.Windows.Forms.NumericUpDown();
             this.lblAltura = new System.Windows.Forms.Label();
             this.nudAltura = new System.Windows.Forms.NumericUpDown();
@@ -275,6 +276,7 @@ namespace TpIngSoft
             this.grpDatosTecnicos.Controls.Add(this.nudLote);
             this.grpDatosTecnicos.Controls.Add(this.lblSupEdificable);
             this.grpDatosTecnicos.Controls.Add(this.nudSupEdificable);
+            this.grpDatosTecnicos.Controls.Add(this.lblConstruiblesTotales);
             this.grpDatosTecnicos.Controls.Add(this.lblAltura);
             this.grpDatosTecnicos.Controls.Add(this.nudAltura);
             this.grpDatosTecnicos.Controls.Add(this.lblCostoM2);
@@ -294,7 +296,7 @@ namespace TpIngSoft
             this.grpDatosTecnicos.ForeColor = System.Drawing.Color.White;
             this.grpDatosTecnicos.Location = new System.Drawing.Point(12, 374);
             this.grpDatosTecnicos.Name = "grpDatosTecnicos";
-            this.grpDatosTecnicos.Size = new System.Drawing.Size(976, 176);
+            this.grpDatosTecnicos.Size = new System.Drawing.Size(976, 196);
             this.grpDatosTecnicos.TabStop = false;
             this.grpDatosTecnicos.Text = "Datos técnicos";
             //
@@ -302,7 +304,7 @@ namespace TpIngSoft
             //
             this.lblLote.Location = new System.Drawing.Point(6, 24);
             this.lblLote.Name = "lblLote";
-            this.lblLote.Size = new System.Drawing.Size(130, 20);
+            this.lblLote.Size = new System.Drawing.Size(170, 20);
             this.lblLote.Text = "Superficie lote (m²):";
             this.lblLote.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
@@ -312,10 +314,10 @@ namespace TpIngSoft
             this.nudLote.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nudLote.DecimalPlaces = 2;
             this.nudLote.ForeColor = System.Drawing.Color.White;
-            this.nudLote.Location = new System.Drawing.Point(142, 24);
+            this.nudLote.Location = new System.Drawing.Point(180, 24);
             this.nudLote.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
             this.nudLote.Name = "nudLote";
-            this.nudLote.Size = new System.Drawing.Size(140, 20);
+            this.nudLote.Size = new System.Drawing.Size(120, 20);
             this.nudLote.ThousandsSeparator = true;
             this.nudLote.ValueChanged += new System.EventHandler(this.DatosTecnicos_Changed);
             //
@@ -323,8 +325,8 @@ namespace TpIngSoft
             //
             this.lblSupEdificable.Location = new System.Drawing.Point(6, 52);
             this.lblSupEdificable.Name = "lblSupEdificable";
-            this.lblSupEdificable.Size = new System.Drawing.Size(130, 20);
-            this.lblSupEdificable.Text = "Sup. edificable (m²):";
+            this.lblSupEdificable.Size = new System.Drawing.Size(170, 20);
+            this.lblSupEdificable.Text = "Sup. edificable por planta (m²):";
             this.lblSupEdificable.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
             // nudSupEdificable
@@ -333,18 +335,30 @@ namespace TpIngSoft
             this.nudSupEdificable.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nudSupEdificable.DecimalPlaces = 2;
             this.nudSupEdificable.ForeColor = System.Drawing.Color.White;
-            this.nudSupEdificable.Location = new System.Drawing.Point(142, 52);
+            this.nudSupEdificable.Location = new System.Drawing.Point(180, 52);
             this.nudSupEdificable.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             this.nudSupEdificable.Name = "nudSupEdificable";
-            this.nudSupEdificable.Size = new System.Drawing.Size(140, 20);
+            this.nudSupEdificable.Size = new System.Drawing.Size(120, 20);
             this.nudSupEdificable.ThousandsSeparator = true;
             this.nudSupEdificable.ValueChanged += new System.EventHandler(this.DatosTecnicos_Changed);
             //
+            // lblConstruiblesTotales
+            //
+            this.lblConstruiblesTotales.AutoEllipsis = true;
+            this.lblConstruiblesTotales.BackColor = System.Drawing.Color.Transparent;
+            this.lblConstruiblesTotales.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.5F);
+            this.lblConstruiblesTotales.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(196)))), ((int)(((byte)(214)))));
+            this.lblConstruiblesTotales.Location = new System.Drawing.Point(6, 75);
+            this.lblConstruiblesTotales.Name = "lblConstruiblesTotales";
+            this.lblConstruiblesTotales.Size = new System.Drawing.Size(296, 20);
+            this.lblConstruiblesTotales.Text = "";
+            this.lblConstruiblesTotales.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            //
             // lblAltura
             //
-            this.lblAltura.Location = new System.Drawing.Point(6, 80);
+            this.lblAltura.Location = new System.Drawing.Point(6, 100);
             this.lblAltura.Name = "lblAltura";
-            this.lblAltura.Size = new System.Drawing.Size(130, 20);
+            this.lblAltura.Size = new System.Drawing.Size(170, 20);
             this.lblAltura.Text = "Altura máxima (m):";
             this.lblAltura.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
@@ -354,18 +368,18 @@ namespace TpIngSoft
             this.nudAltura.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nudAltura.DecimalPlaces = 2;
             this.nudAltura.ForeColor = System.Drawing.Color.White;
-            this.nudAltura.Location = new System.Drawing.Point(142, 80);
+            this.nudAltura.Location = new System.Drawing.Point(180, 100);
             this.nudAltura.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
             this.nudAltura.Name = "nudAltura";
-            this.nudAltura.Size = new System.Drawing.Size(140, 20);
+            this.nudAltura.Size = new System.Drawing.Size(120, 20);
             this.nudAltura.ThousandsSeparator = true;
             this.nudAltura.ValueChanged += new System.EventHandler(this.DatosTecnicos_Changed);
             //
             // lblCostoM2
             //
-            this.lblCostoM2.Location = new System.Drawing.Point(6, 108);
+            this.lblCostoM2.Location = new System.Drawing.Point(6, 128);
             this.lblCostoM2.Name = "lblCostoM2";
-            this.lblCostoM2.Size = new System.Drawing.Size(130, 20);
+            this.lblCostoM2.Size = new System.Drawing.Size(170, 20);
             this.lblCostoM2.Text = "Costo obra / m² (USD):";
             this.lblCostoM2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
@@ -375,18 +389,18 @@ namespace TpIngSoft
             this.nudCostoM2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nudCostoM2.DecimalPlaces = 2;
             this.nudCostoM2.ForeColor = System.Drawing.Color.White;
-            this.nudCostoM2.Location = new System.Drawing.Point(142, 108);
+            this.nudCostoM2.Location = new System.Drawing.Point(180, 128);
             this.nudCostoM2.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             this.nudCostoM2.Name = "nudCostoM2";
-            this.nudCostoM2.Size = new System.Drawing.Size(140, 20);
+            this.nudCostoM2.Size = new System.Drawing.Size(120, 20);
             this.nudCostoM2.ThousandsSeparator = true;
             this.nudCostoM2.ValueChanged += new System.EventHandler(this.DatosTecnicos_Changed);
             //
             // lblValorM2
             //
-            this.lblValorM2.Location = new System.Drawing.Point(6, 136);
+            this.lblValorM2.Location = new System.Drawing.Point(6, 156);
             this.lblValorM2.Name = "lblValorM2";
-            this.lblValorM2.Size = new System.Drawing.Size(130, 20);
+            this.lblValorM2.Size = new System.Drawing.Size(170, 20);
             this.lblValorM2.Text = "Venta unid. / m² (USD):";
             this.lblValorM2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
@@ -396,10 +410,10 @@ namespace TpIngSoft
             this.nudValorM2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.nudValorM2.DecimalPlaces = 2;
             this.nudValorM2.ForeColor = System.Drawing.Color.White;
-            this.nudValorM2.Location = new System.Drawing.Point(142, 136);
+            this.nudValorM2.Location = new System.Drawing.Point(180, 156);
             this.nudValorM2.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             this.nudValorM2.Name = "nudValorM2";
-            this.nudValorM2.Size = new System.Drawing.Size(140, 20);
+            this.nudValorM2.Size = new System.Drawing.Size(120, 20);
             this.nudValorM2.ThousandsSeparator = true;
             this.nudValorM2.ValueChanged += new System.EventHandler(this.DatosTecnicos_Changed);
             //
@@ -493,7 +507,7 @@ namespace TpIngSoft
             this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(818, 558);
+            this.btnGuardar.Location = new System.Drawing.Point(818, 578);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(170, 34);
             this.btnGuardar.Text = "Guardar datos técnicos";
@@ -505,7 +519,7 @@ namespace TpIngSoft
             this.btnConsultarCaba.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnConsultarCaba.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnConsultarCaba.ForeColor = System.Drawing.Color.White;
-            this.btnConsultarCaba.Location = new System.Drawing.Point(638, 558);
+            this.btnConsultarCaba.Location = new System.Drawing.Point(638, 578);
             this.btnConsultarCaba.Name = "btnConsultarCaba";
             this.btnConsultarCaba.Size = new System.Drawing.Size(170, 34);
             this.btnConsultarCaba.Text = "Consultar CABA";
@@ -516,7 +530,7 @@ namespace TpIngSoft
             //
             this.lblParcela.AutoEllipsis = true;
             this.lblParcela.BackColor = System.Drawing.Color.Transparent;
-            this.lblParcela.Location = new System.Drawing.Point(12, 558);
+            this.lblParcela.Location = new System.Drawing.Point(12, 578);
             this.lblParcela.Name = "lblParcela";
             this.lblParcela.Size = new System.Drawing.Size(616, 34);
             this.lblParcela.Text = "";
@@ -528,7 +542,7 @@ namespace TpIngSoft
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(1000, 600);
+            this.ClientSize = new System.Drawing.Size(1000, 620);
             this.Controls.Add(this.dgvProyectos);
             this.Controls.Add(this.grpInmueble);
             this.Controls.Add(this.grpPropietario);
@@ -537,7 +551,7 @@ namespace TpIngSoft
             this.Controls.Add(this.btnConsultarCaba);
             this.Controls.Add(this.lblParcela);
             this.ForeColor = System.Drawing.Color.White;
-            this.MinimumSize = new System.Drawing.Size(1016, 639);
+            this.MinimumSize = new System.Drawing.Size(1016, 659);
             this.Name = "FormEvaluacionArquitectonica";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Evaluación Arquitectónica";
@@ -583,6 +597,7 @@ namespace TpIngSoft
         private System.Windows.Forms.NumericUpDown nudLote;
         private System.Windows.Forms.Label lblSupEdificable;
         private System.Windows.Forms.NumericUpDown nudSupEdificable;
+        private System.Windows.Forms.Label lblConstruiblesTotales;
         private System.Windows.Forms.Label lblAltura;
         private System.Windows.Forms.NumericUpDown nudAltura;
         private System.Windows.Forms.Label lblCostoM2;

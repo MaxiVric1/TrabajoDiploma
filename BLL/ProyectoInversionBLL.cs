@@ -80,6 +80,7 @@ namespace BLL
 
         // Superficie de la parcela, superficie edificable en planta, altura máxima, SMP y distrito según el Código
         // Urbanístico (USIG + EPOK). Solo para inmuebles de CABA: en otras localidades Arquitectura los carga a mano.
+        // Si EPOK no informa la superficie edificable en planta, se estima como el 60% del lote.
         public ParcelaCaba ConsultarParametrosCaba(int idProyecto)
         {
             ExigirPermiso(PermisosDefinidos.AccesoPN3Arquitectura, "Arquitectura");
@@ -88,7 +89,20 @@ namespace BLL
                 throw new Exception("El proyecto no existe.");
             if (!EsCaba(proyecto.Localidad))
                 throw new ArgumentException($"Carga manual requerida para esta localidad ({proyecto.Localidad ?? "sin localidad"}): la consulta automática es solo para CABA.");
-            return new ClienteEpok().Consultar(proyecto.Direccion);
+            return CompletarSuperficieEdificable(new ClienteEpok().Consultar(proyecto.Direccion), proyecto.SuperficieLote);
+        }
+
+        // Superficie edificable en planta = lote x 0,60 cuando EPOK no la devuelve (con la superficie de la parcela de
+        // catastro o, si tampoco está, la del lote cargada en el proyecto)
+        public static ParcelaCaba CompletarSuperficieEdificable(ParcelaCaba parcela, decimal? loteProyecto)
+        {
+            if (parcela == null || parcela.SuperficieEdificablePlanta.HasValue) return parcela;
+            decimal? lote = parcela.SuperficieParcela > 0 ? parcela.SuperficieParcela : loteProyecto > 0 ? loteProyecto : null;
+            if (!lote.HasValue)
+                throw new ArgumentException($"EPOK no informa la superficie edificable de la parcela {parcela.Smp} ni su superficie: cargue los valores a mano.");
+            parcela.SuperficieEdificablePlanta = Math.Round(lote.Value * ParcelaCaba.FACTOR_EDIFICABLE_ESTIMADO, 2);
+            parcela.SuperficieEdificableEstimada = true;
+            return parcela;
         }
 
         // Datos técnicos de Arquitectura (lote, superficie edificable en planta, altura máxima, costo de obra y valor de
