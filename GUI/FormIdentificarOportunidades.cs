@@ -26,9 +26,20 @@ namespace TpIngSoft
             [Browsable(false)] public ProyectoInversion Proyecto { get; set; } // el vigente, o el último rechazado
         }
 
+        // Opción del filtro por estado del proyecto: el texto se traduce con la clave (Formulario.control)
+        private class OpcionFiltro
+        {
+            public string Clave { get; set; }
+            public string Texto { get; set; }
+            public Func<ProyectoInversion, bool> Incluye { get; set; }
+            public override string ToString() => Texto;
+        }
+
         private ProyectoInversionBLL proyectoBLL = new ProyectoInversionBLL();
         private List<IControlTraducible> _controlesTraducibles = new List<IControlTraducible>();
         private DataGridTraducible _grilla;
+        private List<FilaCasa> _casas = new List<FilaCasa>(); // todas las casas; la grilla muestra las del filtro
+        private bool _cargandoFiltro;
 
         public FormIdentificarOportunidades()
         {
@@ -37,6 +48,7 @@ namespace TpIngSoft
             _controlesTraducibles.Add(new EtiquetaTraducible(this, "FormIdentificarOportunidades"));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnCrearProyecto, BE.NombreControl.FormIdentificarOportunidades_btnCrearProyecto));
             _controlesTraducibles.Add(new EtiquetaTraducible(btnVerAnalisis, BE.NombreControl.FormIdentificarOportunidades_btnVerAnalisis));
+            _controlesTraducibles.Add(new EtiquetaTraducible(lblFiltroEstado, BE.NombreControl.FormIdentificarOportunidades_lblFiltroEstado));
             _grilla = new DataGridTraducible(dgvCasas, "FormIdentificarOportunidades.dgvCasas")
                 .ConColumna("Direccion", BE.NombreControl.FormIdentificarOportunidades_dgvCasas_direccion)
                 .ConColumna("Localidad", BE.NombreControl.FormIdentificarOportunidades_dgvCasas_localidad)
@@ -53,6 +65,24 @@ namespace TpIngSoft
         public void Actualizar(Dictionary<string, string> traducciones)
         {
             foreach (var control in _controlesTraducibles) control.Traducir(traducciones);
+            TraducirFiltro(traducciones);
+        }
+
+        // Vuelve a cargar las opciones con el texto traducido, conservando la selección
+        private void TraducirFiltro(Dictionary<string, string> traducciones)
+        {
+            if (traducciones == null || cmbFiltroEstado.Items.Count == 0) return;
+            OpcionFiltro[] opciones = cmbFiltroEstado.Items.Cast<OpcionFiltro>().ToArray();
+            foreach (OpcionFiltro o in opciones)
+                if (traducciones.TryGetValue(o.Clave, out string texto) && !string.IsNullOrWhiteSpace(texto)) o.Texto = texto;
+            _cargandoFiltro = true;
+            int seleccionado = cmbFiltroEstado.SelectedIndex;
+            cmbFiltroEstado.BeginUpdate();
+            cmbFiltroEstado.Items.Clear();
+            cmbFiltroEstado.Items.AddRange(opciones);
+            cmbFiltroEstado.SelectedIndex = seleccionado;
+            cmbFiltroEstado.EndUpdate();
+            _cargandoFiltro = false;
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -63,7 +93,25 @@ namespace TpIngSoft
 
         private void FormIdentificarOportunidades_Load(object sender, EventArgs e)
         {
+            // El estado que cuenta es el de la columna Estado proyecto: el vigente, o el último rechazado
+            _cargandoFiltro = true;
+            cmbFiltroEstado.Items.AddRange(new object[]
+            {
+                new OpcionFiltro { Clave = BE.NombreControl.FormIdentificarOportunidades_cmbFiltroEstado_todos, Texto = "Todos", Incluye = p => true },
+                new OpcionFiltro { Clave = BE.NombreControl.FormIdentificarOportunidades_cmbFiltroEstado_sinProyecto, Texto = PN3Comun.Texto(null), Incluye = p => p == null },
+                new OpcionFiltro { Clave = BE.NombreControl.FormIdentificarOportunidades_cmbFiltroEstado_enAnalisis, Texto = PN3Comun.Texto(EstadoProyecto.EnAnalisis), Incluye = p => p?.Estado == EstadoProyecto.EnAnalisis },
+                new OpcionFiltro { Clave = BE.NombreControl.FormIdentificarOportunidades_cmbFiltroEstado_aprobado, Texto = PN3Comun.Texto(EstadoProyecto.Aprobado), Incluye = p => p?.Estado == EstadoProyecto.Aprobado },
+                new OpcionFiltro { Clave = BE.NombreControl.FormIdentificarOportunidades_cmbFiltroEstado_rechazado, Texto = PN3Comun.Texto(EstadoProyecto.Rechazado), Incluye = p => p?.Estado == EstadoProyecto.Rechazado }
+            });
+            cmbFiltroEstado.SelectedIndex = 0; // Todos
+            _cargandoFiltro = false;
+            TraducirFiltro(GestorIdioma.Instancia.ObtenerTraduccionesActuales());
             CargarCasas();
+        }
+
+        private void cmbFiltroEstado_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!_cargandoFiltro) MostrarCasas(Seleccionada()?.IdInmueble);
         }
 
         private void CargarCasas(int? idInmuebleASeleccionar = null)
@@ -74,7 +122,7 @@ namespace TpIngSoft
                 Dictionary<int, CaptacionResumen> captaciones = new CaptacionBLL().LeerResumen()
                     .GroupBy(r => r.IdInmueble).ToDictionary(g => g.Key, g => g.OrderByDescending(r => r.NroCaptacion).First());
 
-                List<FilaCasa> filas = new InmuebleBLL().LeerTodos()
+                _casas = new InmuebleBLL().LeerTodos()
                     .Where(i => InmuebleBLL.EsCasa(i) && i.EstadoActual == EstadoInmueble.Publicado)
                     .Select(i =>
                     {
@@ -95,22 +143,29 @@ namespace TpIngSoft
                             Proyecto = proyecto
                         };
                     }).OrderBy(f => f.Localidad).ThenBy(f => f.Direccion).ToList();
-
-                dgvCasas.DataSource = null;
-                dgvCasas.DataSource = filas;
-                PN3Comun.FormatoColumnas(dgvCasas, new[] { "ValorPretendido", "M2Terreno", "M2Inmueble" });
-                _grilla.Traducir(GestorIdioma.Instancia.ObtenerTraduccionesActuales());
-                foreach (DataGridViewRow fila in dgvCasas.Rows)
-                {
-                    FilaCasa f = (FilaCasa)fila.DataBoundItem;
-                    if (f.Proyecto?.Estado == EstadoProyecto.Aprobado) fila.DefaultCellStyle.ForeColor = PN3Comun.VERDE;
-                    else if (f.Proyecto?.Estado == EstadoProyecto.EnAnalisis) fila.DefaultCellStyle.ForeColor = PN3Comun.AMARILLO;
-                    if (idInmuebleASeleccionar == f.IdInmueble) dgvCasas.CurrentCell = fila.Cells["Direccion"];
-                }
             }
             catch (Exception ex)
             {
+                _casas = new List<FilaCasa>();
                 MessageBox.Show("Error al cargar las casas del inventario: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            MostrarCasas(idInmuebleASeleccionar);
+        }
+
+        // Muestra en la grilla las casas del estado elegido en el filtro
+        private void MostrarCasas(int? idInmuebleASeleccionar = null)
+        {
+            Func<ProyectoInversion, bool> incluye = (cmbFiltroEstado.SelectedItem as OpcionFiltro)?.Incluye ?? (p => true);
+            dgvCasas.DataSource = null;
+            dgvCasas.DataSource = _casas.Where(f => incluye(f.Proyecto)).ToList();
+            PN3Comun.FormatoColumnas(dgvCasas, new[] { "ValorPretendido", "M2Terreno", "M2Inmueble" });
+            _grilla.Traducir(GestorIdioma.Instancia.ObtenerTraduccionesActuales());
+            foreach (DataGridViewRow fila in dgvCasas.Rows)
+            {
+                FilaCasa f = (FilaCasa)fila.DataBoundItem;
+                if (f.Proyecto?.Estado == EstadoProyecto.Aprobado) fila.DefaultCellStyle.ForeColor = PN3Comun.VERDE;
+                else if (f.Proyecto?.Estado == EstadoProyecto.EnAnalisis) fila.DefaultCellStyle.ForeColor = PN3Comun.AMARILLO;
+                if (idInmuebleASeleccionar == f.IdInmueble) dgvCasas.CurrentCell = fila.Cells["Direccion"];
             }
             ActualizarBotones();
         }

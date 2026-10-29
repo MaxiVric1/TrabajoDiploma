@@ -1416,7 +1416,14 @@ INSERT INTO @Nuevos VALUES
     -- Columna Agente en las grillas del PN1 y descarga del PDF de un contrato existente
     ('dgvCaptaciones.agente', 'FormGestionarCaptaciones', 'Agente', 'Agent'),
     ('dgvInmuebles.agente', 'FormInmueblesPublicados', 'Agente', 'Agent'),
-    ('btnDescargarPdf', 'FormGestionarContratos', 'Descargar contrato PDF', 'Download contract PDF');
+    ('btnDescargarPdf', 'FormGestionarContratos', 'Descargar contrato PDF', 'Download contract PDF'),
+    -- Identificar Oportunidades: filtro por estado del proyecto
+    ('lblFiltroEstado', 'FormIdentificarOportunidades', N'Estado del proyecto:', N'Project status:'),
+    ('cmbFiltroEstado.todos', 'FormIdentificarOportunidades', N'Todos', N'All'),
+    ('cmbFiltroEstado.sinProyecto', 'FormIdentificarOportunidades', N'Sin proyecto', N'No project'),
+    ('cmbFiltroEstado.enAnalisis', 'FormIdentificarOportunidades', N'En Análisis', N'Under Analysis'),
+    ('cmbFiltroEstado.aprobado', 'FormIdentificarOportunidades', N'Aprobado', N'Approved'),
+    ('cmbFiltroEstado.rechazado', 'FormIdentificarOportunidades', N'Rechazado', N'Rejected');
 
 INSERT INTO [dbo].[Control] ([nombre], [formulario])
 SELECT n.[nombre], n.[formulario]

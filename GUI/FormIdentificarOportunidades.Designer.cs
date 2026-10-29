@@ -14,18 +14,41 @@ namespace TpIngSoft
 
         private void InitializeComponent()
         {
+            this.lblFiltroEstado = new System.Windows.Forms.Label();
+            this.cmbFiltroEstado = new System.Windows.Forms.ComboBox();
             this.dgvCasas = new System.Windows.Forms.DataGridView();
             this.lblEstadoSeleccion = new System.Windows.Forms.Label();
             this.btnCrearProyecto = new System.Windows.Forms.Button();
             this.btnVerAnalisis = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
+            // lblFiltroEstado
+            //
+            this.lblFiltroEstado.BackColor = System.Drawing.Color.Transparent;
+            this.lblFiltroEstado.Location = new System.Drawing.Point(12, 13);
+            this.lblFiltroEstado.Name = "lblFiltroEstado";
+            this.lblFiltroEstado.Size = new System.Drawing.Size(150, 20);
+            this.lblFiltroEstado.Text = "Estado del proyecto:";
+            this.lblFiltroEstado.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // cmbFiltroEstado
+            //
+            this.cmbFiltroEstado.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(57)))), ((int)(((byte)(79)))));
+            this.cmbFiltroEstado.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbFiltroEstado.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmbFiltroEstado.ForeColor = System.Drawing.Color.White;
+            this.cmbFiltroEstado.FormattingEnabled = true;
+            this.cmbFiltroEstado.Location = new System.Drawing.Point(166, 13);
+            this.cmbFiltroEstado.Name = "cmbFiltroEstado";
+            this.cmbFiltroEstado.Size = new System.Drawing.Size(180, 21);
+            this.cmbFiltroEstado.SelectedIndexChanged += new System.EventHandler(this.cmbFiltroEstado_SelectedIndexChanged);
+            //
             // dgvCasas
             //
             this.dgvCasas.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right));
-            this.dgvCasas.Location = new System.Drawing.Point(12, 12);
+            this.dgvCasas.Location = new System.Drawing.Point(12, 44);
             this.dgvCasas.Name = "dgvCasas";
-            this.dgvCasas.Size = new System.Drawing.Size(936, 420);
+            this.dgvCasas.Size = new System.Drawing.Size(936, 388);
             this.dgvCasas.SelectionChanged += new System.EventHandler(this.dgvCasas_SelectionChanged);
             //
             // lblEstadoSeleccion
@@ -71,6 +94,8 @@ namespace TpIngSoft
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(960, 488);
+            this.Controls.Add(this.lblFiltroEstado);
+            this.Controls.Add(this.cmbFiltroEstado);
             this.Controls.Add(this.dgvCasas);
             this.Controls.Add(this.lblEstadoSeleccion);
             this.Controls.Add(this.btnCrearProyecto);
@@ -85,6 +110,8 @@ namespace TpIngSoft
 
         }
 
+        private System.Windows.Forms.Label lblFiltroEstado;
+        private System.Windows.Forms.ComboBox cmbFiltroEstado;
         private System.Windows.Forms.DataGridView dgvCasas;
         private System.Windows.Forms.Label lblEstadoSeleccion;
         private System.Windows.Forms.Button btnCrearProyecto;

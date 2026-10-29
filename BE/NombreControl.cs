@@ -478,6 +478,12 @@ namespace BE
         // PN3 - Evaluación de desarrollo de inversión
         public const string FormIdentificarOportunidades_btnCrearProyecto = "FormIdentificarOportunidades.btnCrearProyecto";
         public const string FormIdentificarOportunidades_btnVerAnalisis = "FormIdentificarOportunidades.btnVerAnalisis";
+        public const string FormIdentificarOportunidades_lblFiltroEstado = "FormIdentificarOportunidades.lblFiltroEstado";
+        public const string FormIdentificarOportunidades_cmbFiltroEstado_todos = "FormIdentificarOportunidades.cmbFiltroEstado.todos";
+        public const string FormIdentificarOportunidades_cmbFiltroEstado_sinProyecto = "FormIdentificarOportunidades.cmbFiltroEstado.sinProyecto";
+        public const string FormIdentificarOportunidades_cmbFiltroEstado_enAnalisis = "FormIdentificarOportunidades.cmbFiltroEstado.enAnalisis";
+        public const string FormIdentificarOportunidades_cmbFiltroEstado_aprobado = "FormIdentificarOportunidades.cmbFiltroEstado.aprobado";
+        public const string FormIdentificarOportunidades_cmbFiltroEstado_rechazado = "FormIdentificarOportunidades.cmbFiltroEstado.rechazado";
         public const string FormEvaluacionArquitectonica_grpInmueble = "FormEvaluacionArquitectonica.grpInmueble";
         public const string FormEvaluacionArquitectonica_lblDireccion = "FormEvaluacionArquitectonica.lblDireccion";
         public const string FormEvaluacionArquitectonica_lblLocalidad = "FormEvaluacionArquitectonica.lblLocalidad";
