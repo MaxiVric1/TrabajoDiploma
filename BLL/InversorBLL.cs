@@ -58,17 +58,11 @@ namespace BLL
 
         // ---------- CUIT ----------
 
-        // 11 dígitos con el dígito verificador correcto (módulo 11). Acepta con o sin guiones.
+        // Exactamente 11 dígitos (no se controla el dígito verificador). Acepta con o sin guiones.
         public static bool CuitValido(string cuit)
         {
-            string digitos = new string((cuit ?? "").Where(char.IsDigit).ToArray());
-            if (digitos.Length != 11 || (cuit ?? "").Any(c => !char.IsDigit(c) && c != '-' && c != ' ')) return false;
-            int[] pesos = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
-            int suma = pesos.Select((p, i) => p * (digitos[i] - '0')).Sum();
-            int verificador = 11 - suma % 11;
-            if (verificador == 11) verificador = 0;
-            if (verificador == 10) return false;
-            return verificador == digitos[10] - '0';
+            string digitos = new string((cuit ?? "").Where(c => c >= '0' && c <= '9').ToArray());
+            return digitos.Length == 11 && (cuit ?? "").All(c => (c >= '0' && c <= '9') || c == '-' || c == ' ');
         }
 
         // XX-XXXXXXXX-X (null si no tiene 11 dígitos)
@@ -84,7 +78,7 @@ namespace BLL
             if (string.IsNullOrWhiteSpace(inversor.Nombre) || string.IsNullOrWhiteSpace(inversor.Apellido))
                 throw new ArgumentException("El nombre y el apellido del inversor son obligatorios.");
             if (!CuitValido(inversor.Cuit))
-                throw new ArgumentException("El CUIT no es válido (11 dígitos con su dígito verificador).");
+                throw new ArgumentException("El CUIT debe tener 11 dígitos numéricos.");
             if (!string.IsNullOrWhiteSpace(inversor.Email) && !inversor.Email.Contains("@"))
                 throw new ArgumentException("El email no tiene un formato válido.");
 
