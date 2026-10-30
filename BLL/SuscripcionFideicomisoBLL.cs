@@ -15,6 +15,18 @@ namespace BLL
         private readonly ProyectoInversionDAL proyectoDAL = new ProyectoInversionDAL();
         private readonly InversorDAL inversorDAL = new InversorDAL();
 
+        public const decimal M2_POR_UNIDAD = 60; // superficie de una unidad típica, para pasar de m² a unidades
+
+        // Lo que le corresponde a un aporte: los inversores se reparten los m² construibles que no van al propietario
+        // por el canje, en proporción al capital. m² = construibles x (100% - canje) x aporte / capital necesario;
+        // unidades = m² / M2_POR_UNIDAD redondeado (sugerencia: Inversiones puede corregirlo).
+        public static (decimal Metros, int Unidades) CalcularAsignacion(ProyectoInversion proyecto, decimal capitalNecesario, decimal montoAportado)
+        {
+            if (proyecto?.MetrosConstruibles == null || capitalNecesario <= 0 || montoAportado <= 0) return (0, 0);
+            decimal metros = Math.Round(proyecto.MetrosConstruibles.Value * (100 - proyecto.PorcentajeCanje) / 100 * montoAportado / capitalNecesario, 2);
+            return (metros, (int)Math.Round(metros / M2_POR_UNIDAD, MidpointRounding.AwayFromZero));
+        }
+
         public int AgregarSuscripcion(SuscripcionFideicomiso suscripcion)
         {
             ProyectoInversionBLL.ExigirPermiso(PermisosDefinidos.AccesoPN3Inversiones, "Inversiones");

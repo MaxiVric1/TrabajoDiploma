@@ -32,6 +32,7 @@ namespace TpIngSoft
             this.nudMonto = new System.Windows.Forms.NumericUpDown();
             this.lblUnidades = new System.Windows.Forms.Label();
             this.nudUnidades = new System.Windows.Forms.NumericUpDown();
+            this.lblAsignacion = new System.Windows.Forms.Label();
             this.lblParticipacionValor = new System.Windows.Forms.Label();
             this.btnGuardar = new System.Windows.Forms.Button();
             this.btnCancelar = new System.Windows.Forms.Button();
@@ -181,11 +182,12 @@ namespace TpIngSoft
             this.grpAporte.Controls.Add(this.nudMonto);
             this.grpAporte.Controls.Add(this.lblUnidades);
             this.grpAporte.Controls.Add(this.nudUnidades);
+            this.grpAporte.Controls.Add(this.lblAsignacion);
             this.grpAporte.Controls.Add(this.lblParticipacionValor);
             this.grpAporte.ForeColor = System.Drawing.Color.White;
             this.grpAporte.Location = new System.Drawing.Point(12, 206);
             this.grpAporte.Name = "grpAporte";
-            this.grpAporte.Size = new System.Drawing.Size(496, 118);
+            this.grpAporte.Size = new System.Drawing.Size(496, 148);
             this.grpAporte.TabStop = false;
             this.grpAporte.Text = "Aporte";
             //
@@ -229,14 +231,24 @@ namespace TpIngSoft
             this.nudUnidades.Name = "nudUnidades";
             this.nudUnidades.Size = new System.Drawing.Size(80, 20);
             this.nudUnidades.ThousandsSeparator = true;
+            this.nudUnidades.ValueChanged += new System.EventHandler(this.nudUnidades_ValueChanged);
+            //
+            // lblAsignacion
+            //
+            this.lblAsignacion.AutoEllipsis = true;
+            this.lblAsignacion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(196)))), ((int)(((byte)(214)))));
+            this.lblAsignacion.Location = new System.Drawing.Point(230, 55);
+            this.lblAsignacion.Name = "lblAsignacion";
+            this.lblAsignacion.Size = new System.Drawing.Size(256, 20);
+            this.lblAsignacion.Text = "";
+            this.lblAsignacion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // lblParticipacionValor
             //
             this.lblParticipacionValor.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblParticipacionValor.AutoEllipsis = true;
             this.lblParticipacionValor.Location = new System.Drawing.Point(10, 84);
             this.lblParticipacionValor.Name = "lblParticipacionValor";
-            this.lblParticipacionValor.Size = new System.Drawing.Size(476, 26);
+            this.lblParticipacionValor.Size = new System.Drawing.Size(476, 52);
             this.lblParticipacionValor.Text = "-";
             this.lblParticipacionValor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
@@ -245,7 +257,7 @@ namespace TpIngSoft
             this.btnGuardar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(288, 334);
+            this.btnGuardar.Location = new System.Drawing.Point(288, 364);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(105, 36);
             this.btnGuardar.Text = "Guardar Aporte";
@@ -257,7 +269,7 @@ namespace TpIngSoft
             this.btnCancelar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(89)))), ((int)(((byte)(75)))), ((int)(((byte)(160)))));
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancelar.ForeColor = System.Drawing.Color.White;
-            this.btnCancelar.Location = new System.Drawing.Point(403, 334);
+            this.btnCancelar.Location = new System.Drawing.Point(403, 364);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(105, 36);
             this.btnCancelar.Text = "Cancelar";
@@ -270,13 +282,13 @@ namespace TpIngSoft
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::TpIngSoft.Properties.Resources.mesh_bg;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(520, 382);
+            this.ClientSize = new System.Drawing.Size(520, 412);
             this.Controls.Add(this.grpInversor);
             this.Controls.Add(this.grpAporte);
             this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.btnCancelar);
             this.ForeColor = System.Drawing.Color.White;
-            this.MinimumSize = new System.Drawing.Size(536, 421);
+            this.MinimumSize = new System.Drawing.Size(536, 451);
             this.Name = "FormAgregarSuscripcion";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Agregar Inversor";
@@ -309,6 +321,7 @@ namespace TpIngSoft
         private System.Windows.Forms.NumericUpDown nudMonto;
         private System.Windows.Forms.Label lblUnidades;
         private System.Windows.Forms.NumericUpDown nudUnidades;
+        private System.Windows.Forms.Label lblAsignacion;
         private System.Windows.Forms.Label lblParticipacionValor;
         private System.Windows.Forms.Button btnGuardar;
         private System.Windows.Forms.Button btnCancelar;

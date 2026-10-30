@@ -15,6 +15,9 @@ namespace TpIngSoft
         private InversorBLL inversorBLL = new InversorBLL();
         private List<IControlTraducible> _controlesTraducibles = new List<IControlTraducible>();
         private Inversor _encontrado;
+        private readonly ToolTip toolTip = new ToolTip();
+        private bool _unidadesManuales; // el usuario cambió las unidades sugeridas
+        private bool _calculando;       // las unidades las está poniendo el cálculo, no el usuario
 
         public FormAgregarSuscripcion(ResumenFideicomiso resumen)
         {
@@ -106,12 +109,41 @@ namespace TpIngSoft
             lblEstadoInversor.Text = "Busque el inversor por CUIT o cargue uno nuevo.";
         }
 
-        // Participación sobre el capital necesario (costo total de la obra) y lo que quedaría por suscribir
+        // Participación sobre el capital necesario (costo total de la obra), lo que quedaría por suscribir y las
+        // unidades que le corresponden (sugeridas mientras el usuario no las cambie a mano)
         private void nudMonto_ValueChanged(object sender, EventArgs e)
         {
             decimal monto = nudMonto.Value;
             decimal participacion = _resumen.CapitalNecesario > 0 ? Math.Round(monto * 100 / _resumen.CapitalNecesario, 4) : 0;
-            lblParticipacionValor.Text = $"Participación: {participacion:0.####}% del capital - quedarían por suscribir {PN3Comun.Usd(_resumen.CapitalRestante - monto)}";
+            lblParticipacionValor.Text = $"Participación: {participacion:0.####}% del capital" + Environment.NewLine +
+                                         $"Quedarían por suscribir {PN3Comun.Usd(_resumen.CapitalRestante - monto)}";
+            if (!_unidadesManuales)
+            {
+                _calculando = true;
+                nudUnidades.Value = Math.Min(Asignacion().Unidades, nudUnidades.Maximum);
+                _calculando = false;
+            }
+            MostrarAsignacion();
+        }
+
+        private (decimal Metros, int Unidades) Asignacion() =>
+            SuscripcionFideicomisoBLL.CalcularAsignacion(_resumen.Proyecto, _resumen.CapitalNecesario, nudMonto.Value);
+
+        // Un cambio a mano de las unidades se respeta: deja de seguir al monto
+        private void nudUnidades_ValueChanged(object sender, EventArgs e)
+        {
+            if (_calculando || _resumen == null) return;
+            _unidadesManuales = nudUnidades.Value != Asignacion().Unidades;
+            MostrarAsignacion();
+        }
+
+        private void MostrarAsignacion()
+        {
+            var (metros, unidades) = Asignacion();
+            lblAsignacion.Text = $"≈ {metros:N2} m² ({SuscripcionFideicomisoBLL.M2_POR_UNIDAD:0} m² por unidad)" +
+                                 (_unidadesManuales ? $" - sugeridas: {unidades}" : "");
+            toolTip.SetToolTip(lblAsignacion, $"m² construibles {_resumen.Proyecto.MetrosConstruibles:N2} menos el canje del propietario " +
+                $"({_resumen.Proyecto.PorcentajeCanje:0.##}%), en proporción al aporte sobre el capital necesario.");
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
