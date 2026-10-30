@@ -390,7 +390,7 @@ namespace TpIngSoft
             this.nudCostoM2.DecimalPlaces = 2;
             this.nudCostoM2.ForeColor = System.Drawing.Color.White;
             this.nudCostoM2.Location = new System.Drawing.Point(180, 128);
-            this.nudCostoM2.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            this.nudCostoM2.Maximum = new decimal(new int[] { 99999999, 0, 0, 0 });
             this.nudCostoM2.Name = "nudCostoM2";
             this.nudCostoM2.Size = new System.Drawing.Size(120, 20);
             this.nudCostoM2.ThousandsSeparator = true;
@@ -411,7 +411,7 @@ namespace TpIngSoft
             this.nudValorM2.DecimalPlaces = 2;
             this.nudValorM2.ForeColor = System.Drawing.Color.White;
             this.nudValorM2.Location = new System.Drawing.Point(180, 156);
-            this.nudValorM2.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            this.nudValorM2.Maximum = new decimal(new int[] { 99999999, 0, 0, 0 });
             this.nudValorM2.Name = "nudValorM2";
             this.nudValorM2.Size = new System.Drawing.Size(120, 20);
             this.nudValorM2.ThousandsSeparator = true;
