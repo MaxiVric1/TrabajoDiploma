@@ -1171,15 +1171,16 @@ BEGIN
     FROM @Inversores v
     WHERE NOT EXISTS (SELECT 1 FROM [dbo].[Inversor] i WHERE i.[cuit] = v.[cuit]);
 
-    DECLARE @Aportes TABLE ([orden] INT, [cuit] VARCHAR(13), [monto] DECIMAL(18,2), [unidades] INT, [dias] INT);
+    -- Las unidades asignadas las calcula el bloque siguiente (misma fórmula que la aplicación)
+    DECLARE @Aportes TABLE ([orden] INT, [cuit] VARCHAR(13), [monto] DECIMAL(18,2), [dias] INT);
     INSERT INTO @Aportes VALUES
-        (1, '20-28456123-7', 450000, 4, 110),
-        (1, '27-31567890-6', 300000, 3, 95),
-        (1, '20-25789456-9', 200000, 2, 60),
-        (2, '27-33124578-5', 400000, 4, 40),
-        (2, '20-30987654-8', 370000, 3, 30);
+        (1, '20-28456123-7', 450000, 110),
+        (1, '27-31567890-6', 300000, 95),
+        (1, '20-25789456-9', 200000, 60),
+        (2, '27-33124578-5', 400000, 40),
+        (2, '20-30987654-8', 370000, 30);
     INSERT INTO [dbo].[SuscripcionFideicomiso] ([id_proyecto], [id_inversor], [monto_aportado], [unidades_asignadas], [fecha_suscripcion])
-    SELECT p.[id_proyecto], i.[id_inversor], a.[monto], a.[unidades], DATEADD(DAY, -a.[dias], GETDATE())
+    SELECT p.[id_proyecto], i.[id_inversor], a.[monto], 0, DATEADD(DAY, -a.[dias], GETDATE())
     FROM @Aportes a
     JOIN @Proyectos p ON p.[orden] = a.[orden] AND p.[estado] = 'Aprobado'
     JOIN [dbo].[Inversor] i ON i.[cuit] = a.[cuit];
@@ -1187,6 +1188,21 @@ BEGIN
     DECLARE @Creados INT = (SELECT COUNT(*) FROM @Proyectos);
     PRINT N'PN3: ' + CAST(@Creados AS NVARCHAR(10)) + N' proyectos de inversión de ejemplo creados, con inversores y aportes.';
 END
+GO
+
+-- Unidades asignadas de los inversores de ejemplo con la fórmula de SuscripcionFideicomisoBLL.CalcularAsignacion:
+-- m² = construibles x (100% - canje) x aporte / capital necesario (redondeado a 2 decimales) y unidades = m² / 60
+-- redondeado. Solo los aportes de los inversores de ejemplo (por CUIT) y solo si no coinciden: también corrige las
+-- bases que se cargaron con las unidades anteriores.
+UPDATE s SET [unidades_asignadas] = c.[unidades]
+FROM [dbo].[SuscripcionFideicomiso] s
+JOIN [dbo].[Inversor] i ON i.[id_inversor] = s.[id_inversor]
+JOIN [dbo].[ProyectoInversion] p ON p.[id_proyecto] = s.[id_proyecto]
+CROSS APPLY (SELECT CAST(ROUND(ROUND(p.[metros_construibles] * (100 - p.[porcentaje_canje]) / 100 * s.[monto_aportado] / p.[costo_total_obra], 2)
+                                    / 60, 0) AS INT) AS [unidades]) c
+WHERE i.[cuit] IN ('20-28456123-7', '27-31567890-6', '20-25789456-9', '27-33124578-5', '20-30987654-8')
+  AND p.[costo_total_obra] > 0 AND s.[unidades_asignadas] <> c.[unidades];
+IF @@ROWCOUNT > 0 PRINT N'PN3: unidades asignadas de los inversores de ejemplo recalculadas.';
 GO
 
 -- ====================================================
